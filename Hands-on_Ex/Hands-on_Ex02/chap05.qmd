@@ -1,6 +1,7 @@
 ---
 title: "2nd Order Spatial Point Patterns Analysis Methods"
 subtitle: "Hands-on Exercise 2"
+author: "Zhiyi Hao"
 date: "2026-08-29"
 format:
   html:
@@ -25,15 +26,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-::: {.student-note}
-**Course label.** ISSS626 Geospatial Analytics and Applications, Hands-on Exercise 2.
-
-This chapter continues from Chapter 4 and uses second-order spatial point pattern methods to study interaction between childcare centre locations.
-:::
-
 ## Overview
 
-Second-order spatial point pattern analysis looks beyond overall intensity and asks whether points interact with each other across distance. In this exercise, I compare Choa Chu Kang and Tampines using G-, F-, K-, and L-functions.
+This page continues from the Chapter 4 preparation and focuses on Choa Chu Kang and Tampines. I use G-, F-, K-, and L-functions to compare how childcare centre locations behave across distance.
 
 ## The Data
 

@@ -9,13 +9,13 @@ website:
     left:
       - text: "Hands-on Exercise"
         menu:
-          - text: "Hands-on Exercise 1: Geospatial Data Science with R"
+          - text: "Exercise 1: Geospatial Data"
             href: "Hands-on_Ex/Hands-on_Ex01/chap01.html"
-          - text: "Hands-on Exercise 1: Thematic Mapping and GeoVisualisation with R"
+          - text: "Exercise 1: Thematic Mapping"
             href: "Hands-on_Ex/Hands-on_Ex01/chap02.html"
-          - text: "Hands-on Exercise 2: First-order Spatial Point Patterns Analysis Methods"
+          - text: "Exercise 2: Point Density"
             href: "Hands-on_Ex/Hands-on_Ex02/chap04.html"
-          - text: "Hands-on Exercise 2: 2nd Order Spatial Point Patterns Analysis Methods"
+          - text: "Exercise 2: Point Interaction"
             href: "Hands-on_Ex/Hands-on_Ex02/chap05.html"
       - about.qmd
     right:

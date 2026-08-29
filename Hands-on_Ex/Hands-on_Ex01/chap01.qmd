@@ -12,9 +12,21 @@ format:
     code-fold: false
 ---
 
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
 ## Overview
 
-This exercise follows the Chapter 1 workflow and rebuilds the introductory geospatial data science operations with local data. The main aim is to practise importing spatial and aspatial data, checking coordinate reference systems, converting tabular coordinates into `sf` features, and carrying out basic geometric operations.
+I use this page to reproduce the Chapter 1 workflow with the local data folder. My focus is on the basic geospatial steps: importing layers, checking CRS, converting tabular coordinates into `sf`, and doing simple geometry operations.
 
 ::: {.callout-note}
 ## Local Implementation Note
@@ -118,9 +130,9 @@ plot(st_geometry(preschool), add = TRUE)
 ```
 
 ::: {.callout-tip}
-## Interpretation
+## What I Noticed
 
-The overlay confirms that both layers now share the same projected coordinate space. This matters because the later buffer, area, and density calculations depend on metre-based distances.
+The first overlay makes the preschool points look misplaced because the layers start in different coordinate systems. After transforming to SVY21, the points line up with the subzone boundary, which confirms why CRS checking cannot be skipped.
 :::
 
 ## Importing Aspatial Data
@@ -187,9 +199,9 @@ plot(st_geometry(buffer_cycling_selected), col = "lightblue", add = TRUE)
 ```
 
 ::: {.callout-note}
-## Reproducibility Note
+## What I Noticed
 
-The cycling path layer was downloaded from LTA DataMall's current geospatial release, so the total buffered area can differ from the course page if the network has been updated.
+The current LTA cycling path layer is not exactly the same as an older classroom download, so the buffered area should be read as my current-data result rather than as a number that must match the teacher's screenshot.
 :::
 
 ## Point-in-Polygon Counting
@@ -258,6 +270,12 @@ top_preschool_count <- mpsz %>%
 
 top_preschool_count
 ```
+
+::: {.callout-tip}
+## What I Noticed
+
+With the current preschool layer, Tampines East has the largest raw count in my output. The density plot is still useful because a compact subzone can look more intense than a larger subzone with a similar number of preschools.
+:::
 
 ## Takeaway
 

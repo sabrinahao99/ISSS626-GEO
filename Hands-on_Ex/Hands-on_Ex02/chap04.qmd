@@ -1,6 +1,7 @@
 ---
 title: "First-order Spatial Point Patterns Analysis Methods"
 subtitle: "Hands-on Exercise 2"
+author: "Zhiyi Hao"
 date: "2026-08-29"
 format:
   html:
@@ -25,15 +26,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-::: {.student-note}
-**Course label.** ISSS626 Geospatial Analytics and Applications, Hands-on Exercise 2.
-
-This chapter follows the first-order spatial point pattern workflow from the course material and applies it to childcare centre locations in Singapore.
-:::
-
 ## Overview
 
-First-order spatial point pattern analysis focuses on how the intensity of point events varies across a study area. For this exercise, I use childcare centre locations as the point events and Singapore's planning subzone boundary as the study window.
+I use this page to follow the Chapter 4 point pattern workflow with the local childcare centre and subzone datasets. The main thing I am checking is how the intensity of childcare centres changes across Singapore.
 
 The two practical questions I keep in mind are simple: are childcare centres randomly distributed across Singapore, and where do higher concentrations appear?
 
