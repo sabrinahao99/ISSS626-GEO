@@ -1,0 +1,526 @@
+---
+title: "Thematic Mapping and GeoVisualisation with R"
+subtitle: "Hands-on Exercise 1"
+author: "Zhiyi Hao"
+date: "2026-08-29"
+execute:
+  echo: true
+  message: false
+  warning: false
+format:
+  html:
+    code-fold: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+::: {.student-note}
+**Course label.** ISSS626 Geospatial Analytics and Applications, Hands-on Exercise 1.
+
+This chapter adapts the thematic mapping workflow from the course page and applies it to Singapore subzone population data.
+:::
+
+## Overview
+
+The focus of this exercise is thematic mapping. I first prepare the subzone boundary and population table, then join them into one spatial data frame. After that, I use `tmap` to compare different mapping choices for the dependency ratio.
+
+::: {.callout-note}
+## Local Implementation Note
+
+The course page imports the Master Plan 2019 boundary from KML and extracts attributes from a `Description` field. The local data here is GeoJSON, so the useful fields are already separate columns. The helper function is still kept in the workflow, but it is only used if a `Description` field exists.
+:::
+
+## Installing and Loading the R Packages
+
+```{r}
+pacman::p_load(sf, tmap, tidyverse, rvest)
+```
+
+## Importing and Preparing the Boundary Layer
+
+```{r}
+mpsz <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson",
+                quiet = TRUE) %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+extract_kml_field <- function(html_text, field_name) {
+  if (is.na(html_text) || html_text == "") return(NA_character_)
+  
+  page <- read_html(html_text)
+  rows <- page %>% html_elements("tr")
+  
+  value <- rows %>%
+    keep(~ html_text2(html_element(.x, "th")) == field_name) %>%
+    html_element("td") %>%
+    html_text2()
+  
+  if (length(value) == 0) NA_character_ else value
+}
+```
+
+```{r}
+if ("Description" %in% names(mpsz)) {
+  mpsz <- mpsz %>%
+    mutate(
+      REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
+      PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
+      SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
+      SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
+    ) %>%
+    select(-Name, -Description) %>%
+    relocate(geometry, .after = last_col())
+} else {
+  mpsz <- mpsz %>%
+    select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry)
+}
+```
+
+```{r}
+mpsz
+```
+
+## Importing and Preparing the Population Data
+
+The SingStat population table is aspatial. It needs to be summarised by planning area, subzone, and age group before joining to the subzone boundary.
+
+```{r}
+popdata <- read_csv("data/aspatial/respopagesextod2024.csv")
+```
+
+```{r}
+young_age <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19")
+active_age <- c("20_to_24", "25_to_29", "30_to_34", "35_to_39",
+                "40_to_44", "45_to_49", "50_to_54", "55_to_59",
+                "60_to_64")
+aged_age <- c("65_to_69", "70_to_74", "75_to_79", "80_to_84",
+              "85_to_89", "90_and_over")
+
+popdata2024 <- popdata %>%
+  group_by(PA, SZ, AG) %>%
+  summarise(POP = sum(Pop), .groups = "drop") %>%
+  pivot_wider(names_from = AG,
+              values_from = POP,
+              values_fill = 0) %>%
+  mutate(
+    YOUNG = rowSums(across(any_of(young_age))),
+    `ECONOMY ACTIVE` = rowSums(across(any_of(active_age))),
+    AGED = rowSums(across(any_of(aged_age))),
+    TOTAL = YOUNG + `ECONOMY ACTIVE` + AGED,
+    DEPENDENCY = (YOUNG + AGED) / `ECONOMY ACTIVE`
+  ) %>%
+  select(PA, SZ, YOUNG, `ECONOMY ACTIVE`, AGED, TOTAL, DEPENDENCY)
+```
+
+```{r}
+popdata2024 <- popdata2024 %>%
+  mutate(PA = toupper(PA),
+         SZ = toupper(SZ)) %>%
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+```{r}
+mpsz_pop2024 <- left_join(mpsz, 
+                          popdata2024, 
+                          by = c("SUBZONE_N" = "SZ"))
+```
+
+```{r}
+dir.create("data/rds", recursive = TRUE, showWarnings = FALSE)
+write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
+```
+
+## A Quick Choropleth Map
+
+```{r}
+tmap_mode("plot")
+qtm(shp = mpsz_pop2024, 
+    fill = "DEPENDENCY")
+```
+
+## Designing the Map
+
+The next map uses a more complete `tmap` composition: filled polygons, layout settings, compass, scale bar, grid, and credits.
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY") +
+  tm_title("Dependency Ratio by Subzone") +
+  tm_layout(main.title.position = "center",
+            main.title.size = 1.2,
+            frame = FALSE) +
+  tm_compass(type = "8star", 
+             position = c("right", "top")) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2) +
+  tm_credits("Source: Singapore Residents by Planning Area/Subzone, Age Group, Sex and Type of Dwelling, June 2024",
+             position = c("left", "bottom"))
+```
+
+::: {.callout-tip}
+## Plot Reading
+
+The dependency ratio compares younger and older residents with the working-age group. Darker subzones on these maps therefore point to places where more non-working-age residents are supported by each working-age resident.
+:::
+
+## Choropleth Mapping Choices
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "equal",
+              n = 5,
+              palette = "Blues",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "quantile",
+              n = 5,
+              palette = "Blues",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "Blues",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "pretty",
+              n = 5,
+              palette = "Blues",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "YlOrRd",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "-YlOrRd",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              breaks = c(0, 0.25, 0.5, 0.75, 1, Inf),
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 6,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 7,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(legend.outside = TRUE,
+            frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(legend.outside = TRUE,
+            legend.outside.position = "right",
+            frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(legend.outside = TRUE,
+            legend.outside.position = "bottom",
+            frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_layout(legend.outside = TRUE,
+            legend.outside.position = "right",
+            legend.title.size = 0.9,
+            legend.text.size = 0.7,
+            frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              border.col = "grey40",
+              border.alpha = 0.4) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              border.col = "white",
+              border.alpha = 0.5) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              border.col = "grey80",
+              border.alpha = 0.7) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              border.col = "grey70",
+              border.alpha = 0.5) +
+  tm_borders(col = "grey35", lwd = 0.3) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "jenks",
+              n = 5,
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_facets(by = "REGION_N", 
+            ncol = 2) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+## Small Multiple Maps
+
+Small multiples make it easier to compare the spatial distribution of young residents and aged residents.
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons(c("YOUNG", "AGED"),
+              style = "quantile",
+              palette = "YlGnBu",
+              title = c("Young residents", "Aged residents")) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+```{r}
+youngmap <- tm_shape(mpsz_pop2024) +
+  tm_polygons("YOUNG",
+              style = "quantile",
+              palette = "YlGnBu",
+              title = "Young residents") +
+  tm_layout(frame = FALSE)
+
+agedmap <- tm_shape(mpsz_pop2024) +
+  tm_polygons("AGED",
+              style = "quantile",
+              palette = "YlOrRd",
+              title = "Aged residents") +
+  tm_layout(frame = FALSE)
+
+tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
+```
+
+```{r}
+tm_shape(mpsz_pop2024) +
+  tm_polygons("DEPENDENCY",
+              style = "quantile",
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_facets(by = "REGION_N",
+            ncol = 2) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+## Mapping the Central Region
+
+```{r}
+mpsz_pop2024_central <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+```
+
+```{r}
+tm_shape(mpsz_pop2024_central) +
+  tm_polygons("DEPENDENCY",
+              style = "quantile",
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              fill.chart = tm_chart_box()) +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+```{r}
+central_box <- boxplot.stats(mpsz_pop2024_central$DEPENDENCY)$stats
+central_outliers <- boxplot.stats(mpsz_pop2024_central$DEPENDENCY)$out
+
+mpsz_pop2024_central <- mpsz_pop2024_central %>%
+  mutate(outlier = if_else(DEPENDENCY %in% central_outliers,
+                           "Outlier", "Not outlier"))
+
+tm_shape(mpsz_pop2024_central) +
+  tm_polygons("DEPENDENCY",
+              style = "quantile",
+              palette = "PuBuGn",
+              title = "Dependency ratio") +
+  tm_shape(filter(mpsz_pop2024_central, outlier == "Outlier")) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_text("SUBZONE_N", size = 0.45, col = "red") +
+  tm_layout(frame = FALSE,
+            legend.outside = TRUE)
+```
+
+## Interactive Mapping Code
+
+The course page switches to interactive view mode for inspection. The submitted site renders the same layers in static mode to keep the Netlify build lightweight, while the code structure remains close to the classroom workflow.
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz_pop2024_central) +
+  tm_polygons("DEPENDENCY",
+              style = "quantile",
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              id = "SUBZONE_N") +
+  tm_shape(filter(mpsz_pop2024_central, outlier == "Outlier")) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(mpsz_pop2024_central) +
+  tm_polygons("DEPENDENCY",
+              style = "quantile",
+              palette = "PuBuGn",
+              title = "Dependency ratio",
+              id = "SUBZONE_N") +
+  tm_shape(filter(mpsz_pop2024_central, outlier == "Outlier")) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_view(set_zoom_limits = c(12, 14)) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tmap_mode("plot")
+```
+
+## Comparison of Mapping Decisions
+
+```{r}
+mapping_choices <- tibble::tribble(
+  ~Choice, ~Strength, ~Caution,
+  "Equal interval", "Easy to explain", "Can hide variation when values are skewed",
+  "Quantile", "Places similar numbers of subzones in each class", "Class breaks may group unlike values",
+  "Jenks", "Highlights natural breaks in the distribution", "Breaks depend on the specific dataset",
+  "Small multiples", "Supports side-by-side visual comparison", "Needs consistent legends for fair comparison",
+  "Outlier highlighting", "Draws attention to unusual places", "Should be interpreted with local context"
+)
+
+knitr::kable(mapping_choices)
+```
+
+## Takeaway
+
+Different classification and layout choices can change how strongly a choropleth map communicates spatial contrast. For this dependency-ratio example, the same joined dataset supports overview mapping, regional comparison, and focused outlier inspection. I would use the Jenks or quantile versions for exploration, then refine the legend and annotations depending on the final story.
+
+## References
+
+- R for Geospatial Data Science and Analytics, Chapter 2: [Thematic Mapping and GeoVisualisation with R](https://r4gdsa.netlify.app/chap02.html)
+- data.gov.sg: [Master Plan 2019 Subzone Boundary No Sea](https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view)
+- Singapore Department of Statistics: [Geographic Distribution data tables](https://www.singstat.gov.sg/find-data/search-by-theme/population/geographic-distribution/latest-data)

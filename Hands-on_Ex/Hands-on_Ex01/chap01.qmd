@@ -1,0 +1,272 @@
+---
+title: "Geospatial Data Science with R"
+subtitle: "Hands-on Exercise 1"
+author: "Zhiyi Hao"
+date: "2026-08-29"
+execute:
+  echo: true
+  message: false
+  warning: false
+format:
+  html:
+    code-fold: false
+---
+
+## Overview
+
+This exercise follows the Chapter 1 workflow and rebuilds the introductory geospatial data science operations with local data. The main aim is to practise importing spatial and aspatial data, checking coordinate reference systems, converting tabular coordinates into `sf` features, and carrying out basic geometric operations.
+
+::: {.callout-note}
+## Local Implementation Note
+
+The original teaching page reads several files from a `chap01/data` folder. In this website, the data has been downloaded into `Hands-on_Ex/Hands-on_Ex01/data`, so the code below uses local relative paths such as `data/geospatial` and `data/aspatial/listings.csv`.
+:::
+
+## Getting Started
+
+```{r}
+pacman::p_load(sf, tidyverse)
+```
+
+## Importing Geospatial Data
+
+The first step is to bring the Singapore planning subzone boundary, cycling path layer, and preschool point layer into R. The Master Plan 2014 boundary and cycling path files are read as vector layers, while the preschool layer is read from the local KML derived from the downloaded GeoJSON.
+
+```{r}
+mpsz = st_read(dsn = "data/geospatial", 
+               layer = "MP14_SUBZONE_WEB_PL",
+               quiet = TRUE)
+```
+
+```{r}
+cyclingpath = st_read(dsn = "data/geospatial", 
+                      layer = "CyclingPathGazette",
+                      quiet = TRUE)
+```
+
+```{r}
+cyclingpath <- st_set_crs(cyclingpath, 3414)
+```
+
+```{r}
+preschool = st_read("data/geospatial/PreSchoolsLocation.kml",
+                    quiet = TRUE) %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
+```
+
+The geometry column tells us what spatial type is stored in each object. For the planning subzones, the geometry is polygon-based because each row represents an areal unit.
+
+```{r}
+st_geometry(mpsz)
+```
+
+```{r}
+glimpse(mpsz)
+```
+
+```{r}
+head(mpsz, n=5)
+```
+
+## Visualising Simple Feature Objects
+
+The default `plot()` method is a quick diagnostic view. It is not a publication map, but it is useful for confirming that the geometries and selected attributes look sensible.
+
+```{r}
+plot(mpsz)
+```
+
+```{r}
+plot(st_geometry(mpsz))
+```
+
+```{r}
+plot(mpsz["PLN_AREA_N"])
+```
+
+Overlaying preschool locations on the subzone boundary is an immediate visual check that the points fall within Singapore after projection.
+
+```{r}
+plot(st_geometry(mpsz))
+plot(st_geometry(preschool), add = TRUE)
+```
+
+## Checking Coordinate Reference Systems
+
+Distance and area calculations should be done in a projected coordinate system. For Singapore, SVY21 / EPSG:3414 is appropriate because its units are metres.
+
+```{r}
+st_crs(mpsz)
+```
+
+```{r}
+mpsz <- st_set_crs(mpsz, 3414)
+```
+
+```{r}
+st_crs(mpsz)
+```
+
+```{r}
+preschool <- st_transform(preschool, crs = 3414)
+```
+
+```{r}
+plot(st_geometry(mpsz))
+plot(st_geometry(preschool), add = TRUE)
+```
+
+::: {.callout-tip}
+## Interpretation
+
+The overlay confirms that both layers now share the same projected coordinate space. This matters because the later buffer, area, and density calculations depend on metre-based distances.
+:::
+
+## Importing Aspatial Data
+
+The Airbnb listings file is a CSV table with longitude and latitude columns. It starts as non-spatial data, then becomes an `sf` point layer after assigning WGS84 coordinates and transforming to SVY21.
+
+```{r}
+listings <- read_csv("data/aspatial/listings.csv")
+```
+
+```{r}
+list(listings)
+```
+
+```{r}
+listings_sf <- st_as_sf(listings, 
+                        coords = c("longitude", "latitude"), 
+                        crs=4326) %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+glimpse(listings_sf)
+```
+
+## Geoprocessing With Buffer
+
+This section creates a 5 metre buffer around cycling paths. The result is useful for asking how much land area is covered by a narrow corridor around the cycling network.
+
+```{r}
+buffer_cycling <- st_buffer(cyclingpath, 
+                            dist=5, 
+                            nQuadSegs = 30)
+```
+
+```{r}
+buffer_cycling$AREA <- st_area(buffer_cycling)
+```
+
+```{r}
+buffer_cycling <- buffer_cycling %>%
+  mutate(AREA = st_area(geometry))
+```
+
+```{r}
+sum(buffer_cycling$AREA)
+```
+
+The next operation narrows the cycling-path buffer to a single subzone, Tampines West.
+
+```{r}
+mpsz_selected <- mpsz %>%
+  filter(SUBZONE_N == "TAMPINES WEST")
+```
+
+```{r}
+buffer_cycling_selected <- st_intersection(buffer_cycling, 
+                                           mpsz_selected)
+```
+
+```{r}
+plot(st_geometry(mpsz_selected), border = "grey30", lwd = 1.5)
+plot(st_geometry(buffer_cycling_selected), col = "lightblue", add = TRUE)
+```
+
+::: {.callout-note}
+## Reproducibility Note
+
+The cycling path layer was downloaded from LTA DataMall's current geospatial release, so the total buffered area can differ from the course page if the network has been updated.
+:::
+
+## Point-in-Polygon Counting
+
+The subzone polygon layer can be used to count how many preschool points fall inside each subzone.
+
+```{r}
+mpsz$`PreSch Count`<- lengths(st_intersects(mpsz, preschool))
+```
+
+```{r}
+summary(mpsz$`PreSch Count`)
+```
+
+```{r}
+top_n(mpsz, 1, `PreSch Count`)
+```
+
+## Density Calculation
+
+A count alone can be misleading because subzones have different sizes. Density standardises the count by area, here expressed as preschools per square kilometre.
+
+```{r}
+mpsz$Area <- mpsz %>%
+  st_area()
+```
+
+```{r}
+mpsz <- mpsz %>%
+  mutate(`PreSch Density` = `PreSch Count`/Area * 1000000)
+```
+
+```{r}
+hist(mpsz$`PreSch Density`)
+```
+
+```{r}
+ggplot(data = mpsz,
+       aes(x = as.numeric(`PreSch Density`))) +
+  geom_histogram(bins = 20,
+                 colour = "white",
+                 fill = "#0f766e") +
+  labs(title = "Distribution of preschool density by subzone",
+       x = "Preschools per square kilometre",
+       y = "Number of subzones") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data = st_drop_geometry(mpsz),
+       aes(x = `PreSch Count`, 
+           y = as.numeric(`PreSch Density`))) +
+  geom_point(alpha = 0.65, colour = "#2563eb") +
+  labs(title = "Preschool count and density",
+       x = "Preschool count",
+       y = "Preschools per square kilometre") +
+  theme_minimal()
+```
+
+```{r}
+top_preschool_count <- mpsz %>%
+  st_drop_geometry() %>%
+  arrange(desc(`PreSch Count`)) %>%
+  select(SUBZONE_N, PLN_AREA_N, `PreSch Count`, `PreSch Density`) %>%
+  slice_head(n = 5)
+
+top_preschool_count
+```
+
+## Takeaway
+
+The workflow shows why CRS checks and geometry operations are central to geospatial analysis. With the current preschool data, the areas with the highest raw counts are not always the same as the areas with the highest density, because compact subzones can have high service concentration even with moderate counts.
+
+## References
+
+- R for Geospatial Data Science and Analytics, Chapter 1: [Geospatial Data Science with R](https://r4gdsa.netlify.app/chap01.html)
+- data.gov.sg: [Pre-Schools Location](https://data.gov.sg/datasets/d_61eefab99958fd70e6aab17320a71f1c/view)
+- data.gov.sg: [Master Plan 2014 Subzone Boundary No Sea](https://data.gov.sg/datasets/d_226cacceceff94f0c8b814962a5307c9/view)
+- LTA DataMall: [Cycling Path geospatial dataset](https://datamall.lta.gov.sg/)
+- Inside Airbnb: [Singapore listings data](https://insideairbnb.com/get-the-data/)

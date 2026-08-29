@@ -9,6 +9,10 @@ website:
     left:
       - text: "Hands-on Exercise"
         menu:
+          - text: "Hands-on Exercise 1: Geospatial Data Science with R"
+            href: "Hands-on_Ex/Hands-on_Ex01/chap01.html"
+          - text: "Hands-on Exercise 1: Thematic Mapping and GeoVisualisation with R"
+            href: "Hands-on_Ex/Hands-on_Ex01/chap02.html"
           - text: "Hands-on Exercise 2: First-order Spatial Point Patterns Analysis Methods"
             href: "Hands-on_Ex/Hands-on_Ex02/chap04.html"
           - text: "Hands-on Exercise 2: 2nd Order Spatial Point Patterns Analysis Methods"
