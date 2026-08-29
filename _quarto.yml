@@ -3,17 +3,24 @@ project:
 
 website:
   title: "ISSS626-GAA"
+  page-navigation: true
+  back-to-top-navigation: true
   navbar:
     left:
       - text: "Hands-on Exercise"
         menu:
-         -  text:"Hands-on Exercise 1"
-            href:"Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html"
+          - text: "Hands-on Exercise 2: First-order Spatial Point Patterns Analysis Methods"
+            href: "Hands-on_Ex/Hands-on_Ex02/chap04.html"
+          - text: "Hands-on Exercise 2: 2nd Order Spatial Point Patterns Analysis Methods"
+            href: "Hands-on_Ex/Hands-on_Ex02/chap05.html"
       - about.qmd
     right:
+      - icon: github
+        href: https://github.com/sabrinahao99/ISSS626-GEO
       - href: index.qmd
         text: Home
-      - about.qmd
+  page-footer:
+    center: "ISSS626 Geospatial Analytics and Applications coursework"
 
 format:
   html:
@@ -22,6 +29,10 @@ format:
       - brand
     css: styles.css
     toc: true
+    toc-depth: 4
+    number-sections: true
+    code-copy: true
+    code-overflow: wrap
+    fig-align: center
 
 editor: visual
-

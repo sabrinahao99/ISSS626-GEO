@@ -1,1 +1,139 @@
-/* css styles */
+/* Coursework website styles */
+
+:root {
+  --course-ink: #1f2933;
+  --course-muted: #667085;
+  --course-line: #d8e2e7;
+  --course-accent: #0f766e;
+  --course-accent-2: #2563eb;
+  --course-soft: #f5fbfa;
+  --course-code: #f7fafc;
+}
+
+body {
+  color: var(--course-ink);
+  line-height: 1.65;
+}
+
+.navbar {
+  border-bottom: 1px solid rgba(15, 118, 110, 0.18);
+  box-shadow: 0 3px 18px rgba(31, 41, 51, 0.04);
+}
+
+.navbar .nav-link {
+  transition: color 160ms ease, border-color 160ms ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .dropdown-item:hover {
+  color: var(--course-accent);
+}
+
+#title-block-header {
+  margin-block: 1.2rem 2rem;
+  padding: 1.6rem 1.8rem;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgba(15, 118, 110, 0.08), rgba(37, 99, 235, 0.04)),
+    repeating-linear-gradient(0deg, transparent, transparent 23px, rgba(15, 118, 110, 0.045) 24px),
+    repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(15, 118, 110, 0.035) 24px);
+}
+
+#title-block-header .title {
+  color: #102a43;
+  font-weight: 750;
+  letter-spacing: 0;
+}
+
+.subtitle,
+.description,
+.quarto-title-meta {
+  color: var(--course-muted);
+}
+
+h2 {
+  border-bottom: 1px solid var(--course-line);
+  padding-bottom: 0.35rem;
+}
+
+h2, h3, h4 {
+  color: #243b53;
+  letter-spacing: 0;
+}
+
+p, li {
+  max-width: 78ch;
+}
+
+main table {
+  border: 1px solid var(--course-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+main table th {
+  background: #eef7f6;
+  color: #1f3f46;
+}
+
+pre.sourceCode,
+div.sourceCode {
+  border-radius: 8px;
+  background: var(--course-code);
+}
+
+div.sourceCode {
+  border: 1px solid #dbe7ee;
+}
+
+code {
+  color: #164e63;
+}
+
+.cell-output-display,
+.figure {
+  margin-block: 1.2rem 1.8rem;
+}
+
+.callout {
+  border-radius: 8px;
+}
+
+.callout-note,
+.callout-tip,
+.callout-important {
+  border-left-color: var(--course-accent);
+}
+
+.callout .callout-title {
+  letter-spacing: 0;
+}
+
+.student-note {
+  border-left: 4px solid var(--course-accent);
+  background: var(--course-soft);
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+  margin: 1rem 0 1.4rem;
+}
+
+.student-note p:last-child {
+  margin-bottom: 0;
+}
+
+.quarto-figure-center > figure > figcaption,
+figcaption {
+  color: var(--course-muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 720px) {
+  #title-block-header {
+    padding: 1.1rem 1rem;
+  }
+
+  p, li {
+    max-width: 100%;
+  }
+}

@@ -1,0 +1,352 @@
+---
+title: "2nd Order Spatial Point Patterns Analysis Methods"
+subtitle: "Hands-on Exercise 2"
+date: "2026-08-29"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+::: {.student-note}
+**Course label.** ISSS626 Geospatial Analytics and Applications, Hands-on Exercise 2.
+
+This chapter continues from Chapter 4 and uses second-order spatial point pattern methods to study interaction between childcare centre locations.
+:::
+
+## Overview
+
+Second-order spatial point pattern analysis looks beyond overall intensity and asks whether points interact with each other across distance. In this exercise, I compare Choa Chu Kang and Tampines using G-, F-, K-, and L-functions.
+
+## The Data
+
+The same two local GeoJSON datasets are used:
+
+- Child Care Services as point features.
+- Master Plan 2019 Subzone Boundary (No Sea) as polygon features.
+
+The Chapter 5 analysis focuses on the Choa Chu Kang and Tampines planning areas, using the point pattern objects prepared in the same way as Chapter 4.
+
+## Installing and Loading the R Packages
+
+```{r}
+#| label: ch05-packages
+pacman::p_load(sf, spatstat, tmap, tidyverse)
+```
+
+```{r}
+#| label: ch05-seed
+set.seed(1234)
+```
+
+## Data Import and Preparation
+
+::: {.callout-note}
+### Local implementation note
+
+The course workflow assumes objects prepared in Chapter 4. To keep this page reproducible on its own, I recreate the required `sf`, `owin`, and `ppp` objects from the local GeoJSON files.
+:::
+
+```{r}
+#| label: ch05-read-data
+mpsz_cl <- st_read("data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson",
+                   quiet = TRUE) %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414) %>%
+  select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry) %>%
+  filter(SUBZONE_N != "SOUTHERN GROUP",
+         PLN_AREA_N != "WESTERN ISLANDS",
+         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
+
+childcare_sf <- st_read("data/ChildCareServices.geojson",
+                        quiet = TRUE) %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
+
+childcare_ppp <- as.ppp(childcare_sf)
+```
+
+```{r}
+#| label: ch05-create-planning-patterns
+tm <- mpsz_cl %>%
+  filter(PLN_AREA_N == "TAMPINES")
+ck <- mpsz_cl %>%
+  filter(PLN_AREA_N == "CHOA CHU KANG")
+
+tm_owin = as.owin(tm)
+ck_owin = as.owin(ck)
+
+childcare_tm_ppp = childcare_ppp[tm_owin]
+childcare_ck_ppp = childcare_ppp[ck_owin]
+```
+
+```{r}
+#| label: ch05-plot-study-areas
+par(mfrow=c(1,2))
+plot(unmark(childcare_ck_ppp), main = "Choa Chu Kang")
+plot(unmark(childcare_tm_ppp), main = "Tampines")
+```
+
+## Second-order Spatial Point Patterns Analysis
+
+The observed curve is compared with what complete spatial randomness would look like. When an observed line moves outside the simulation envelope, I read that as evidence that the pattern is behaving differently from CSR for that distance range.
+
+## Analysing Spatial Point Process Using G-Function
+
+::: {.callout-tip}
+### How I read this plot
+
+The G-function is event-to-event. I read it as a nearest-neighbour view: if the observed curve rises faster than the CSR expectation, many events have close neighbours.
+:::
+
+### Choa Chu Kang Planning Area
+
+#### Computing G-function Estimation
+
+```{r}
+#| label: ch05-g-ck
+G_CK = Gest(childcare_ck_ppp, correction = "border")
+plot(G_CK, xlim=c(0,500))
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-g-ck-envelope
+G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
+```
+
+```{r}
+#| label: ch05-plot-g-ck-envelope
+plot(G_CK.csr)
+```
+
+### Tampines Planning Area
+
+#### Computing G-function Estimation
+
+```{r}
+#| label: ch05-g-tm
+G_tm = Gest(childcare_tm_ppp, correction = "best")
+plot(G_tm)
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-g-tm-envelope
+G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
+```
+
+```{r}
+#| label: ch05-plot-g-tm-envelope
+plot(G_tm.csr)
+```
+
+## Analysing Spatial Point Process Using F-Function
+
+::: {.callout-tip}
+### How I read this plot
+
+The F-function is location-to-event. Instead of starting from an existing childcare centre, it starts from arbitrary locations in the study area and asks how far those locations are from the nearest centre.
+:::
+
+### Choa Chu Kang Planning Area
+
+#### Computing F-function Estimation
+
+```{r}
+#| label: ch05-f-ck
+F_CK = Fest(childcare_ck_ppp)
+plot(F_CK)
+```
+
+### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-f-ck-envelope
+F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
+```
+
+```{r}
+#| label: ch05-plot-f-ck-envelope
+plot(F_CK.csr)
+```
+
+### Tampines Planning Area
+
+#### Computing F-function Estimation
+
+```{r}
+#| label: ch05-f-tm
+F_tm = Fest(childcare_tm_ppp, correction = "best")
+plot(F_tm)
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-f-tm-envelope
+F_tm.csr <- envelope(childcare_tm_ppp, Fest, correction = "all", nsim = 999)
+```
+
+```{r}
+#| label: ch05-plot-f-tm-envelope
+plot(F_tm.csr)
+```
+
+## Analysing Spatial Point Process Using K-Function
+
+::: {.callout-tip}
+### How I read this plot
+
+The K-function is more multi-scale. It counts neighbours within increasing distance bands, so it is useful when clustering may happen at some distances but not others.
+:::
+
+### Choa Chu Kang Planning Area
+
+#### Computing K-fucntion Estimate
+
+```{r}
+#| label: ch05-k-ck
+K_ck = Kest(childcare_ck_ppp, correction = "Ripley")
+plot(K_ck, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-k-ck-envelope
+K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
+```
+
+```{r}
+#| label: ch05-plot-k-ck-envelope
+plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
+```
+
+### Tampines Planning Area
+
+#### Computing K-fucntion Estimation
+
+```{r}
+#| label: ch05-k-tm
+K_tm = Kest(childcare_tm_ppp, correction = "Ripley")
+plot(K_tm, . -r ~ r, 
+     ylab= "K(d)-r", xlab = "d(m)", 
+     xlim=c(0,1000))
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-k-tm-envelope
+K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
+```
+
+```{r}
+#| label: ch05-plot-k-tm-envelope
+plot(K_tm.csr, . - r ~ r, 
+     xlab="d", ylab="K(d)-r", xlim=c(0,500))
+```
+
+## Analysing Spatial Point Process Using L-Function
+
+::: {.callout-tip}
+### How I read this plot
+
+The L-function is a transformed version of K. I find it easier to read because the CSR reference is closer to a flat zero line after plotting `L(d)-r`.
+:::
+
+### Choa Chu Kang Planning Area
+
+#### Computing L Fucntion Estimation
+
+```{r}
+#| label: ch05-l-ck
+L_ck = Lest(childcare_ck_ppp, correction = "Ripley")
+plot(L_ck, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)")
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-l-ck-envelope
+L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
+```
+
+```{r}
+#| label: ch05-plot-l-ck-envelope
+plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
+```
+
+### Tampines Planning Area
+
+#### Computing L-fucntion Estimate
+
+```{r}
+#| label: ch05-l-tm
+L_tm = Lest(childcare_tm_ppp, correction = "Ripley")
+plot(L_tm, . -r ~ r, 
+     ylab= "L(d)-r", xlab = "d(m)", 
+     xlim=c(0,1000))
+```
+
+#### Performing Complete Spatial Randomness Test
+
+```{r}
+#| label: ch05-l-tm-envelope
+L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
+```
+
+```{r}
+#| label: ch05-plot-l-tm-envelope
+plot(L_tm.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r", xlim=c(0,500))
+```
+
+## G, F, K and L: How I Distinguish Them
+
+| Function | What it focuses on | Intuition |
+|---|---|---|
+| G | event-to-event | nearest neighbour |
+| F | arbitrary location-to-event | empty space |
+| K | neighbours across distance | multi-scale clustering |
+| L | transformed K | easier interpretation |
+
+## My Interpretation
+
+Across these plots, I read the observed curves relative to the CSR line and simulation envelope rather than from the curve alone. When a curve sits outside the envelope, it suggests that the childcare centre pattern in that planning area is not behaving like CSR at that distance range. The G and F functions help me think about nearest events and empty space, while K and L give a broader distance-based view.
+
+## What I Learned
+
+- First-order and second-order methods answer different questions: intensity versus interaction.
+- Simulation envelopes make the plots more useful because they give a practical CSR comparison.
+- The same planning area can look different depending on whether I use G, F, K, or L.
+- The interpretation should be tied to distance ranges, not just one overall statement.
+
+## Limitations
+
+CSR is a simple benchmark, and it does not account for population distribution, residential land use, transport access, or planning policy. The result is useful for describing spatial pattern, but not enough by itself to explain the causes of that pattern.
+
+## References
+
+- R for Geospatial Data Science and Analytics. Chapter 5: 2nd Order Spatial Point Patterns Analysis Methods. <https://r4gdsa.netlify.app/chap05>
