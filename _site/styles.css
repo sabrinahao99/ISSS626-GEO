@@ -6,7 +6,9 @@
   --course-line: #d8e2e7;
   --course-accent: #0f766e;
   --course-accent-2: #2563eb;
-  --course-accent-3: #c2410c;
+  --course-accent-3: #d59a12;
+  --course-gold: #e3ad18;
+  --course-gold-dark: #8a5b00;
   --course-soft: #f5fbfa;
   --course-code: #f7fafc;
 }
@@ -23,9 +25,22 @@ body {
 }
 
 .navbar {
-  border-bottom: 1px solid rgba(15, 118, 110, 0.16);
-  box-shadow: 0 4px 22px rgba(31, 41, 51, 0.055);
-  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(138, 91, 0, 0.22);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, #edbd2f 0%, var(--course-gold) 100%) !important;
+  box-shadow: 0 8px 24px rgba(80, 52, 0, 0.14);
+}
+
+.navbar .navbar-brand,
+.navbar .navbar-nav .nav-link,
+.navbar .dropdown-toggle,
+.navbar #quarto-search.type-overlay .aa-Autocomplete svg {
+  color: #231f14 !important;
+}
+
+.navbar .navbar-brand {
+  font-weight: 820;
 }
 
 .navbar .nav-link {
@@ -34,7 +49,7 @@ body {
 
 .navbar .nav-link:hover,
 .navbar .dropdown-item:hover {
-  color: var(--course-accent);
+  color: #064e3b !important;
 }
 
 #title-block-header {
@@ -131,16 +146,16 @@ figcaption {
 .home-shell {
   width: min(1180px, calc(100vw - 32px));
   margin: 0 auto;
-  padding: 2rem 0 4rem;
+  padding: 2rem 0 4.5rem;
 }
 
 .home-hero {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(420px, 0.98fr) minmax(360px, 1.02fr);
+  grid-template-columns: minmax(500px, 0.98fr) minmax(390px, 1.02fr);
   gap: clamp(1.5rem, 4vw, 3.5rem);
   align-items: center;
-  min-height: min(720px, calc(100vh - 84px));
+  min-height: min(590px, calc(100vh - 132px));
   overflow: hidden;
 }
 
@@ -165,10 +180,10 @@ figcaption {
 }
 
 .home-copy h1 {
-  max-width: 11ch;
+  max-width: 14ch;
   margin: 0.55rem 0 1rem;
   color: #102a43;
-  font-size: clamp(3.2rem, 6.8vw, 5.9rem);
+  font-size: clamp(3rem, 5.3vw, 4.85rem);
   line-height: 0.98;
   font-weight: 820;
   letter-spacing: 0;
@@ -278,33 +293,11 @@ figcaption {
   z-index: 1;
 }
 
-.home-metrics {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin: -1.1rem 0 2.2rem;
-}
-
-.metric {
-  padding: 1rem;
-  border: 1px solid rgba(15, 118, 110, 0.14);
-  border-radius: 8px;
-  background: #ffffff;
-  color: var(--course-muted);
-  box-shadow: 0 10px 26px rgba(31, 41, 51, 0.045);
-}
-
-.metric span {
-  display: block;
-  color: #123047;
-  font-size: 1.45rem;
-  font-weight: 800;
-}
-
 .exercise-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
+  margin-top: 0.7rem;
 }
 
 .exercise-card {
@@ -340,15 +333,6 @@ figcaption {
   color: var(--course-accent-2);
   font-weight: 760;
   text-decoration: none;
-}
-
-.home-note {
-  margin-top: 1.35rem;
-  padding: 1rem 1.15rem;
-  border-left: 4px solid var(--course-accent-3);
-  border-radius: 8px;
-  background: #fff7ed;
-  color: #5f4336;
 }
 
 @keyframes pulse-map {
@@ -398,7 +382,6 @@ figcaption {
   }
 
   .home-hero,
-  .home-metrics,
   .exercise-grid {
     grid-template-columns: 1fr;
   }
@@ -455,8 +438,7 @@ figcaption {
 }
 
 @media (min-width: 721px) and (max-width: 1080px) {
-  .home-hero,
-  .home-metrics {
+  .home-hero {
     grid-template-columns: 1fr;
   }
 

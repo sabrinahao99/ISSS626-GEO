@@ -32,21 +32,6 @@ Welcome to my ISSS626 coursework website. I use this portfolio to present my han
 :::
 :::
 
-::: {.home-metrics}
-::: {.metric}
-<span>4</span>
-Chapters completed
-:::
-::: {.metric}
-<span>147</span>
-Core R chunks rendered
-:::
-::: {.metric}
-<span>EPSG:3414</span>
-Singapore projected CRS
-:::
-:::
-
 ::: {.exercise-grid}
 ::: {.exercise-card}
 <span class="card-label">Hands-on Exercise 1</span>
@@ -87,9 +72,5 @@ Use G-, F-, K-, and L-functions with CSR simulation envelopes to compare Choa Ch
 
 [Open Chapter 5](Hands-on_Ex/Hands-on_Ex02/chap05.html)
 :::
-:::
-
-::: {.home-note}
-Each page is generated from reproducible Quarto/R code and local Singapore geospatial datasets.
 :::
 :::
