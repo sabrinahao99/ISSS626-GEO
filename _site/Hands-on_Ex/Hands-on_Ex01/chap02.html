@@ -238,7 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="overview" class="level2" data-number="1">
 <h2 data-number="1" class="anchored" data-anchor-id="overview"><span class="header-section-number">1</span> Overview</h2>
-<p>This page follows the teacher’s Chapter 2 workflow on thematic mapping. I prepare the subzone boundary and the 2024 population table first, then use <code>tmap</code> to see how classification, borders, palettes, facets, and outlier highlighting change the story of the same dependency-ratio data.</p>
+<p>This page presents my thematic mapping workflow for Singapore’s 2024 subzone population data. I prepare the boundary and population table first, then use <code>tmap</code> to see how classification, borders, palettes, facets, and outlier highlighting change the story of the same dependency-ratio data.</p>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -249,7 +249,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The course page imports the Master Plan 2019 boundary from KML and extracts attributes from a <code>Description</code> field. The local data here is GeoJSON, so the useful fields are already separate columns. The helper function is still kept in the workflow, but it is only used if a <code>Description</code> field exists.</p>
+<p>The local boundary data is stored as GeoJSON, so the useful planning-area fields are already separate columns. The helper function below is kept for reproducibility when a boundary file contains a <code>Description</code> field.</p>
 </div>
 </div>
 </section>
@@ -394,7 +394,7 @@ First 10 features:
 </section>
 <section id="designing-the-map" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="designing-the-map"><span class="header-section-number">6</span> Designing the Map</h2>
-<p>The next map follows the fuller <code>tmap</code> composition from the course page: filled polygons, title, border, compass, scale bar, grid, and data credits.</p>
+<p>The next map uses a fuller <code>tmap</code> composition: filled polygons, title, border, compass, scale bar, grid, and data credits.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -436,7 +436,7 @@ First 10 features:
 </section>
 <section id="choropleth-mapping-choices" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="choropleth-mapping-choices"><span class="header-section-number">7</span> Choropleth Mapping Choices</h2>
-<p>The following blocks keep the sequence of simple <code>tmap</code> experiments from the teacher’s page.</p>
+<p>The following blocks show how small <code>tmap</code> design choices change the same spatial pattern.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -811,7 +811,7 @@ First 10 features:
 </section>
 <section id="interactive-mapping-code" class="level2" data-number="10">
 <h2 data-number="10" class="anchored" data-anchor-id="interactive-mapping-code"><span class="header-section-number">10</span> Interactive Mapping Code</h2>
-<p>The course page switches to interactive view mode at this point. I keep the same logic and render it in plot mode for the static website, because the important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.</p>
+<p>For the website version, I render this inspection step in plot mode. The important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>region_selected <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>)</span>

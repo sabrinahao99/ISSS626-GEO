@@ -26,12 +26,12 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-This page follows the teacher's Chapter 2 workflow on thematic mapping. I prepare the subzone boundary and the 2024 population table first, then use `tmap` to see how classification, borders, palettes, facets, and outlier highlighting change the story of the same dependency-ratio data.
+This page presents my thematic mapping workflow for Singapore's 2024 subzone population data. I prepare the boundary and population table first, then use `tmap` to see how classification, borders, palettes, facets, and outlier highlighting change the story of the same dependency-ratio data.
 
 ::: {.callout-note}
 ## Local Implementation Note
 
-The course page imports the Master Plan 2019 boundary from KML and extracts attributes from a `Description` field. The local data here is GeoJSON, so the useful fields are already separate columns. The helper function is still kept in the workflow, but it is only used if a `Description` field exists.
+The local boundary data is stored as GeoJSON, so the useful planning-area fields are already separate columns. The helper function below is kept for reproducibility when a boundary file contains a `Description` field.
 :::
 
 ## Installing and Loading the R Packages
@@ -146,7 +146,7 @@ qtm(shp = mpsz_pop2024,
 
 ## Designing the Map
 
-The next map follows the fuller `tmap` composition from the course page: filled polygons, title, border, compass, scale bar, grid, and data credits.
+The next map uses a fuller `tmap` composition: filled polygons, title, border, compass, scale bar, grid, and data credits.
 
 ```{r}
 tm_shape(mpsz_pop2024) +
@@ -175,7 +175,7 @@ The dependency ratio map is sensitive to classification. I find the quantile map
 
 ## Choropleth Mapping Choices
 
-The following blocks keep the sequence of simple `tmap` experiments from the teacher's page.
+The following blocks show how small `tmap` design choices change the same spatial pattern.
 
 ```{r}
 tm_shape(mpsz_pop2024) +
@@ -426,7 +426,7 @@ tm_shape(outlier_sf) +
 
 ## Interactive Mapping Code
 
-The course page switches to interactive view mode at this point. I keep the same logic and render it in plot mode for the static website, because the important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.
+For the website version, I render this inspection step in plot mode. The important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.
 
 ```{r}
 region_selected <- mpsz_pop2024 %>%

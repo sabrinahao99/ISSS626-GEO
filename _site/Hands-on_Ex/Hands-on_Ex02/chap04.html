@@ -313,7 +313,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The course page reads the two datasets from KML. In this repository, the same working datasets are already stored as GeoJSON, with the useful boundary attributes already extracted. I therefore keep the same workflow but adapt the <code>st_read()</code> paths and only use the KML extraction helper when a <code>Description</code> field is present.</p>
+<p>The local working datasets are stored as GeoJSON, with the useful boundary attributes already extracted. The import code therefore uses local <code>st_read()</code> paths and only uses the KML extraction helper when a <code>Description</code> field is present.</p>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
@@ -373,12 +373,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mapping-the-geospatial-data-sets" class="level3" data-number="4.1">
 <h3 data-number="4.1" class="anchored" data-anchor-id="mapping-the-geospatial-data-sets"><span class="header-section-number">4.1</span> Mapping the Geospatial Data Sets</h3>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The source exercise uses tmap_mode('view') here.</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For the submitted Quarto website, I render this as a static map so the</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Netlify page remains lightweight and reliable.</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(childcare_sf)<span class="sc">+</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">size =</span> <span class="fl">0.015</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The website version renders this as a static map so the Netlify page</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># remains lightweight and reliable.</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">'plot'</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(childcare_sf)<span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_dots</span>(<span class="at">size =</span> <span class="fl">0.015</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">

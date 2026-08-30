@@ -54,7 +54,7 @@ pacman::p_load(sf, terra, spatstat,
 ::: {.callout-note}
 ### Local implementation note
 
-The course page reads the two datasets from KML. In this repository, the same working datasets are already stored as GeoJSON, with the useful boundary attributes already extracted. I therefore keep the same workflow but adapt the `st_read()` paths and only use the KML extraction helper when a `Description` field is present.
+The local working datasets are stored as GeoJSON, with the useful boundary attributes already extracted. The import code therefore uses local `st_read()` paths and only uses the KML extraction helper when a `Description` field is present.
 :::
 
 ```{r}
@@ -128,9 +128,8 @@ The projected CRS is important here because the point pattern methods below use 
 
 ```{r}
 #| label: ch04-map-childcare-view
-# The source exercise uses tmap_mode('view') here.
-# For the submitted Quarto website, I render this as a static map so the
-# Netlify page remains lightweight and reliable.
+# The website version renders this as a static map so the Netlify page
+# remains lightweight and reliable.
 tmap_mode('plot')
 tm_shape(childcare_sf)+
   tm_dots(size = 0.015)

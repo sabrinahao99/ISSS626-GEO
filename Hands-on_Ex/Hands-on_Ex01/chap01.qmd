@@ -31,7 +31,7 @@ I use this page to reproduce the Chapter 1 workflow with the local data folder. 
 ::: {.callout-note}
 ## Local Implementation Note
 
-The original teaching page reads several files from a `chap01/data` folder. In this website, the data has been downloaded into `Hands-on_Ex/Hands-on_Ex01/data`, so the code below uses local relative paths such as `data/geospatial` and `data/aspatial/listings.csv`.
+All data for this exercise is stored in `Hands-on_Ex/Hands-on_Ex01/data`, so the code below uses local relative paths such as `data/geospatial` and `data/aspatial/listings.csv`.
 :::
 
 ## Getting Started
@@ -201,7 +201,7 @@ plot(st_geometry(buffer_cycling_selected), col = "lightblue", add = TRUE)
 ::: {.callout-note}
 ## What I Noticed
 
-The current LTA cycling path layer is not exactly the same as an older classroom download, so the buffered area should be read as my current-data result rather than as a number that must match the teacher's screenshot.
+The cycling path layer is a current local download, so the buffered area should be read as my reproducible result from this dataset.
 :::
 
 ## Point-in-Polygon Counting

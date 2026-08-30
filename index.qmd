@@ -13,9 +13,9 @@ format:
 ::: {.home-copy}
 <span class="home-kicker">ISSS626 Geospatial Analytics and Applications</span>
 
-# Geospatial Coursework Portfolio
+# Welcome to My Geospatial Analytics Portfolio
 
-This website records my hands-on work in R, from reading spatial data to building thematic maps and point pattern analysis. I kept the teacher's analysis sequence, then added my own short notes from the rendered outputs.
+Welcome to my ISSS626 coursework website. I use this portfolio to present my hands-on geospatial analytics work in R, including spatial data preparation, thematic mapping, point density analysis, and spatial interaction diagnostics.
 
 ::: {.home-actions}
 [Start with Exercise 1](Hands-on_Ex/Hands-on_Ex01/chap01.html){.home-button .primary}
@@ -35,11 +35,11 @@ This website records my hands-on work in R, from reading spatial data to buildin
 ::: {.home-metrics}
 ::: {.metric}
 <span>4</span>
-Chapters rebuilt
+Chapters completed
 :::
 ::: {.metric}
 <span>147</span>
-Teacher code blocks checked
+Core R chunks rendered
 :::
 ::: {.metric}
 <span>EPSG:3414</span>
@@ -90,6 +90,6 @@ Use G-, F-, K-, and L-functions with CSR simulation envelopes to compare Choa Ch
 :::
 
 ::: {.home-note}
-The maps and figures are rendered from local coursework data in this repository, so the pages can be reproduced from source instead of being static screenshots.
+Each page is generated from reproducible Quarto/R code and local Singapore geospatial datasets.
 :::
 :::

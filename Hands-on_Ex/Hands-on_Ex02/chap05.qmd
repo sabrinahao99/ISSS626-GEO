@@ -56,7 +56,7 @@ set.seed(1234)
 ::: {.callout-note}
 ### Local implementation note
 
-The course workflow assumes objects prepared in Chapter 4. To keep this page reproducible on its own, I recreate the required `sf`, `owin`, and `ppp` objects from the local GeoJSON files.
+To keep this page reproducible on its own, I recreate the required `sf`, `owin`, and `ppp` objects from the local GeoJSON files.
 :::
 
 ```{r}
