@@ -1,0 +1,20 @@
+---
+title: "Take-home Exercise"
+author: "Zhiyi Hao"
+format:
+  html:
+    toc: false
+    number-sections: false
+---
+
+::: {.profile-panel}
+::: {.profile-kicker}
+Take-home Exercise
+:::
+
+# Coming Soon
+
+This section will be used to present my take-home geospatial analytics work for ISSS626.
+
+The page is prepared as a clean entry point so future take-home submissions can be added to the website with the same navigation and visual style.
+:::

@@ -1,9 +1,27 @@
 ---
 title: "About"
+author: "Zhiyi Hao"
+format:
+  html:
+    toc: false
+    number-sections: false
 ---
 
-About this site
+::: {.profile-panel}
+::: {.profile-kicker}
+About Me
+:::
 
-```{r}
-1 + 1
-```
+# Zhiyi Hao
+
+You can also call me Sabrina. I am a Master of IT in Business student in the Artificial Intelligence track, and I joined the programme in 2025.
+
+This website is my ISSS626 Geospatial Analytics and Applications coursework portfolio. I use it to organise my hands-on exercises, R workflows, maps, and short reflections from each analysis.
+
+::: {.profile-tags}
+<span>MITB AI Track</span>
+<span>2025 Intake</span>
+<span>Geospatial Analytics</span>
+<span>R & Quarto</span>
+:::
+:::
