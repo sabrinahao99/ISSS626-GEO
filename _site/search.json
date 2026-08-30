@@ -396,34 +396,13 @@
     "href": "index.html",
     "title": "ISSS626-GAA",
     "section": "",
-    "text": "ISSS626 Geospatial Analytics and Applications\n\n\nWelcome to my ISSS626 coursework website. I use this portfolio to present my hands-on geospatial analytics work in R, including spatial data preparation, thematic mapping, point density analysis, and spatial interaction diagnostics.\n\nStart with Exercise 1 Point Pattern Analysis\n\n\n\n\n    \n\n\n\n\nHands-on Exercise 1\n\n\nImport spatial layers, inspect simple feature objects, transform CRS, convert Airbnb listings into points, and run basic geoprocessing.\nOpen Chapter 1\n\n\n\nHands-on Exercise 1\n\n\nJoin population data to subzones, compare choropleth classifications, use facets, and highlight dependency-ratio outliers.\nOpen Chapter 2\n\n\n\nHands-on Exercise 2\n\n\nPrepare childcare centre point patterns, test nearest-neighbour clustering, compare KDE bandwidths, and map density surfaces.\nOpen Chapter 4\n\n\n\nHands-on Exercise 2\n\n\nUse G-, F-, K-, and L-functions with CSR simulation envelopes to compare Choa Chu Kang and Tampines.\nOpen Chapter 5"
+    "text": "Home Geospatial Data Thematic Mapping Point Density Point Interaction\n\n\n\nISSS626 Geospatial Analytics and Applications · Zhiyi Hao\n\n\n\n\n\nGeospatial Data Science 26 Aug\n\n\nThematic Mapping 28 Aug\n\n\nPoint Density 30 Aug\n\n\nPoint Interaction 2 Sep\n\n\n\n\nThis portfolio presents four hands-on geospatial analytics exercises completed with R and Quarto. The work starts from spatial data import and coordinate systems, moves into choropleth mapping, and then develops first-order and second-order spatial point pattern analysis for Singapore childcare centre locations.\nI designed the site so each chapter can be read as a self-contained workflow: the code is visible, the maps are rendered in the page, and short observations are included after key outputs.\n\n\nHands-on Exercise 1 · 26 Aug\n\n\nSpatial layers, CRS transformation, point conversion, and basic geoprocessing.\nOpen Chapter 1\n\n\n\nHands-on Exercise 1 · 28 Aug\n\n\nPopulation joins, choropleth classifications, facets, and dependency-ratio outliers.\nOpen Chapter 2\n\n\n\nHands-on Exercise 2 · 30 Aug\n\n\nPoint pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.\nOpen Chapter 4\n\n\n\nHands-on Exercise 2 · 2 Sep\n\n\nG-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.\nOpen Chapter 5"
   },
   {
-    "objectID": "index.html#geospatial-data-science",
-    "href": "index.html#geospatial-data-science",
+    "objectID": "index.html#coursework-overview",
+    "href": "index.html#coursework-overview",
     "title": "ISSS626-GAA",
     "section": "",
-    "text": "Import spatial layers, inspect simple feature objects, transform CRS, convert Airbnb listings into points, and run basic geoprocessing.\nOpen Chapter 1"
-  },
-  {
-    "objectID": "index.html#thematic-mapping",
-    "href": "index.html#thematic-mapping",
-    "title": "ISSS626-GAA",
-    "section": "",
-    "text": "Join population data to subzones, compare choropleth classifications, use facets, and highlight dependency-ratio outliers.\nOpen Chapter 2"
-  },
-  {
-    "objectID": "index.html#point-density",
-    "href": "index.html#point-density",
-    "title": "ISSS626-GAA",
-    "section": "",
-    "text": "Prepare childcare centre point patterns, test nearest-neighbour clustering, compare KDE bandwidths, and map density surfaces.\nOpen Chapter 4"
-  },
-  {
-    "objectID": "index.html#point-interaction",
-    "href": "index.html#point-interaction",
-    "title": "ISSS626-GAA",
-    "section": "",
-    "text": "Use G-, F-, K-, and L-functions with CSR simulation envelopes to compare Choa Chu Kang and Tampines.\nOpen Chapter 5"
+    "text": "This portfolio presents four hands-on geospatial analytics exercises completed with R and Quarto. The work starts from spatial data import and coordinate systems, moves into choropleth mapping, and then develops first-order and second-order spatial point pattern analysis for Singapore childcare centre locations.\nI designed the site so each chapter can be read as a self-contained workflow: the code is visible, the maps are rendered in the page, and short observations are included after key outputs.\n\n\nHands-on Exercise 1 · 26 Aug\n\n\nSpatial layers, CRS transformation, point conversion, and basic geoprocessing.\nOpen Chapter 1\n\n\n\nHands-on Exercise 1 · 28 Aug\n\n\nPopulation joins, choropleth classifications, facets, and dependency-ratio outliers.\nOpen Chapter 2\n\n\n\nHands-on Exercise 2 · 30 Aug\n\n\nPoint pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.\nOpen Chapter 4\n\n\n\nHands-on Exercise 2 · 2 Sep\n\n\nG-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.\nOpen Chapter 5"
   }
 ]

@@ -2,7 +2,7 @@
 title: "2nd Order Spatial Point Patterns Analysis Methods"
 subtitle: "Hands-on Exercise 2"
 author: "Zhiyi Hao"
-date: "2026-08-29"
+date: "2026-09-02"
 format:
   html:
     toc: true

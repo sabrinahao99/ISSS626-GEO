@@ -2,7 +2,7 @@
 title: "Geospatial Data Science with R"
 subtitle: "Hands-on Exercise 1"
 author: "Zhiyi Hao"
-date: "2026-08-29"
+date: "2026-08-26"
 execute:
   echo: true
   message: false

@@ -9,68 +9,91 @@ format:
 ---
 
 ::: {.home-shell}
-::: {.home-hero}
-::: {.home-copy}
-<span class="home-kicker">ISSS626 Geospatial Analytics and Applications</span>
+::: {.home-banner}
+::: {.hero-links}
+[Home](index.html)
+[Geospatial Data](Hands-on_Ex/Hands-on_Ex01/chap01.html)
+[Thematic Mapping](Hands-on_Ex/Hands-on_Ex01/chap02.html)
+[Point Density](Hands-on_Ex/Hands-on_Ex02/chap04.html)
+[Point Interaction](Hands-on_Ex/Hands-on_Ex02/chap05.html)
+:::
 
 # Welcome to My Geospatial Analytics Portfolio
 
-Welcome to my ISSS626 coursework website. I use this portfolio to present my hands-on geospatial analytics work in R, including spatial data preparation, thematic mapping, point density analysis, and spatial interaction diagnostics.
-
-::: {.home-actions}
-[Start with Exercise 1](Hands-on_Ex/Hands-on_Ex01/chap01.html){.home-button .primary}
-[Point Pattern Analysis](Hands-on_Ex/Hands-on_Ex02/chap04.html){.home-button}
-:::
+<span>ISSS626 Geospatial Analytics and Applications · Zhiyi Hao</span>
 :::
 
-::: {.home-map-card}
-![Singapore geospatial coursework map](images/home-singapore-map.png){.home-map}
-<span class="pulse-dot dot-a"></span>
-<span class="pulse-dot dot-b"></span>
-<span class="pulse-dot dot-c"></span>
-<span class="scan-line"></span>
+::: {.home-content}
+::: {.home-side-menu}
+::: {.home-side-item .active}
+[Geospatial Data Science](Hands-on_Ex/Hands-on_Ex01/chap01.html)
+<span>26 Aug</span>
+:::
+
+::: {.home-side-item}
+[Thematic Mapping](Hands-on_Ex/Hands-on_Ex01/chap02.html)
+<span>28 Aug</span>
+:::
+
+::: {.home-side-item}
+[Point Density](Hands-on_Ex/Hands-on_Ex02/chap04.html)
+<span>30 Aug</span>
+:::
+
+::: {.home-side-item}
+[Point Interaction](Hands-on_Ex/Hands-on_Ex02/chap05.html)
+<span>2 Sep</span>
 :::
 :::
+
+::: {.home-main}
+## Coursework Overview
+
+This portfolio presents four hands-on geospatial analytics exercises completed with R and Quarto. The work starts from spatial data import and coordinate systems, moves into choropleth mapping, and then develops first-order and second-order spatial point pattern analysis for Singapore childcare centre locations.
+
+I designed the site so each chapter can be read as a self-contained workflow: the code is visible, the maps are rendered in the page, and short observations are included after key outputs.
 
 ::: {.exercise-grid}
 ::: {.exercise-card}
-<span class="card-label">Hands-on Exercise 1</span>
+<span class="card-label">Hands-on Exercise 1 · 26 Aug</span>
 
-## Geospatial Data Science
+### Geospatial Data Science
 
-Import spatial layers, inspect simple feature objects, transform CRS, convert Airbnb listings into points, and run basic geoprocessing.
+Spatial layers, CRS transformation, point conversion, and basic geoprocessing.
 
 [Open Chapter 1](Hands-on_Ex/Hands-on_Ex01/chap01.html)
 :::
 
 ::: {.exercise-card}
-<span class="card-label">Hands-on Exercise 1</span>
+<span class="card-label">Hands-on Exercise 1 · 28 Aug</span>
 
-## Thematic Mapping
+### Thematic Mapping
 
-Join population data to subzones, compare choropleth classifications, use facets, and highlight dependency-ratio outliers.
+Population joins, choropleth classifications, facets, and dependency-ratio outliers.
 
 [Open Chapter 2](Hands-on_Ex/Hands-on_Ex01/chap02.html)
 :::
 
 ::: {.exercise-card}
-<span class="card-label">Hands-on Exercise 2</span>
+<span class="card-label">Hands-on Exercise 2 · 30 Aug</span>
 
-## Point Density
+### Point Density
 
-Prepare childcare centre point patterns, test nearest-neighbour clustering, compare KDE bandwidths, and map density surfaces.
+Point pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.
 
 [Open Chapter 4](Hands-on_Ex/Hands-on_Ex02/chap04.html)
 :::
 
 ::: {.exercise-card}
-<span class="card-label">Hands-on Exercise 2</span>
+<span class="card-label">Hands-on Exercise 2 · 2 Sep</span>
 
-## Point Interaction
+### Point Interaction
 
-Use G-, F-, K-, and L-functions with CSR simulation envelopes to compare Choa Chu Kang and Tampines.
+G-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.
 
 [Open Chapter 5](Hands-on_Ex/Hands-on_Ex02/chap05.html)
+:::
+:::
 :::
 :::
 :::
