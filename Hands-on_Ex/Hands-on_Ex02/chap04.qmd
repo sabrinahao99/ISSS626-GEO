@@ -51,7 +51,7 @@ pacman::p_load(sf, terra, spatstat,
 
 ## Importing and Wrangling Geospatial Data Sets
 
-::: {.callout-note}
+::: callout-note
 ### Local implementation note
 
 The local working datasets are stored as GeoJSON, with the useful boundary attributes already extracted. The import code therefore uses local `st_read()` paths and only uses the KML extraction helper when a `Description` field is present.
@@ -219,7 +219,7 @@ ce_sg_mc <- clarkevans.test(childcareSG_ppp,
 ce_sg_mc
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My interpretation
 
 The rendered Singapore-wide Clark-Evans index is `r round(unname(ce_sg$statistic[["R"]]), 3)`. Since it is below 1, the nearest-neighbour pattern supports clustering rather than a regular spacing. The Monte Carlo p-value is `r signif(ce_sg_mc$p.value, 3)`, so the result is statistical evidence against CSR. This does not explain why childcare centres cluster, but it does show that the observed spacing is unlikely to be purely random under this simple null model.
@@ -310,7 +310,7 @@ plot(kde_childcareSG_km, main = "bw.diggle")
 plot(kde_childcareSG.ppl, main = "bw.ppl")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My finding from the bandwidth comparison
 
 The two bandwidth choices tell slightly different stories. `bw.diggle` keeps the surface more locally responsive, while `bw.ppl` gives a smoother island-wide impression. For this childcare dataset, I would use the sharper surface for exploration and the smoother surface when explaining the broad pattern to a non-technical reader.
@@ -343,7 +343,7 @@ plot(density(childcareSG_ppp_km,
      main="Disc")
 ```
 
-::: {.callout-note}
+::: callout-note
 ### My reading of the kernel plots
 
 The kernel choice changes the texture of the density surface less dramatically than the bandwidth choice. I read the four panels mainly as a sensitivity check: the strongest concentration zones remain visible, so the broad interpretation does not depend on only one kernel shape.
@@ -379,7 +379,7 @@ plot(kde_childcareSG_fb, main = "Fixed bandwidth")
 plot(kde_childcareSG_ab, main = "Adaptive bandwidth")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### Why bandwidth matters
 
 The bandwidth changes how strongly the surface is smoothed. A smaller bandwidth keeps local peaks sharper, while a larger fixed bandwidth makes the pattern easier to read at a broad scale but can blur nearby concentrations. The adaptive KDE is useful here because childcare centres are not evenly spread across Singapore; it keeps more local detail where points are dense and smooths more where points are sparse.
@@ -394,7 +394,7 @@ The bandwidth changes how strongly the surface is smoothed. A smaller bandwidth 
 kde_childcareSG_bw_terra <- rast(kde_childcareSG_km)
 ```
 
-::: {.callout-note}
+::: callout-note
 ### Local cartographic note
 
 The KDE object above was calculated from a point pattern rescaled to kilometres. Before assigning EPSG:3414 for mapping, I convert the raster extent back to metres so the cartographic coordinates match Singapore SVY21.
@@ -455,7 +455,7 @@ tm_shape(kde_childcareSG_bw_terra) +
   tm_layout(scale = 1.0)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed on the KDE map
 
 The cartographic KDE map makes the density result easier to discuss because it places the intensity surface back into Singapore coordinates. The higher density areas appear as a spatial surface rather than isolated points, which is more useful for describing service concentration.
@@ -529,7 +529,7 @@ plot(unmark(childcare_jw_ppp.km),
   main="Jurong West")
 ```
 
-::: {.callout-note}
+::: callout-note
 ### Comparing local point patterns
 
 The four planning areas do not look equally dense or equally spread out. This is why I think the local windows are important: a national pattern can hide the fact that each planning area has its own geometry, number of centres, and internal spacing.
@@ -563,7 +563,7 @@ ce_tm <- clarkevans.test(childcare_tm_ppp,
 ce_tm
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### Singapore-wide vs planning-area view
 
 The planning-area tests show why the analysis window matters. The Singapore-wide result summarises one point pattern over the whole country, while the Choa Chu Kang and Tampines windows focus on local spacing inside each planning area. In this render, Choa Chu Kang has a Clark-Evans index of `r round(unname(ce_ck$statistic[["R"]]), 3)` and Tampines has an index of `r round(unname(ce_tm$statistic[["R"]]), 3)`, so the local interpretation should not be read as a simple copy of the national pattern.
@@ -618,7 +618,7 @@ tm_shape(focus_areas) +
   tm_layout(frame = FALSE)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My finding from the focus map
 
 The focus map is useful because Choa Chu Kang and Tampines are easier to compare when they are shown together with the same symbol style. Tampines appears to have a more visibly distributed set of childcare centres, while Choa Chu Kang looks more constrained by its planning-area shape.
