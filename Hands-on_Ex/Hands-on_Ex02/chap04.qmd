@@ -310,6 +310,12 @@ plot(kde_childcareSG_km, main = "bw.diggle")
 plot(kde_childcareSG.ppl, main = "bw.ppl")
 ```
 
+::: {.callout-tip}
+### My finding from the bandwidth comparison
+
+The two bandwidth choices tell slightly different stories. `bw.diggle` keeps the surface more locally responsive, while `bw.ppl` gives a smoother island-wide impression. For this childcare dataset, I would use the sharper surface for exploration and the smoother surface when explaining the broad pattern to a non-technical reader.
+:::
+
 ### Working With Different Kernel Methods
 
 ```{r}
@@ -336,6 +342,12 @@ plot(density(childcareSG_ppp_km,
              kernel="disc"), 
      main="Disc")
 ```
+
+::: {.callout-note}
+### My reading of the kernel plots
+
+The kernel choice changes the texture of the density surface less dramatically than the bandwidth choice. I read the four panels mainly as a sensitivity check: the strongest concentration zones remain visible, so the broad interpretation does not depend on only one kernel shape.
+:::
 
 ## Fixed and Adaptive KDE
 
@@ -443,6 +455,12 @@ tm_shape(kde_childcareSG_bw_terra) +
   tm_layout(scale = 1.0)
 ```
 
+::: {.callout-tip}
+### What I noticed on the KDE map
+
+The cartographic KDE map makes the density result easier to discuss because it places the intensity surface back into Singapore coordinates. The higher density areas appear as a spatial surface rather than isolated points, which is more useful for describing service concentration.
+:::
+
 ## First Order SPPA at the Planning Subzone Level
 
 ### Geospatial Data Wrangling
@@ -510,6 +528,12 @@ plot(unmark(childcare_ck_ppp.km),
 plot(unmark(childcare_jw_ppp.km), 
   main="Jurong West")
 ```
+
+::: {.callout-note}
+### Comparing local point patterns
+
+The four planning areas do not look equally dense or equally spread out. This is why I think the local windows are important: a national pattern can hide the fact that each planning area has its own geometry, number of centres, and internal spacing.
+:::
 
 ### Clark and Evans Test
 
@@ -593,6 +617,12 @@ tm_shape(focus_areas) +
   tm_title("Childcare centres in Choa Chu Kang and Tampines") +
   tm_layout(frame = FALSE)
 ```
+
+::: {.callout-tip}
+### My finding from the focus map
+
+The focus map is useful because Choa Chu Kang and Tampines are easier to compare when they are shown together with the same symbol style. Tampines appears to have a more visibly distributed set of childcare centres, while Choa Chu Kang looks more constrained by its planning-area shape.
+:::
 
 ## Clark-Evans vs KDE
 

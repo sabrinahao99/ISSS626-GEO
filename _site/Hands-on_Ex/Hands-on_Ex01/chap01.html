@@ -582,6 +582,19 @@ $ license                        &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA,
 $ geometry                       &lt;POINT [m]&gt; POINT (41972.5 36390.05), POINT (…</code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What I Noticed
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This step reminded me that a table with longitude and latitude is not yet a spatial layer until the coordinates and CRS are declared. After conversion, the geometry column becomes part of the data, so later spatial operations can use the Airbnb records in the same way as other point layers.</p>
+</div>
+</div>
 </section>
 <section id="geoprocessing-with-buffer" class="level2" data-number="7">
 <h2 data-number="7" class="anchored" data-anchor-id="geoprocessing-with-buffer"><span class="header-section-number">7</span> Geoprocessing With Buffer</h2>
@@ -667,6 +680,19 @@ Projected CRS: SVY21 / Singapore TM
 1 41122.55 37392.39 MULTIPOLYGON (((42196.76 38...           72</code></pre>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>My Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The raw count is a first useful ranking, but I would not use it alone for planning interpretation. A large subzone has more room to contain many facilities, so the count needs to be compared with area before saying a place is especially well-served.</p>
+</div>
+</div>
 </section>
 <section id="density-calculation" class="level2" data-number="9">
 <h2 data-number="9" class="anchored" data-anchor-id="density-calculation"><span class="header-section-number">9</span> Density Calculation</h2>
@@ -722,6 +748,19 @@ Projected CRS: SVY21 / Singapore TM
 <p><img src="chap01_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>My Reading of the Plot
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The scatterplot helps me see why count and density should be interpreted together. Some subzones with moderate counts can still have high density, which means the spatial concentration is stronger than the count table alone suggests.</p>
 </div>
 </div>
 <div class="cell" data-layout-align="center">

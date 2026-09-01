@@ -395,6 +395,19 @@ First 10 features:
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>First Impression
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The quick map is useful as a first check because it confirms that the joined attribute can be mapped immediately. At the same time, it feels too plain for communication: the legend, classification, borders, and layout still need design work before the map can support a clear interpretation.</p>
+</div>
+</div>
 </section>
 <section id="designing-the-map" class="level2" data-number="6">
 <h2 data-number="6" class="anchored" data-anchor-id="designing-the-map"><span class="header-section-number">6</span> Designing the Map</h2>
@@ -680,6 +693,19 @@ First 10 features:
 </div>
 </div>
 </div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>What I Noticed
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Mapping young and aged population side by side makes the dependency ratio more understandable. Instead of treating dependency as one abstract number, I can see that it is produced by two different age structures, and those two patterns do not always peak in the same places.</p>
+</div>
+</div>
 </section>
 <section id="small-multiple-maps" class="level2" data-number="8">
 <h2 data-number="8" class="anchored" data-anchor-id="small-multiple-maps"><span class="header-section-number">8</span> Small Multiple Maps</h2>
@@ -739,6 +765,19 @@ First 10 features:
 <p><img src="chap02_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>My Reading of the Facets
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The regional facets are helpful because Singapore-wide maps can make smaller regions hard to compare. With <code>free.coords = TRUE</code>, each region gets more visual space, so I can inspect internal variation within regions rather than only noticing the largest polygons on the full island map.</p>
 </div>
 </div>
 </section>
@@ -837,13 +876,26 @@ First 10 features:
 <span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>() <span class="sc">+</span></span>
 <span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_shape</span>(outlier_sf) <span class="sc">+</span></span>
 <span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_layout</span>(<span class="at">frame =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="chap02_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>My Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The central region subset changes the reading scale. On the full-island map, central subzones compete visually with the rest of Singapore; after filtering, the same dependency values become easier to compare locally, and the red outlier borders feel more purposeful.</p>
 </div>
 </div>
 <div class="cell" data-layout-align="center">

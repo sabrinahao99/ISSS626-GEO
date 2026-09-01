@@ -143,6 +143,36 @@ figcaption {
   font-size: 0.92rem;
 }
 
+#quarto-margin-sidebar {
+  align-self: flex-start;
+}
+
+#quarto-margin-sidebar .quarto-listing-category,
+#quarto-margin-sidebar nav[role="doc-toc"] {
+  position: sticky;
+  top: 5.6rem;
+  max-height: calc(100vh - 7rem);
+  overflow-y: auto;
+  padding: 0.85rem 0.75rem;
+  border-left: 3px solid rgba(166, 201, 54, 0.72);
+  border-radius: 0 8px 8px 0;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 10px 28px rgba(31, 41, 51, 0.05);
+  backdrop-filter: blur(8px);
+}
+
+#quarto-margin-sidebar nav[role="doc-toc"] .nav-link {
+  border-left: 0;
+  color: #4f5f70;
+  font-size: 0.9rem;
+}
+
+#quarto-margin-sidebar nav[role="doc-toc"] .nav-link.active,
+#quarto-margin-sidebar nav[role="doc-toc"] .nav-link:hover {
+  color: var(--course-accent);
+  font-weight: 760;
+}
+
 .profile-panel {
   margin: 2.2rem 0 3rem;
   padding: clamp(1.6rem, 4vw, 3.2rem);

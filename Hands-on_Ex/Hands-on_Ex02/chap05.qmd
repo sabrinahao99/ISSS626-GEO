@@ -155,6 +155,12 @@ G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
 plot(G_tm.csr)
 ```
 
+::: {.callout-tip}
+### My finding from the G-function
+
+The G-function is the easiest one for me to connect to nearest-neighbour clustering. In these two planning areas, I read the early part of the curve most carefully because short-distance behaviour tells me whether childcare centres tend to have nearby neighbours more often than expected under CSR.
+:::
+
 ## Analysing Spatial Point Process Using F-Function
 
 ::: {.callout-tip}
@@ -206,6 +212,12 @@ F_tm.csr <- envelope(childcare_tm_ppp, Fest, correction = "all", nsim = 999)
 #| label: ch05-plot-f-tm-envelope
 plot(F_tm.csr)
 ```
+
+::: {.callout-note}
+### My finding from the F-function
+
+The F-function adds a different perspective because it starts from empty locations rather than existing centres. If the observed curve rises quickly, it means many locations in the planning area are close to a childcare centre. I find this useful because it connects the point pattern to accessibility-like thinking, even though it is still a geometric summary rather than a service-demand model.
+:::
 
 ## Analysing Spatial Point Process Using K-Function
 
@@ -262,6 +274,12 @@ plot(K_tm.csr, . - r ~ r,
      xlab="d", ylab="K(d)-r", xlim=c(0,500))
 ```
 
+::: {.callout-tip}
+### My finding from the K-function
+
+The K-function helps me avoid making only a nearest-neighbour statement. I read it as a multi-distance check: clustering can be visible at short distances but become weaker at larger distances, so the distance range matters as much as whether the curve is above or below the CSR reference.
+:::
+
 ## Analysing Spatial Point Process Using L-Function
 
 ::: {.callout-tip}
@@ -317,6 +335,12 @@ L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
 plot(L_tm.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r", xlim=c(0,500))
 ```
+
+::: {.callout-note}
+### My finding from the L-function
+
+The L-function is helpful as a final check because it makes the K-function easier to read visually. When the transformed curve moves away from the zero reference and outside the simulation envelope, I treat that distance range as stronger evidence of departure from CSR.
+:::
 
 ## G, F, K and L: How I Distinguish Them
 

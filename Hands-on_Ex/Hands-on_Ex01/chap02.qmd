@@ -144,6 +144,12 @@ qtm(shp = mpsz_pop2024,
     fill = "DEPENDENCY")
 ```
 
+::: {.callout-note}
+## First Impression
+
+The quick map is useful as a first check because it confirms that the joined attribute can be mapped immediately. At the same time, it feels too plain for communication: the legend, classification, borders, and layout still need design work before the map can support a clear interpretation.
+:::
+
 ## Designing the Map
 
 The next map uses a fuller `tmap` composition: filled polygons, title, border, compass, scale bar, grid, and data credits.
@@ -323,6 +329,12 @@ tm_shape(mpsz_pop2024) +
   tmap_style("natural")
 ```
 
+::: {.callout-tip}
+## What I Noticed
+
+Mapping young and aged population side by side makes the dependency ratio more understandable. Instead of treating dependency as one abstract number, I can see that it is produced by two different age structures, and those two patterns do not always peak in the same places.
+:::
+
 ## Small Multiple Maps
 
 Small multiples make it easier to compare young and aged population patterns without changing datasets between plots.
@@ -371,6 +383,12 @@ tm_shape(mpsz_pop2024) +
             title.size = 1.1) +
   tm_borders(fill_alpha = 0.5)
 ```
+
+::: {.callout-tip}
+## My Reading of the Facets
+
+The regional facets are helpful because Singapore-wide maps can make smaller regions hard to compare. With `free.coords = TRUE`, each region gets more visual space, so I can inspect internal variation within regions rather than only noticing the largest polygons on the full island map.
+:::
 
 ## Mapping the Central Region
 
@@ -449,8 +467,14 @@ tm_shape(region_selected,
   tm_borders() +
   tm_shape(outlier_sf) +
   tm_borders(col = "red", lwd = 2) +
-  tm_layout(frame = FALSE)
+tm_layout(frame = FALSE)
 ```
+
+::: {.callout-note}
+## My Finding
+
+The central region subset changes the reading scale. On the full-island map, central subzones compete visually with the rest of Singapore; after filtering, the same dependency values become easier to compare locally, and the red outlier borders feel more purposeful.
+:::
 
 ```{r}
 tmap_mode("plot")

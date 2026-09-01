@@ -158,6 +158,12 @@ listings_sf <- st_as_sf(listings,
 glimpse(listings_sf)
 ```
 
+::: {.callout-tip}
+## What I Noticed
+
+This step reminded me that a table with longitude and latitude is not yet a spatial layer until the coordinates and CRS are declared. After conversion, the geometry column becomes part of the data, so later spatial operations can use the Airbnb records in the same way as other point layers.
+:::
+
 ## Geoprocessing With Buffer
 
 This section creates a 5 metre buffer around cycling paths. The result is useful for asking how much land area is covered by a narrow corridor around the cycling network.
@@ -220,6 +226,12 @@ summary(mpsz$`PreSch Count`)
 top_n(mpsz, 1, `PreSch Count`)
 ```
 
+::: {.callout-tip}
+## My Finding
+
+The raw count is a first useful ranking, but I would not use it alone for planning interpretation. A large subzone has more room to contain many facilities, so the count needs to be compared with area before saying a place is especially well-served.
+:::
+
 ## Density Calculation
 
 A count alone can be misleading because subzones have different sizes. Density standardises the count by area, here expressed as preschools per square kilometre.
@@ -260,6 +272,12 @@ ggplot(data = st_drop_geometry(mpsz),
        y = "Preschools per square kilometre") +
   theme_minimal()
 ```
+
+::: {.callout-note}
+## My Reading of the Plot
+
+The scatterplot helps me see why count and density should be interpreted together. Some subzones with moderate counts can still have high density, which means the spatial concentration is stronger than the count table alone suggests.
+:::
 
 ```{r}
 top_preschool_count <- mpsz %>%
