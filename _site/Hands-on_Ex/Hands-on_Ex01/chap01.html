@@ -191,16 +191,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">1</span> Overview</a></li>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started"><span class="header-section-number">2</span> Getting Started</a></li>
-  <li><a href="#importing-geospatial-data" id="toc-importing-geospatial-data" class="nav-link" data-scroll-target="#importing-geospatial-data"><span class="header-section-number">3</span> Importing Geospatial Data</a></li>
-  <li><a href="#visualising-simple-feature-objects" id="toc-visualising-simple-feature-objects" class="nav-link" data-scroll-target="#visualising-simple-feature-objects"><span class="header-section-number">4</span> Visualising Simple Feature Objects</a></li>
-  <li><a href="#checking-coordinate-reference-systems" id="toc-checking-coordinate-reference-systems" class="nav-link" data-scroll-target="#checking-coordinate-reference-systems"><span class="header-section-number">5</span> Checking Coordinate Reference Systems</a></li>
-  <li><a href="#importing-aspatial-data" id="toc-importing-aspatial-data" class="nav-link" data-scroll-target="#importing-aspatial-data"><span class="header-section-number">6</span> Importing Aspatial Data</a></li>
-  <li><a href="#geoprocessing-with-buffer" id="toc-geoprocessing-with-buffer" class="nav-link" data-scroll-target="#geoprocessing-with-buffer"><span class="header-section-number">7</span> Geoprocessing With Buffer</a></li>
-  <li><a href="#point-in-polygon-counting" id="toc-point-in-polygon-counting" class="nav-link" data-scroll-target="#point-in-polygon-counting"><span class="header-section-number">8</span> Point-in-Polygon Counting</a></li>
-  <li><a href="#density-calculation" id="toc-density-calculation" class="nav-link" data-scroll-target="#density-calculation"><span class="header-section-number">9</span> Density Calculation</a></li>
-  <li><a href="#takeaway" id="toc-takeaway" class="nav-link" data-scroll-target="#takeaway"><span class="header-section-number">10</span> Takeaway</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">11</span> References</a></li>
+  <li><a href="#spatial-data-types-used-here" id="toc-spatial-data-types-used-here" class="nav-link" data-scroll-target="#spatial-data-types-used-here"><span class="header-section-number">2</span> Spatial Data Types Used Here</a></li>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started"><span class="header-section-number">3</span> Getting Started</a></li>
+  <li><a href="#importing-geospatial-data" id="toc-importing-geospatial-data" class="nav-link" data-scroll-target="#importing-geospatial-data"><span class="header-section-number">4</span> Importing Geospatial Data</a></li>
+  <li><a href="#visualising-simple-feature-objects" id="toc-visualising-simple-feature-objects" class="nav-link" data-scroll-target="#visualising-simple-feature-objects"><span class="header-section-number">5</span> Visualising Simple Feature Objects</a></li>
+  <li><a href="#checking-coordinate-reference-systems" id="toc-checking-coordinate-reference-systems" class="nav-link" data-scroll-target="#checking-coordinate-reference-systems"><span class="header-section-number">6</span> Checking Coordinate Reference Systems</a></li>
+  <li><a href="#importing-aspatial-data" id="toc-importing-aspatial-data" class="nav-link" data-scroll-target="#importing-aspatial-data"><span class="header-section-number">7</span> Importing Aspatial Data</a></li>
+  <li><a href="#geoprocessing-with-buffer" id="toc-geoprocessing-with-buffer" class="nav-link" data-scroll-target="#geoprocessing-with-buffer"><span class="header-section-number">8</span> Geoprocessing With Buffer</a></li>
+  <li><a href="#point-in-polygon-counting" id="toc-point-in-polygon-counting" class="nav-link" data-scroll-target="#point-in-polygon-counting"><span class="header-section-number">9</span> Point-in-Polygon Counting</a></li>
+  <li><a href="#density-calculation" id="toc-density-calculation" class="nav-link" data-scroll-target="#density-calculation"><span class="header-section-number">10</span> Density Calculation</a></li>
+  <li><a href="#takeaway" id="toc-takeaway" class="nav-link" data-scroll-target="#takeaway"><span class="header-section-number">11</span> Takeaway</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection"><span class="header-section-number">12</span> Reflection</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">13</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -256,14 +258,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="getting-started" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="getting-started"><span class="header-section-number">2</span> Getting Started</h2>
+<section id="spatial-data-types-used-here" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="spatial-data-types-used-here"><span class="header-section-number">2</span> Spatial Data Types Used Here</h2>
+<p>Before running the code, I found it useful to separate the data by spatial type because each type supports a different kind of question.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Spatial data type</th>
+<th>Dataset in this exercise</th>
+<th>How I use it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Points</td>
+<td>Preschool locations and Airbnb listings</td>
+<td>Represent individual facilities or listings</td>
+</tr>
+<tr class="even">
+<td>Polygons</td>
+<td>Planning subzones</td>
+<td>Define administrative areas for counting and density</td>
+</tr>
+<tr class="odd">
+<td>Lines</td>
+<td>Cycling paths</td>
+<td>Represent a network-like feature for buffering</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>My Learning Point
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The same map can mix points, polygons, and lines, but the operations are not interchangeable. For example, <code>st_intersects()</code> answers a point-in-polygon question, while <code>st_buffer()</code> expands a line into an area that can be measured.</p>
+</div>
+</div>
+</section>
+<section id="getting-started" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="getting-started"><span class="header-section-number">3</span> Getting Started</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="importing-geospatial-data" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="importing-geospatial-data"><span class="header-section-number">3</span> Importing Geospatial Data</h2>
+<section id="importing-geospatial-data" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="importing-geospatial-data"><span class="header-section-number">4</span> Importing Geospatial Data</h2>
 <p>The first step is to bring the Singapore planning subzone boundary, cycling path layer, and preschool point layer into R. The Master Plan 2014 boundary and cycling path files are read as vector layers, while the preschool layer is read from the local KML derived from the downloaded GeoJSON.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">=</span> <span class="fu">st_read</span>(<span class="at">dsn =</span> <span class="st">"data/geospatial"</span>, </span>
@@ -348,8 +398,8 @@ Projected CRS: SVY21 / Singapore TM
 </div>
 </div>
 </section>
-<section id="visualising-simple-feature-objects" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="visualising-simple-feature-objects"><span class="header-section-number">4</span> Visualising Simple Feature Objects</h2>
+<section id="visualising-simple-feature-objects" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="visualising-simple-feature-objects"><span class="header-section-number">5</span> Visualising Simple Feature Objects</h2>
 <p>The default <code>plot()</code> method is a quick diagnostic view. It is not a publication map, but it is useful for confirming that the geometries and selected attributes look sensible.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(mpsz)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -394,8 +444,8 @@ Projected CRS: SVY21 / Singapore TM
 </div>
 </div>
 </section>
-<section id="checking-coordinate-reference-systems" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="checking-coordinate-reference-systems"><span class="header-section-number">5</span> Checking Coordinate Reference Systems</h2>
+<section id="checking-coordinate-reference-systems" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="checking-coordinate-reference-systems"><span class="header-section-number">6</span> Checking Coordinate Reference Systems</h2>
 <p>Distance and area calculations should be done in a projected coordinate system. For Singapore, SVY21 / EPSG:3414 is appropriate because its units are metres.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_crs</span>(mpsz)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -520,8 +570,8 @@ PROJCRS["SVY21 / Singapore TM",
 </div>
 </div>
 </section>
-<section id="importing-aspatial-data" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="importing-aspatial-data"><span class="header-section-number">6</span> Importing Aspatial Data</h2>
+<section id="importing-aspatial-data" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="importing-aspatial-data"><span class="header-section-number">7</span> Importing Aspatial Data</h2>
 <p>The Airbnb listings file is a CSV table with longitude and latitude columns. It starts as non-spatial data, then becomes an <code>sf</code> point layer after assigning WGS84 coordinates and transforming to SVY21.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>listings <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/listings.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -596,8 +646,8 @@ $ geometry                       &lt;POINT [m]&gt; POINT (41972.5 36390.05), POI
 </div>
 </div>
 </section>
-<section id="geoprocessing-with-buffer" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="geoprocessing-with-buffer"><span class="header-section-number">7</span> Geoprocessing With Buffer</h2>
+<section id="geoprocessing-with-buffer" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="geoprocessing-with-buffer"><span class="header-section-number">8</span> Geoprocessing With Buffer</h2>
 <p>This section creates a 5 metre buffer around cycling paths. The result is useful for asking how much land area is covered by a narrow corridor around the cycling network.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>buffer_cycling <span class="ot">&lt;-</span> <span class="fu">st_buffer</span>(cyclingpath, </span>
@@ -651,8 +701,8 @@ $ geometry                       &lt;POINT [m]&gt; POINT (41972.5 36390.05), POI
 </div>
 </div>
 </section>
-<section id="point-in-polygon-counting" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="point-in-polygon-counting"><span class="header-section-number">8</span> Point-in-Polygon Counting</h2>
+<section id="point-in-polygon-counting" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="point-in-polygon-counting"><span class="header-section-number">9</span> Point-in-Polygon Counting</h2>
 <p>The subzone polygon layer can be used to count how many preschool points fall inside each subzone.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>mpsz<span class="sc">$</span><span class="st">`</span><span class="at">PreSch Count</span><span class="st">`</span><span class="ot">&lt;-</span> <span class="fu">lengths</span>(<span class="fu">st_intersects</span>(mpsz, preschool))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -694,8 +744,8 @@ Projected CRS: SVY21 / Singapore TM
 </div>
 </div>
 </section>
-<section id="density-calculation" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="density-calculation"><span class="header-section-number">9</span> Density Calculation</h2>
+<section id="density-calculation" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="density-calculation"><span class="header-section-number">10</span> Density Calculation</h2>
 <p>A count alone can be misleading because subzones have different sizes. Density standardises the count by area, here expressed as preschools per square kilometre.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>mpsz<span class="sc">$</span>Area <span class="ot">&lt;-</span> mpsz <span class="sc">%&gt;%</span></span>
@@ -794,12 +844,16 @@ Projected CRS: SVY21 / Singapore TM
 </div>
 </div>
 </section>
-<section id="takeaway" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="takeaway"><span class="header-section-number">10</span> Takeaway</h2>
+<section id="takeaway" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="takeaway"><span class="header-section-number">11</span> Takeaway</h2>
 <p>The workflow shows why CRS checks and geometry operations are central to geospatial analysis. With the current preschool data, the areas with the highest raw counts are not always the same as the areas with the highest density, because compact subzones can have high service concentration even with moderate counts.</p>
 </section>
-<section id="references" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="references"><span class="header-section-number">11</span> References</h2>
+<section id="reflection" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="reflection"><span class="header-section-number">12</span> Reflection</h2>
+<p>The most important lesson for me is that spatial analysis is not only about drawing data on a map. The geometry type, CRS, and spatial unit all affect what question the code is answering. I also realised that a result can be technically correct but still incomplete if I do not explain whether it is a count, density, buffer area, or spatial relationship.</p>
+</section>
+<section id="references" class="level2" data-number="13">
+<h2 data-number="13" class="anchored" data-anchor-id="references"><span class="header-section-number">13</span> References</h2>
 <ul>
 <li>R for Geospatial Data Science and Analytics, Chapter 1: <a href="https://r4gdsa.netlify.app/chap01.html">Geospatial Data Science with R</a></li>
 <li>data.gov.sg: <a href="https://data.gov.sg/datasets/d_61eefab99958fd70e6aab17320a71f1c/view">Pre-Schools Location</a></li>

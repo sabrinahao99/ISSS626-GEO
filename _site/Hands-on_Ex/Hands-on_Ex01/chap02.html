@@ -200,8 +200,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#small-multiple-maps" id="toc-small-multiple-maps" class="nav-link" data-scroll-target="#small-multiple-maps"><span class="header-section-number">8</span> Small Multiple Maps</a></li>
   <li><a href="#mapping-the-central-region" id="toc-mapping-the-central-region" class="nav-link" data-scroll-target="#mapping-the-central-region"><span class="header-section-number">9</span> Mapping the Central Region</a></li>
   <li><a href="#interactive-mapping-code" id="toc-interactive-mapping-code" class="nav-link" data-scroll-target="#interactive-mapping-code"><span class="header-section-number">10</span> Interactive Mapping Code</a></li>
-  <li><a href="#takeaway" id="toc-takeaway" class="nav-link" data-scroll-target="#takeaway"><span class="header-section-number">11</span> Takeaway</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">12</span> References</a></li>
+  <li><a href="#beyond-the-basic-choropleth" id="toc-beyond-the-basic-choropleth" class="nav-link" data-scroll-target="#beyond-the-basic-choropleth"><span class="header-section-number">11</span> Beyond the Basic Choropleth</a>
+  <ul>
+  <li><a href="#same-values-shuffled-locations" id="toc-same-values-shuffled-locations" class="nav-link" data-scroll-target="#same-values-shuffled-locations"><span class="header-section-number">11.1</span> Same Values, Shuffled Locations</a></li>
+  <li><a href="#visual-area-bias" id="toc-visual-area-bias" class="nav-link" data-scroll-target="#visual-area-bias"><span class="header-section-number">11.2</span> Visual Area Bias</a></li>
+  <li><a href="#does-preschool-provision-broadly-follow-young-population" id="toc-does-preschool-provision-broadly-follow-young-population" class="nav-link" data-scroll-target="#does-preschool-provision-broadly-follow-young-population"><span class="header-section-number">11.3</span> Does Preschool Provision Broadly Follow Young Population?</a></li>
+  </ul></li>
+  <li><a href="#takeaway" id="toc-takeaway" class="nav-link" data-scroll-target="#takeaway"><span class="header-section-number">12</span> Takeaway</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection"><span class="header-section-number">13</span> Reflection</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -948,12 +955,190 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="takeaway" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="takeaway"><span class="header-section-number">11</span> Takeaway</h2>
+<section id="beyond-the-basic-choropleth" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="beyond-the-basic-choropleth"><span class="header-section-number">11</span> Beyond the Basic Choropleth</h2>
+<p>The maps above describe where dependency ratio is high or low. I also wanted to check how much of the story comes from the spatial arrangement itself, not just the distribution of the numbers.</p>
+<section id="same-values-shuffled-locations" class="level3" data-number="11.1">
+<h3 data-number="11.1" class="anchored" data-anchor-id="same-values-shuffled-locations"><span class="header-section-number">11.1</span> Same Values, Shuffled Locations</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">626</span>)</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>mpsz_shuffle <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">DEPENDENCY_SHUFFLED =</span> <span class="fu">sample</span>(DEPENDENCY))</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>observed_dependency_map <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">n =</span> <span class="dv">5</span>,</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.blues"</span>),</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Dependency"</span>)) <span class="sc">+</span></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Observed dependency ratio"</span>) <span class="sc">+</span></span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">fill_alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>shuffled_dependency_map <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz_shuffle) <span class="sc">+</span></span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY_SHUFFLED"</span>,</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.scale =</span> <span class="fu">tm_scale_intervals</span>(</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>                <span class="at">style =</span> <span class="st">"quantile"</span>,</span>
+<span id="cb40-20"><a href="#cb40-20" aria-hidden="true" tabindex="-1"></a>                <span class="at">n =</span> <span class="dv">5</span>,</span>
+<span id="cb40-21"><a href="#cb40-21" aria-hidden="true" tabindex="-1"></a>                <span class="at">values =</span> <span class="st">"brewer.blues"</span>),</span>
+<span id="cb40-22"><a href="#cb40-22" aria-hidden="true" tabindex="-1"></a>              <span class="at">fill.legend =</span> <span class="fu">tm_legend</span>(<span class="at">title =</span> <span class="st">"Dependency"</span>)) <span class="sc">+</span></span>
+<span id="cb40-23"><a href="#cb40-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_title</span>(<span class="st">"Same values, shuffled"</span>) <span class="sc">+</span></span>
+<span id="cb40-24"><a href="#cb40-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">fill_alpha =</span> <span class="fl">0.5</span>)</span>
+<span id="cb40-25"><a href="#cb40-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-26"><a href="#cb40-26" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_arrange</span>(observed_dependency_map, shuffled_dependency_map, <span class="at">ncol =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="chap02_files/figure-html/ch02-shuffled-dependency-map-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>My Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The shuffled map uses the same dependency-ratio values, but it breaks the connection between value and location. The observed map looks more geographically coherent, while the shuffled map looks noisier. This is a useful reminder that a choropleth is not only about the variable distribution; the spatial arrangement also carries information.</p>
+</div>
+</div>
+</section>
+<section id="visual-area-bias" class="level3" data-number="11.2">
+<h3 data-number="11.2" class="anchored" data-anchor-id="visual-area-bias"><span class="header-section-number">11.2</span> Visual Area Bias</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>valid_pop_area <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TOTAL), TOTAL <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">area_km2 =</span> <span class="fu">as.numeric</span>(<span class="fu">st_area</span>(geometry)) <span class="sc">/</span> <span class="dv">1000000</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(TOTAL)</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>least_pop_half <span class="ot">&lt;-</span> valid_pop_area <span class="sc">%&gt;%</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">prop =</span> <span class="fl">0.5</span>)</span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>area_bias_summary <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">c</span>(</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Share of mapped land area in least-populated half of subzones (%)"</span>,</span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Share of population in those subzones (%)"</span></span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>  ),</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">value =</span> <span class="fu">c</span>(</span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">sum</span>(least_pop_half<span class="sc">$</span>area_km2) <span class="sc">/</span> <span class="fu">sum</span>(valid_pop_area<span class="sc">$</span>area_km2) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>),</span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">round</span>(<span class="fu">sum</span>(least_pop_half<span class="sc">$</span>TOTAL) <span class="sc">/</span> <span class="fu">sum</span>(valid_pop_area<span class="sc">$</span>TOTAL) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">1</span>)</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>area_bias_summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  measure                                                           value
+  &lt;chr&gt;                                                             &lt;dbl&gt;
+1 Share of mapped land area in least-populated half of subzones (%)  53.4
+2 Share of population in those subzones (%)                          12.5</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>What This Changes for My Map Reading
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In my output, the least-populated half of subzones takes up 53.4% of the mapped land area but contains only 12.5% of the population. That means the eye can easily overweight large, sparsely populated subzones. For population mapping, I should be careful not to read visual area as population importance.</p>
+</div>
+</div>
+</section>
+<section id="does-preschool-provision-broadly-follow-young-population" class="level3" data-number="11.3">
+<h3 data-number="11.3" class="anchored" data-anchor-id="does-preschool-provision-broadly-follow-young-population"><span class="header-section-number">11.3</span> Does Preschool Provision Broadly Follow Young Population?</h3>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>preschool2019 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geospatial/PreSchoolsLocation.geojson"</span>,</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>preschool_counts <span class="ot">&lt;-</span> <span class="fu">lengths</span>(<span class="fu">st_intersects</span>(mpsz, preschool2019))</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>preschool_by_sz <span class="ot">&lt;-</span> mpsz <span class="sc">%&gt;%</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">PRESCHOOL_COUNT =</span> preschool_counts) <span class="sc">%&gt;%</span></span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SUBZONE_N, PRESCHOOL_COUNT)</span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>provision <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TOTAL), YOUNG <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(preschool_by_sz, <span class="at">by =</span> <span class="st">"SUBZONE_N"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">PRESCHOOL_COUNT =</span> <span class="fu">replace_na</span>(PRESCHOOL_COUNT, <span class="dv">0</span>),</span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">young_per_preschool =</span> YOUNG <span class="sc">/</span> <span class="fu">pmax</span>(PRESCHOOL_COUNT, <span class="dv">1</span>),</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">has_preschool =</span> PRESCHOOL_COUNT <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>provision_summary <span class="ot">&lt;-</span> provision <span class="sc">%&gt;%</span></span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">correlation =</span> <span class="fu">round</span>(<span class="fu">cor</span>(YOUNG, PRESCHOOL_COUNT, <span class="at">use =</span> <span class="st">"complete.obs"</span>), <span class="dv">3</span>),</span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">subzones_without_preschool =</span> <span class="fu">sum</span>(<span class="sc">!</span>has_preschool),</span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">max_young_no_preschool =</span> <span class="fu">max</span>(YOUNG[<span class="sc">!</span>has_preschool], <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb43-29"><a href="#cb43-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-30"><a href="#cb43-30" aria-hidden="true" tabindex="-1"></a>provision_summary</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  correlation subzones_without_preschool max_young_no_preschool
+1       0.823                         20                   1960</code></pre>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(provision,</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> YOUNG,</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> PRESCHOOL_COUNT,</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">colour =</span> has_preschool)) <span class="sc">+</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">TRUE</span>, <span class="at">colour =</span> <span class="st">"grey30"</span>, <span class="at">linewidth =</span> <span class="fl">0.6</span>) <span class="sc">+</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"FALSE"</span> <span class="ot">=</span> <span class="st">"#c2410c"</span>, <span class="st">"TRUE"</span> <span class="ot">=</span> <span class="st">"#0f766e"</span>),</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"No preschool"</span>, <span class="st">"Has preschool"</span>),</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">name =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Preschool count and young population by subzone"</span>,</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Residents aged 0-19"</span>,</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Preschools in subzone"</span>) <span class="sc">+</span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="chap02_files/figure-html/ch02-preschool-provision-plot-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>My Finding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The correlation between young population and preschool count is 0.823, so the broad relationship is positive. However, 20 subzones with young residents have no preschool point in this dataset, and the largest of these still has 1960 young residents. I would treat this as an exploratory signal rather than a final provision assessment, because demand also depends on age bands, school capacity, and nearby centres across subzone boundaries.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="takeaway" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="takeaway"><span class="header-section-number">12</span> Takeaway</h2>
 <p>Different classification and layout choices can change how strongly a choropleth map communicates spatial contrast. For this dependency-ratio example, the same joined dataset supports overview mapping, regional comparison, and focused outlier inspection. I would use the Jenks or quantile versions for exploration, then refine the legend and annotations depending on the final story.</p>
 </section>
-<section id="references" class="level2" data-number="12">
-<h2 data-number="12" class="anchored" data-anchor-id="references"><span class="header-section-number">12</span> References</h2>
+<section id="reflection" class="level2" data-number="13">
+<h2 data-number="13" class="anchored" data-anchor-id="reflection"><span class="header-section-number">13</span> Reflection</h2>
+<p>The extra checks changed how I read the choropleth maps. A map can look persuasive even when the classification, area size, or spatial unit is shaping the visual message. The shuffled map, area-bias table, and preschool-population comparison help me slow down and ask whether the pattern is genuinely spatial, visually exaggerated, or only a first descriptive clue.</p>
+</section>
+<section id="references" class="level2" data-number="14">
+<h2 data-number="14" class="anchored" data-anchor-id="references"><span class="header-section-number">14</span> References</h2>
 <ul>
 <li>R for Geospatial Data Science and Analytics, Chapter 2: <a href="https://r4gdsa.netlify.app/chap02.html">Thematic Mapping and GeoVisualisation with R</a></li>
 <li>data.gov.sg: <a href="https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view">Master Plan 2019 Subzone Boundary No Sea</a></li>

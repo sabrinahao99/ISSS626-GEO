@@ -514,9 +514,146 @@ tmap_mode("plot")
 The central region view makes the outliers easier to inspect than the whole-island map. In my rendered result, places such as Pearl's Hill and Kampong Glam stand out because the dependency ratio is high relative to nearby central subzones.
 :::
 
+## Beyond the Basic Choropleth
+
+The maps above describe where dependency ratio is high or low. I also wanted to check how much of the story comes from the spatial arrangement itself, not just the distribution of the numbers.
+
+### Same Values, Shuffled Locations
+
+```{r}
+#| label: ch02-shuffled-dependency-map
+set.seed(626)
+
+mpsz_shuffle <- mpsz_pop2024 %>%
+  mutate(DEPENDENCY_SHUFFLED = sample(DEPENDENCY))
+
+observed_dependency_map <- tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(title = "Dependency")) +
+  tm_title("Observed dependency ratio") +
+  tm_borders(fill_alpha = 0.5)
+
+shuffled_dependency_map <- tm_shape(mpsz_shuffle) +
+  tm_polygons(fill = "DEPENDENCY_SHUFFLED",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(title = "Dependency")) +
+  tm_title("Same values, shuffled") +
+  tm_borders(fill_alpha = 0.5)
+
+tmap_arrange(observed_dependency_map, shuffled_dependency_map, ncol = 2)
+```
+
+::: {.callout-important}
+## My Finding
+
+The shuffled map uses the same dependency-ratio values, but it breaks the connection between value and location. The observed map looks more geographically coherent, while the shuffled map looks noisier. This is a useful reminder that a choropleth is not only about the variable distribution; the spatial arrangement also carries information.
+:::
+
+### Visual Area Bias
+
+```{r}
+#| label: ch02-area-bias-summary
+valid_pop_area <- mpsz_pop2024 %>%
+  filter(!is.na(TOTAL), TOTAL > 0) %>%
+  mutate(area_km2 = as.numeric(st_area(geometry)) / 1000000) %>%
+  arrange(TOTAL)
+
+least_pop_half <- valid_pop_area %>%
+  slice_head(prop = 0.5)
+
+area_bias_summary <- tibble(
+  measure = c(
+    "Share of mapped land area in least-populated half of subzones (%)",
+    "Share of population in those subzones (%)"
+  ),
+  value = c(
+    round(sum(least_pop_half$area_km2) / sum(valid_pop_area$area_km2) * 100, 1),
+    round(sum(least_pop_half$TOTAL) / sum(valid_pop_area$TOTAL) * 100, 1)
+  )
+)
+
+area_bias_summary
+```
+
+::: {.callout-note}
+## What This Changes for My Map Reading
+
+In my output, the least-populated half of subzones takes up `r area_bias_summary$value[1]`% of the mapped land area but contains only `r area_bias_summary$value[2]`% of the population. That means the eye can easily overweight large, sparsely populated subzones. For population mapping, I should be careful not to read visual area as population importance.
+:::
+
+### Does Preschool Provision Broadly Follow Young Population?
+
+```{r}
+#| label: ch02-preschool-provision-summary
+preschool2019 <- st_read("data/geospatial/PreSchoolsLocation.geojson",
+                         quiet = TRUE) %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
+
+preschool_counts <- lengths(st_intersects(mpsz, preschool2019))
+
+preschool_by_sz <- mpsz %>%
+  st_drop_geometry() %>%
+  mutate(PRESCHOOL_COUNT = preschool_counts) %>%
+  select(SUBZONE_N, PRESCHOOL_COUNT)
+
+provision <- mpsz_pop2024 %>%
+  st_drop_geometry() %>%
+  filter(!is.na(TOTAL), YOUNG > 0) %>%
+  left_join(preschool_by_sz, by = "SUBZONE_N") %>%
+  mutate(
+    PRESCHOOL_COUNT = replace_na(PRESCHOOL_COUNT, 0),
+    young_per_preschool = YOUNG / pmax(PRESCHOOL_COUNT, 1),
+    has_preschool = PRESCHOOL_COUNT > 0
+  )
+
+provision_summary <- provision %>%
+  summarise(
+    correlation = round(cor(YOUNG, PRESCHOOL_COUNT, use = "complete.obs"), 3),
+    subzones_without_preschool = sum(!has_preschool),
+    max_young_no_preschool = max(YOUNG[!has_preschool], na.rm = TRUE)
+  )
+
+provision_summary
+```
+
+```{r}
+#| label: ch02-preschool-provision-plot
+ggplot(provision,
+       aes(x = YOUNG,
+           y = PRESCHOOL_COUNT,
+           colour = has_preschool)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(method = "lm", se = TRUE, colour = "grey30", linewidth = 0.6) +
+  scale_colour_manual(values = c("FALSE" = "#c2410c", "TRUE" = "#0f766e"),
+                      labels = c("No preschool", "Has preschool"),
+                      name = NULL) +
+  labs(title = "Preschool count and young population by subzone",
+       x = "Residents aged 0-19",
+       y = "Preschools in subzone") +
+  theme_minimal()
+```
+
+::: {.callout-tip}
+## My Finding
+
+The correlation between young population and preschool count is `r provision_summary$correlation`, so the broad relationship is positive. However, `r provision_summary$subzones_without_preschool` subzones with young residents have no preschool point in this dataset, and the largest of these still has `r provision_summary$max_young_no_preschool` young residents. I would treat this as an exploratory signal rather than a final provision assessment, because demand also depends on age bands, school capacity, and nearby centres across subzone boundaries.
+:::
+
 ## Takeaway
 
 Different classification and layout choices can change how strongly a choropleth map communicates spatial contrast. For this dependency-ratio example, the same joined dataset supports overview mapping, regional comparison, and focused outlier inspection. I would use the Jenks or quantile versions for exploration, then refine the legend and annotations depending on the final story.
+
+## Reflection
+
+The extra checks changed how I read the choropleth maps. A map can look persuasive even when the classification, area size, or spatial unit is shaping the visual message. The shuffled map, area-bias table, and preschool-population comparison help me slow down and ask whether the pattern is genuinely spatial, visually exaggerated, or only a first descriptive clue.
 
 ## References
 

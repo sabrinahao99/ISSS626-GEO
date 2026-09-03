@@ -192,60 +192,62 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">1</span> Overview</a></li>
   <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">2</span> The Data</a></li>
-  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages"><span class="header-section-number">3</span> Installing and Loading the R Packages</a></li>
-  <li><a href="#importing-and-wrangling-geospatial-data-sets" id="toc-importing-and-wrangling-geospatial-data-sets" class="nav-link" data-scroll-target="#importing-and-wrangling-geospatial-data-sets"><span class="header-section-number">4</span> Importing and Wrangling Geospatial Data Sets</a>
+  <li><a href="#how-i-think-about-the-method-choices" id="toc-how-i-think-about-the-method-choices" class="nav-link" data-scroll-target="#how-i-think-about-the-method-choices"><span class="header-section-number">3</span> How I Think About the Method Choices</a></li>
+  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages"><span class="header-section-number">4</span> Installing and Loading the R Packages</a></li>
+  <li><a href="#importing-and-wrangling-geospatial-data-sets" id="toc-importing-and-wrangling-geospatial-data-sets" class="nav-link" data-scroll-target="#importing-and-wrangling-geospatial-data-sets"><span class="header-section-number">5</span> Importing and Wrangling Geospatial Data Sets</a>
   <ul>
-  <li><a href="#mapping-the-geospatial-data-sets" id="toc-mapping-the-geospatial-data-sets" class="nav-link" data-scroll-target="#mapping-the-geospatial-data-sets"><span class="header-section-number">4.1</span> Mapping the Geospatial Data Sets</a></li>
+  <li><a href="#mapping-the-geospatial-data-sets" id="toc-mapping-the-geospatial-data-sets" class="nav-link" data-scroll-target="#mapping-the-geospatial-data-sets"><span class="header-section-number">5.1</span> Mapping the Geospatial Data Sets</a></li>
   </ul></li>
-  <li><a href="#geospatial-data-wrangling" id="toc-geospatial-data-wrangling" class="nav-link" data-scroll-target="#geospatial-data-wrangling"><span class="header-section-number">5</span> Geospatial Data Wrangling</a>
+  <li><a href="#geospatial-data-wrangling" id="toc-geospatial-data-wrangling" class="nav-link" data-scroll-target="#geospatial-data-wrangling"><span class="header-section-number">6</span> Geospatial Data Wrangling</a>
   <ul>
-  <li><a href="#converting-sf-data-frames-to-ppp-class" id="toc-converting-sf-data-frames-to-ppp-class" class="nav-link" data-scroll-target="#converting-sf-data-frames-to-ppp-class"><span class="header-section-number">5.1</span> Converting sf Data Frames to ppp Class</a></li>
-  <li><a href="#creating-owin-object" id="toc-creating-owin-object" class="nav-link" data-scroll-target="#creating-owin-object"><span class="header-section-number">5.2</span> Creating owin Object</a></li>
-  <li><a href="#combining-point-events-object-and-owin-object" id="toc-combining-point-events-object-and-owin-object" class="nav-link" data-scroll-target="#combining-point-events-object-and-owin-object"><span class="header-section-number">5.3</span> Combining Point Events Object and owin Object</a></li>
+  <li><a href="#converting-sf-data-frames-to-ppp-class" id="toc-converting-sf-data-frames-to-ppp-class" class="nav-link" data-scroll-target="#converting-sf-data-frames-to-ppp-class"><span class="header-section-number">6.1</span> Converting sf Data Frames to ppp Class</a></li>
+  <li><a href="#creating-owin-object" id="toc-creating-owin-object" class="nav-link" data-scroll-target="#creating-owin-object"><span class="header-section-number">6.2</span> Creating owin Object</a></li>
+  <li><a href="#combining-point-events-object-and-owin-object" id="toc-combining-point-events-object-and-owin-object" class="nav-link" data-scroll-target="#combining-point-events-object-and-owin-object"><span class="header-section-number">6.3</span> Combining Point Events Object and owin Object</a></li>
   </ul></li>
-  <li><a href="#clark-evan-test-for-nearest-neighbour-analysis" id="toc-clark-evan-test-for-nearest-neighbour-analysis" class="nav-link" data-scroll-target="#clark-evan-test-for-nearest-neighbour-analysis"><span class="header-section-number">6</span> Clark-Evan Test for Nearest Neighbour Analysis</a>
+  <li><a href="#clark-evan-test-for-nearest-neighbour-analysis" id="toc-clark-evan-test-for-nearest-neighbour-analysis" class="nav-link" data-scroll-target="#clark-evan-test-for-nearest-neighbour-analysis"><span class="header-section-number">7</span> Clark-Evan Test for Nearest Neighbour Analysis</a>
   <ul>
-  <li><a href="#perform-the-clark-evans-test-without-csr" id="toc-perform-the-clark-evans-test-without-csr" class="nav-link" data-scroll-target="#perform-the-clark-evans-test-without-csr"><span class="header-section-number">6.1</span> Perform the Clark-Evans Test Without CSR</a></li>
-  <li><a href="#perform-the-clark-evans-test-with-csr" id="toc-perform-the-clark-evans-test-with-csr" class="nav-link" data-scroll-target="#perform-the-clark-evans-test-with-csr"><span class="header-section-number">6.2</span> Perform the Clark-Evans Test With CSR</a></li>
+  <li><a href="#perform-the-clark-evans-test-without-csr" id="toc-perform-the-clark-evans-test-without-csr" class="nav-link" data-scroll-target="#perform-the-clark-evans-test-without-csr"><span class="header-section-number">7.1</span> Perform the Clark-Evans Test Without CSR</a></li>
+  <li><a href="#perform-the-clark-evans-test-with-csr" id="toc-perform-the-clark-evans-test-with-csr" class="nav-link" data-scroll-target="#perform-the-clark-evans-test-with-csr"><span class="header-section-number">7.2</span> Perform the Clark-Evans Test With CSR</a></li>
   </ul></li>
-  <li><a href="#kernel-density-estimation-method" id="toc-kernel-density-estimation-method" class="nav-link" data-scroll-target="#kernel-density-estimation-method"><span class="header-section-number">7</span> Kernel Density Estimation Method</a>
+  <li><a href="#kernel-density-estimation-method" id="toc-kernel-density-estimation-method" class="nav-link" data-scroll-target="#kernel-density-estimation-method"><span class="header-section-number">8</span> Kernel Density Estimation Method</a>
   <ul>
-  <li><a href="#working-with-automatic-bandwidth-selection-method" id="toc-working-with-automatic-bandwidth-selection-method" class="nav-link" data-scroll-target="#working-with-automatic-bandwidth-selection-method"><span class="header-section-number">7.1</span> Working With Automatic Bandwidth Selection Method</a></li>
-  <li><a href="#rescalling-kde-values" id="toc-rescalling-kde-values" class="nav-link" data-scroll-target="#rescalling-kde-values"><span class="header-section-number">7.2</span> Rescalling KDE Values</a></li>
-  <li><a href="#working-with-different-automatic-badwidth-methods" id="toc-working-with-different-automatic-badwidth-methods" class="nav-link" data-scroll-target="#working-with-different-automatic-badwidth-methods"><span class="header-section-number">7.3</span> Working With Different Automatic Badwidth Methods</a></li>
-  <li><a href="#working-with-different-kernel-methods" id="toc-working-with-different-kernel-methods" class="nav-link" data-scroll-target="#working-with-different-kernel-methods"><span class="header-section-number">7.4</span> Working With Different Kernel Methods</a></li>
+  <li><a href="#working-with-automatic-bandwidth-selection-method" id="toc-working-with-automatic-bandwidth-selection-method" class="nav-link" data-scroll-target="#working-with-automatic-bandwidth-selection-method"><span class="header-section-number">8.1</span> Working With Automatic Bandwidth Selection Method</a></li>
+  <li><a href="#rescalling-kde-values" id="toc-rescalling-kde-values" class="nav-link" data-scroll-target="#rescalling-kde-values"><span class="header-section-number">8.2</span> Rescalling KDE Values</a></li>
+  <li><a href="#working-with-different-automatic-badwidth-methods" id="toc-working-with-different-automatic-badwidth-methods" class="nav-link" data-scroll-target="#working-with-different-automatic-badwidth-methods"><span class="header-section-number">8.3</span> Working With Different Automatic Badwidth Methods</a></li>
+  <li><a href="#working-with-different-kernel-methods" id="toc-working-with-different-kernel-methods" class="nav-link" data-scroll-target="#working-with-different-kernel-methods"><span class="header-section-number">8.4</span> Working With Different Kernel Methods</a></li>
   </ul></li>
-  <li><a href="#fixed-and-adaptive-kde" id="toc-fixed-and-adaptive-kde" class="nav-link" data-scroll-target="#fixed-and-adaptive-kde"><span class="header-section-number">8</span> Fixed and Adaptive KDE</a>
+  <li><a href="#fixed-and-adaptive-kde" id="toc-fixed-and-adaptive-kde" class="nav-link" data-scroll-target="#fixed-and-adaptive-kde"><span class="header-section-number">9</span> Fixed and Adaptive KDE</a>
   <ul>
-  <li><a href="#computing-kde-by-using-fixed-bandwidth" id="toc-computing-kde-by-using-fixed-bandwidth" class="nav-link" data-scroll-target="#computing-kde-by-using-fixed-bandwidth"><span class="header-section-number">8.1</span> Computing KDE by Using Fixed Bandwidth</a></li>
-  <li><a href="#computing-kde-by-using-adaptive-bandwidth" id="toc-computing-kde-by-using-adaptive-bandwidth" class="nav-link" data-scroll-target="#computing-kde-by-using-adaptive-bandwidth"><span class="header-section-number">8.2</span> Computing KDE by Using Adaptive Bandwidth</a></li>
+  <li><a href="#computing-kde-by-using-fixed-bandwidth" id="toc-computing-kde-by-using-fixed-bandwidth" class="nav-link" data-scroll-target="#computing-kde-by-using-fixed-bandwidth"><span class="header-section-number">9.1</span> Computing KDE by Using Fixed Bandwidth</a></li>
+  <li><a href="#computing-kde-by-using-adaptive-bandwidth" id="toc-computing-kde-by-using-adaptive-bandwidth" class="nav-link" data-scroll-target="#computing-kde-by-using-adaptive-bandwidth"><span class="header-section-number">9.2</span> Computing KDE by Using Adaptive Bandwidth</a></li>
   </ul></li>
-  <li><a href="#plotting-cartographic-quality-kde-map" id="toc-plotting-cartographic-quality-kde-map" class="nav-link" data-scroll-target="#plotting-cartographic-quality-kde-map"><span class="header-section-number">9</span> Plotting Cartographic Quality KDE Map</a>
+  <li><a href="#plotting-cartographic-quality-kde-map" id="toc-plotting-cartographic-quality-kde-map" class="nav-link" data-scroll-target="#plotting-cartographic-quality-kde-map"><span class="header-section-number">10</span> Plotting Cartographic Quality KDE Map</a>
   <ul>
-  <li><a href="#converting-gridded-output-into-raster" id="toc-converting-gridded-output-into-raster" class="nav-link" data-scroll-target="#converting-gridded-output-into-raster"><span class="header-section-number">9.1</span> Converting Gridded Output Into Raster</a></li>
-  <li><a href="#assigning-projection-systems" id="toc-assigning-projection-systems" class="nav-link" data-scroll-target="#assigning-projection-systems"><span class="header-section-number">9.2</span> Assigning Projection Systems</a></li>
-  <li><a href="#plotting-kde-map-with-tmap" id="toc-plotting-kde-map-with-tmap" class="nav-link" data-scroll-target="#plotting-kde-map-with-tmap"><span class="header-section-number">9.3</span> Plotting KDE Map With tmap</a></li>
+  <li><a href="#converting-gridded-output-into-raster" id="toc-converting-gridded-output-into-raster" class="nav-link" data-scroll-target="#converting-gridded-output-into-raster"><span class="header-section-number">10.1</span> Converting Gridded Output Into Raster</a></li>
+  <li><a href="#assigning-projection-systems" id="toc-assigning-projection-systems" class="nav-link" data-scroll-target="#assigning-projection-systems"><span class="header-section-number">10.2</span> Assigning Projection Systems</a></li>
+  <li><a href="#plotting-kde-map-with-tmap" id="toc-plotting-kde-map-with-tmap" class="nav-link" data-scroll-target="#plotting-kde-map-with-tmap"><span class="header-section-number">10.3</span> Plotting KDE Map With tmap</a></li>
   </ul></li>
-  <li><a href="#first-order-sppa-at-the-planning-subzone-level" id="toc-first-order-sppa-at-the-planning-subzone-level" class="nav-link" data-scroll-target="#first-order-sppa-at-the-planning-subzone-level"><span class="header-section-number">10</span> First Order SPPA at the Planning Subzone Level</a>
+  <li><a href="#first-order-sppa-at-the-planning-subzone-level" id="toc-first-order-sppa-at-the-planning-subzone-level" class="nav-link" data-scroll-target="#first-order-sppa-at-the-planning-subzone-level"><span class="header-section-number">11</span> First Order SPPA at the Planning Subzone Level</a>
   <ul>
-  <li><a href="#geospatial-data-wrangling-1" id="toc-geospatial-data-wrangling-1" class="nav-link" data-scroll-target="#geospatial-data-wrangling-1"><span class="header-section-number">10.1</span> Geospatial Data Wrangling</a>
+  <li><a href="#geospatial-data-wrangling-1" id="toc-geospatial-data-wrangling-1" class="nav-link" data-scroll-target="#geospatial-data-wrangling-1"><span class="header-section-number">11.1</span> Geospatial Data Wrangling</a>
   <ul class="collapse">
-  <li><a href="#extracting-study-area" id="toc-extracting-study-area" class="nav-link" data-scroll-target="#extracting-study-area"><span class="header-section-number">10.1.1</span> Extracting Study Area</a></li>
-  <li><a href="#creating-owin-object-1" id="toc-creating-owin-object-1" class="nav-link" data-scroll-target="#creating-owin-object-1"><span class="header-section-number">10.1.2</span> Creating owin Object</a></li>
-  <li><a href="#combining-point-events-object-and-owin-object-1" id="toc-combining-point-events-object-and-owin-object-1" class="nav-link" data-scroll-target="#combining-point-events-object-and-owin-object-1"><span class="header-section-number">10.1.3</span> Combining Point Events Object and owin Object</a></li>
+  <li><a href="#extracting-study-area" id="toc-extracting-study-area" class="nav-link" data-scroll-target="#extracting-study-area"><span class="header-section-number">11.1.1</span> Extracting Study Area</a></li>
+  <li><a href="#creating-owin-object-1" id="toc-creating-owin-object-1" class="nav-link" data-scroll-target="#creating-owin-object-1"><span class="header-section-number">11.1.2</span> Creating owin Object</a></li>
+  <li><a href="#combining-point-events-object-and-owin-object-1" id="toc-combining-point-events-object-and-owin-object-1" class="nav-link" data-scroll-target="#combining-point-events-object-and-owin-object-1"><span class="header-section-number">11.1.3</span> Combining Point Events Object and owin Object</a></li>
   </ul></li>
-  <li><a href="#clark-and-evans-test" id="toc-clark-and-evans-test" class="nav-link" data-scroll-target="#clark-and-evans-test"><span class="header-section-number">10.2</span> Clark and Evans Test</a>
+  <li><a href="#clark-and-evans-test" id="toc-clark-and-evans-test" class="nav-link" data-scroll-target="#clark-and-evans-test"><span class="header-section-number">11.2</span> Clark and Evans Test</a>
   <ul class="collapse">
-  <li><a href="#choa-chu-kang-planning-area" id="toc-choa-chu-kang-planning-area" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area"><span class="header-section-number">10.2.1</span> Choa Chu Kang Planning Area</a></li>
-  <li><a href="#tampines-planning-area" id="toc-tampines-planning-area" class="nav-link" data-scroll-target="#tampines-planning-area"><span class="header-section-number">10.2.2</span> Tampines Planning Area</a></li>
+  <li><a href="#choa-chu-kang-planning-area" id="toc-choa-chu-kang-planning-area" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area"><span class="header-section-number">11.2.1</span> Choa Chu Kang Planning Area</a></li>
+  <li><a href="#tampines-planning-area" id="toc-tampines-planning-area" class="nav-link" data-scroll-target="#tampines-planning-area"><span class="header-section-number">11.2.2</span> Tampines Planning Area</a></li>
   </ul></li>
-  <li><a href="#computing-kde-surfaces-by-planning-area" id="toc-computing-kde-surfaces-by-planning-area" class="nav-link" data-scroll-target="#computing-kde-surfaces-by-planning-area"><span class="header-section-number">10.3</span> Computing KDE Surfaces by Planning Area</a></li>
-  <li><a href="#my-enhanced-view" id="toc-my-enhanced-view" class="nav-link" data-scroll-target="#my-enhanced-view"><span class="header-section-number">10.4</span> My Enhanced View</a></li>
+  <li><a href="#computing-kde-surfaces-by-planning-area" id="toc-computing-kde-surfaces-by-planning-area" class="nav-link" data-scroll-target="#computing-kde-surfaces-by-planning-area"><span class="header-section-number">11.3</span> Computing KDE Surfaces by Planning Area</a></li>
+  <li><a href="#my-enhanced-view" id="toc-my-enhanced-view" class="nav-link" data-scroll-target="#my-enhanced-view"><span class="header-section-number">11.4</span> My Enhanced View</a></li>
   </ul></li>
-  <li><a href="#clark-evans-vs-kde" id="toc-clark-evans-vs-kde" class="nav-link" data-scroll-target="#clark-evans-vs-kde"><span class="header-section-number">11</span> Clark-Evans vs KDE</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned"><span class="header-section-number">12</span> What I Learned</a></li>
-  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">13</span> Limitations</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14</span> References</a></li>
+  <li><a href="#beyond-the-basic-density-surface" id="toc-beyond-the-basic-density-surface" class="nav-link" data-scroll-target="#beyond-the-basic-density-surface"><span class="header-section-number">12</span> Beyond the Basic Density Surface</a></li>
+  <li><a href="#clark-evans-vs-kde" id="toc-clark-evans-vs-kde" class="nav-link" data-scroll-target="#clark-evans-vs-kde"><span class="header-section-number">13</span> Clark-Evans vs KDE</a></li>
+  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned"><span class="header-section-number">14</span> What I Learned</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">15</span> Limitations</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">16</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -298,15 +300,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>The local project uses GeoJSON copies of both datasets in <code>Hands-on_Ex/Hands-on_Ex02/data</code>. I keep all paths relative to this chapter folder so the project can still render after being cloned.</p>
 </section>
-<section id="installing-and-loading-the-r-packages" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="installing-and-loading-the-r-packages"><span class="header-section-number">3</span> Installing and Loading the R Packages</h2>
+<section id="how-i-think-about-the-method-choices" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="how-i-think-about-the-method-choices"><span class="header-section-number">3</span> How I Think About the Method Choices</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Choice</th>
+<th>Why it matters in this exercise</th>
+<th>What I watch for</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Study window</td>
+<td>It defines where points are allowed to occur</td>
+<td>Singapore-wide and planning-area results should not be treated as the same question</td>
+</tr>
+<tr class="even">
+<td>Projected CRS</td>
+<td>Distance calculations need metre-based coordinates</td>
+<td>EPSG:3414 keeps nearest-neighbour and KDE distances meaningful</td>
+</tr>
+<tr class="odd">
+<td>Bandwidth</td>
+<td>It controls how smooth the KDE surface becomes</td>
+<td>A very smooth surface can hide local peaks; a very sharp one can over-emphasise noise</td>
+</tr>
+<tr class="even">
+<td>Kernel</td>
+<td>It changes how density is spread around each point</td>
+<td>I compare kernels as a sensitivity check, not as the main conclusion</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>My learning point
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For first-order point pattern analysis, the study window and bandwidth feel just as important as the points themselves. The same childcare centres can look more clustered or more evenly spread depending on the scale at which I summarise them.</p>
+</div>
+</div>
+</section>
+<section id="installing-and-loading-the-r-packages" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="installing-and-loading-the-r-packages"><span class="header-section-number">4</span> Installing and Loading the R Packages</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, terra, spatstat, </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>               tmap, rvest, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="importing-and-wrangling-geospatial-data-sets" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="importing-and-wrangling-geospatial-data-sets"><span class="header-section-number">4</span> Importing and Wrangling Geospatial Data Sets</h2>
+<section id="importing-and-wrangling-geospatial-data-sets" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="importing-and-wrangling-geospatial-data-sets"><span class="header-section-number">5</span> Importing and Wrangling Geospatial Data Sets</h2>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -374,8 +428,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>The projected CRS is important here because the point pattern methods below use distance. Longitude and latitude are good for storing global positions, but metres are more appropriate for measuring nearest neighbours and KDE bandwidths.</p>
-<section id="mapping-the-geospatial-data-sets" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="mapping-the-geospatial-data-sets"><span class="header-section-number">4.1</span> Mapping the Geospatial Data Sets</h3>
+<section id="mapping-the-geospatial-data-sets" class="level3" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="mapping-the-geospatial-data-sets"><span class="header-section-number">5.1</span> Mapping the Geospatial Data Sets</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The website version renders this as a static map so the Netlify page</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># remains lightweight and reliable.</span></span>
@@ -395,11 +449,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="geospatial-data-wrangling" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="geospatial-data-wrangling"><span class="header-section-number">5</span> Geospatial Data Wrangling</h2>
+<section id="geospatial-data-wrangling" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="geospatial-data-wrangling"><span class="header-section-number">6</span> Geospatial Data Wrangling</h2>
 <p>For this exercise, <code>sf</code> stores the raw geospatial layers with their attributes, <code>ppp</code> stores the point pattern for <code>spatstat</code>, and <code>owin</code> stores the observation window. I think of them as three different shapes of the same problem: data layer, point process, and study area.</p>
-<section id="converting-sf-data-frames-to-ppp-class" class="level3" data-number="5.1">
-<h3 data-number="5.1" class="anchored" data-anchor-id="converting-sf-data-frames-to-ppp-class"><span class="header-section-number">5.1</span> Converting sf Data Frames to ppp Class</h3>
+<section id="converting-sf-data-frames-to-ppp-class" class="level3" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="converting-sf-data-frames-to-ppp-class"><span class="header-section-number">6.1</span> Converting sf Data Frames to ppp Class</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>childcare_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(childcare_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -457,8 +511,8 @@ Window area = 796335000 square units</code></pre>
 </div>
 </div>
 </section>
-<section id="creating-owin-object" class="level3" data-number="5.2">
-<h3 data-number="5.2" class="anchored" data-anchor-id="creating-owin-object"><span class="header-section-number">5.2</span> Creating owin Object</h3>
+<section id="creating-owin-object" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="creating-owin-object"><span class="header-section-number">6.2</span> Creating owin Object</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>sg_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(mpsz_cl)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -479,8 +533,8 @@ Window area = 796335000 square units</code></pre>
 </div>
 </div>
 </section>
-<section id="combining-point-events-object-and-owin-object" class="level3" data-number="5.3">
-<h3 data-number="5.3" class="anchored" data-anchor-id="combining-point-events-object-and-owin-object"><span class="header-section-number">5.3</span> Combining Point Events Object and owin Object</h3>
+<section id="combining-point-events-object-and-owin-object" class="level3" data-number="6.3">
+<h3 data-number="6.3" class="anchored" data-anchor-id="combining-point-events-object-and-owin-object"><span class="header-section-number">6.3</span> Combining Point Events Object and owin Object</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>childcareSG_ppp <span class="ot">=</span> childcare_ppp[sg_owin]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -499,11 +553,11 @@ enclosing rectangle: [2667.54, 55941.94] x [21448.47, 50256.33] units</code></pr
 </div>
 </section>
 </section>
-<section id="clark-evan-test-for-nearest-neighbour-analysis" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="clark-evan-test-for-nearest-neighbour-analysis"><span class="header-section-number">6</span> Clark-Evan Test for Nearest Neighbour Analysis</h2>
+<section id="clark-evan-test-for-nearest-neighbour-analysis" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="clark-evan-test-for-nearest-neighbour-analysis"><span class="header-section-number">7</span> Clark-Evan Test for Nearest Neighbour Analysis</h2>
 <p>The Clark-Evans test compares the observed nearest-neighbour distances with what would be expected under complete spatial randomness. An index below 1 suggests clustering, while an index above 1 suggests a more regular pattern.</p>
-<section id="perform-the-clark-evans-test-without-csr" class="level3" data-number="6.1">
-<h3 data-number="6.1" class="anchored" data-anchor-id="perform-the-clark-evans-test-without-csr"><span class="header-section-number">6.1</span> Perform the Clark-Evans Test Without CSR</h3>
+<section id="perform-the-clark-evans-test-without-csr" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="perform-the-clark-evans-test-without-csr"><span class="header-section-number">7.1</span> Perform the Clark-Evans Test Without CSR</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ce_sg <span class="ot">&lt;-</span> <span class="fu">clarkevans.test</span>(childcareSG_ppp,</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">correction=</span><span class="st">"none"</span>,</span>
@@ -522,8 +576,8 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </div>
 </div>
 </section>
-<section id="perform-the-clark-evans-test-with-csr" class="level3" data-number="6.2">
-<h3 data-number="6.2" class="anchored" data-anchor-id="perform-the-clark-evans-test-with-csr"><span class="header-section-number">6.2</span> Perform the Clark-Evans Test With CSR</h3>
+<section id="perform-the-clark-evans-test-with-csr" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="perform-the-clark-evans-test-with-csr"><span class="header-section-number">7.2</span> Perform the Clark-Evans Test With CSR</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ce_sg_mc <span class="ot">&lt;-</span> <span class="fu">clarkevans.test</span>(childcareSG_ppp,</span>
@@ -559,11 +613,11 @@ alternative hypothesis: clustered (R &lt; 1)</code></pre>
 </div>
 </section>
 </section>
-<section id="kernel-density-estimation-method" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="kernel-density-estimation-method"><span class="header-section-number">7</span> Kernel Density Estimation Method</h2>
+<section id="kernel-density-estimation-method" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="kernel-density-estimation-method"><span class="header-section-number">8</span> Kernel Density Estimation Method</h2>
 <p>KDE turns the point pattern into a continuous intensity surface. I use it after the Clark-Evans test because it answers a slightly different question: not whether the pattern is random, but where concentrations appear more clearly on the map.</p>
-<section id="working-with-automatic-bandwidth-selection-method" class="level3" data-number="7.1">
-<h3 data-number="7.1" class="anchored" data-anchor-id="working-with-automatic-bandwidth-selection-method"><span class="header-section-number">7.1</span> Working With Automatic Bandwidth Selection Method</h3>
+<section id="working-with-automatic-bandwidth-selection-method" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="working-with-automatic-bandwidth-selection-method"><span class="header-section-number">8.1</span> Working With Automatic Bandwidth Selection Method</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>kde_SG_diggle <span class="ot">&lt;-</span> <span class="fu">density</span>(</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  childcareSG_ppp,</span>
@@ -598,8 +652,8 @@ Pixel values (inside window):
 </div>
 </div>
 </section>
-<section id="rescalling-kde-values" class="level3" data-number="7.2">
-<h3 data-number="7.2" class="anchored" data-anchor-id="rescalling-kde-values"><span class="header-section-number">7.2</span> Rescalling KDE Values</h3>
+<section id="rescalling-kde-values" class="level3" data-number="8.2">
+<h3 data-number="8.2" class="anchored" data-anchor-id="rescalling-kde-values"><span class="header-section-number">8.2</span> Rescalling KDE Values</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>bw <span class="ot">&lt;-</span> <span class="fu">bw.diggle</span>(childcareSG_ppp)</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>bw</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -629,8 +683,8 @@ Pixel values (inside window):
 </div>
 </div>
 </section>
-<section id="working-with-different-automatic-badwidth-methods" class="level3" data-number="7.3">
-<h3 data-number="7.3" class="anchored" data-anchor-id="working-with-different-automatic-badwidth-methods"><span class="header-section-number">7.3</span> Working With Different Automatic Badwidth Methods</h3>
+<section id="working-with-different-automatic-badwidth-methods" class="level3" data-number="8.3">
+<h3 data-number="8.3" class="anchored" data-anchor-id="working-with-different-automatic-badwidth-methods"><span class="header-section-number">8.3</span> Working With Different Automatic Badwidth Methods</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">bw.CvL</span>(childcareSG_ppp_km)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -689,8 +743,8 @@ Pixel values (inside window):
 </div>
 </div>
 </section>
-<section id="working-with-different-kernel-methods" class="level3" data-number="7.4">
-<h3 data-number="7.4" class="anchored" data-anchor-id="working-with-different-kernel-methods"><span class="header-section-number">7.4</span> Working With Different Kernel Methods</h3>
+<section id="working-with-different-kernel-methods" class="level3" data-number="8.4">
+<h3 data-number="8.4" class="anchored" data-anchor-id="working-with-different-kernel-methods"><span class="header-section-number">8.4</span> Working With Different Kernel Methods</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(childcareSG_ppp_km, </span>
@@ -736,10 +790,10 @@ Pixel values (inside window):
 </div>
 </section>
 </section>
-<section id="fixed-and-adaptive-kde" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="fixed-and-adaptive-kde"><span class="header-section-number">8</span> Fixed and Adaptive KDE</h2>
-<section id="computing-kde-by-using-fixed-bandwidth" class="level3" data-number="8.1">
-<h3 data-number="8.1" class="anchored" data-anchor-id="computing-kde-by-using-fixed-bandwidth"><span class="header-section-number">8.1</span> Computing KDE by Using Fixed Bandwidth</h3>
+<section id="fixed-and-adaptive-kde" class="level2" data-number="9">
+<h2 data-number="9" class="anchored" data-anchor-id="fixed-and-adaptive-kde"><span class="header-section-number">9</span> Fixed and Adaptive KDE</h2>
+<section id="computing-kde-by-using-fixed-bandwidth" class="level3" data-number="9.1">
+<h3 data-number="9.1" class="anchored" data-anchor-id="computing-kde-by-using-fixed-bandwidth"><span class="header-section-number">9.1</span> Computing KDE by Using Fixed Bandwidth</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_fb <span class="ot">&lt;-</span> <span class="fu">density</span>(childcareSG_ppp_km,</span>
 <span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">sigma=</span><span class="fl">0.6</span>, </span>
@@ -755,8 +809,8 @@ Pixel values (inside window):
 </div>
 </div>
 </section>
-<section id="computing-kde-by-using-adaptive-bandwidth" class="level3" data-number="8.2">
-<h3 data-number="8.2" class="anchored" data-anchor-id="computing-kde-by-using-adaptive-bandwidth"><span class="header-section-number">8.2</span> Computing KDE by Using Adaptive Bandwidth</h3>
+<section id="computing-kde-by-using-adaptive-bandwidth" class="level3" data-number="9.2">
+<h3 data-number="9.2" class="anchored" data-anchor-id="computing-kde-by-using-adaptive-bandwidth"><span class="header-section-number">9.2</span> Computing KDE by Using Adaptive Bandwidth</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_ab <span class="ot">&lt;-</span> <span class="fu">adaptive.density</span>(</span>
 <span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  childcareSG_ppp_km, </span>
@@ -797,10 +851,10 @@ Pixel values (inside window):
 </div>
 </section>
 </section>
-<section id="plotting-cartographic-quality-kde-map" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="plotting-cartographic-quality-kde-map"><span class="header-section-number">9</span> Plotting Cartographic Quality KDE Map</h2>
-<section id="converting-gridded-output-into-raster" class="level3" data-number="9.1">
-<h3 data-number="9.1" class="anchored" data-anchor-id="converting-gridded-output-into-raster"><span class="header-section-number">9.1</span> Converting Gridded Output Into Raster</h3>
+<section id="plotting-cartographic-quality-kde-map" class="level2" data-number="10">
+<h2 data-number="10" class="anchored" data-anchor-id="plotting-cartographic-quality-kde-map"><span class="header-section-number">10</span> Plotting Cartographic Quality KDE Map</h2>
+<section id="converting-gridded-output-into-raster" class="level3" data-number="10.1">
+<h3 data-number="10.1" class="anchored" data-anchor-id="converting-gridded-output-into-raster"><span class="header-section-number">10.1</span> Converting Gridded Output Into Raster</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>kde_childcareSG_bw_terra <span class="ot">&lt;-</span> <span class="fu">rast</span>(kde_childcareSG_km)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -850,8 +904,8 @@ unit        : km</code></pre>
 </div>
 </div>
 </section>
-<section id="assigning-projection-systems" class="level3" data-number="9.2">
-<h3 data-number="9.2" class="anchored" data-anchor-id="assigning-projection-systems"><span class="header-section-number">9.2</span> Assigning Projection Systems</h3>
+<section id="assigning-projection-systems" class="level3" data-number="10.2">
+<h3 data-number="10.2" class="anchored" data-anchor-id="assigning-projection-systems"><span class="header-section-number">10.2</span> Assigning Projection Systems</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">crs</span>(kde_childcareSG_bw_terra) <span class="ot">&lt;-</span> <span class="st">"EPSG:3414"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -871,8 +925,8 @@ unit        : km</code></pre>
 </div>
 </div>
 </section>
-<section id="plotting-kde-map-with-tmap" class="level3" data-number="9.3">
-<h3 data-number="9.3" class="anchored" data-anchor-id="plotting-kde-map-with-tmap"><span class="header-section-number">9.3</span> Plotting KDE Map With tmap</h3>
+<section id="plotting-kde-map-with-tmap" class="level3" data-number="10.3">
+<h3 data-number="10.3" class="anchored" data-anchor-id="plotting-kde-map-with-tmap"><span class="header-section-number">10.3</span> Plotting KDE Map With tmap</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kde_childcareSG_bw_terra) <span class="sc">+</span> </span>
 <span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_raster</span>(<span class="at">col.scale =</span> </span>
@@ -913,10 +967,10 @@ unit        : km</code></pre>
 </div>
 </section>
 </section>
-<section id="first-order-sppa-at-the-planning-subzone-level" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="first-order-sppa-at-the-planning-subzone-level"><span class="header-section-number">10</span> First Order SPPA at the Planning Subzone Level</h2>
-<section id="geospatial-data-wrangling-1" class="level3" data-number="10.1">
-<h3 data-number="10.1" class="anchored" data-anchor-id="geospatial-data-wrangling-1"><span class="header-section-number">10.1</span> Geospatial Data Wrangling</h3>
+<section id="first-order-sppa-at-the-planning-subzone-level" class="level2" data-number="11">
+<h2 data-number="11" class="anchored" data-anchor-id="first-order-sppa-at-the-planning-subzone-level"><span class="header-section-number">11</span> First Order SPPA at the Planning Subzone Level</h2>
+<section id="geospatial-data-wrangling-1" class="level3" data-number="11.1">
+<h3 data-number="11.1" class="anchored" data-anchor-id="geospatial-data-wrangling-1"><span class="header-section-number">11.1</span> Geospatial Data Wrangling</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>pg <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
 <span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"PUNGGOL"</span>)</span>
@@ -927,8 +981,8 @@ unit        : km</code></pre>
 <span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>jw <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
 <span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"JURONG WEST"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="extracting-study-area" class="level4" data-number="10.1.1">
-<h4 data-number="10.1.1" class="anchored" data-anchor-id="extracting-study-area"><span class="header-section-number">10.1.1</span> Extracting Study Area</h4>
+<section id="extracting-study-area" class="level4" data-number="11.1.1">
+<h4 data-number="11.1.1" class="anchored" data-anchor-id="extracting-study-area"><span class="header-section-number">11.1.1</span> Extracting Study Area</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">st_geometry</span>(pg), <span class="at">main =</span> <span class="st">"Ponggol"</span>)</span>
@@ -944,8 +998,8 @@ unit        : km</code></pre>
 </div>
 </div>
 </section>
-<section id="creating-owin-object-1" class="level4" data-number="10.1.2">
-<h4 data-number="10.1.2" class="anchored" data-anchor-id="creating-owin-object-1"><span class="header-section-number">10.1.2</span> Creating owin Object</h4>
+<section id="creating-owin-object-1" class="level4" data-number="11.1.2">
+<h4 data-number="11.1.2" class="anchored" data-anchor-id="creating-owin-object-1"><span class="header-section-number">11.1.2</span> Creating owin Object</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>pg_owin <span class="ot">=</span> <span class="fu">as.owin</span>(pg)</span>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>tm_owin <span class="ot">=</span> <span class="fu">as.owin</span>(tm)</span>
@@ -953,8 +1007,8 @@ unit        : km</code></pre>
 <span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>jw_owin <span class="ot">=</span> <span class="fu">as.owin</span>(jw)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="combining-point-events-object-and-owin-object-1" class="level4" data-number="10.1.3">
-<h4 data-number="10.1.3" class="anchored" data-anchor-id="combining-point-events-object-and-owin-object-1"><span class="header-section-number">10.1.3</span> Combining Point Events Object and owin Object</h4>
+<section id="combining-point-events-object-and-owin-object-1" class="level4" data-number="11.1.3">
+<h4 data-number="11.1.3" class="anchored" data-anchor-id="combining-point-events-object-and-owin-object-1"><span class="header-section-number">11.1.3</span> Combining Point Events Object and owin Object</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>childcare_pg_ppp <span class="ot">=</span> childcare_ppp[pg_owin]</span>
 <span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>childcare_tm_ppp <span class="ot">=</span> childcare_ppp[tm_owin]</span>
@@ -1000,10 +1054,10 @@ unit        : km</code></pre>
 </div>
 </section>
 </section>
-<section id="clark-and-evans-test" class="level3" data-number="10.2">
-<h3 data-number="10.2" class="anchored" data-anchor-id="clark-and-evans-test"><span class="header-section-number">10.2</span> Clark and Evans Test</h3>
-<section id="choa-chu-kang-planning-area" class="level4" data-number="10.2.1">
-<h4 data-number="10.2.1" class="anchored" data-anchor-id="choa-chu-kang-planning-area"><span class="header-section-number">10.2.1</span> Choa Chu Kang Planning Area</h4>
+<section id="clark-and-evans-test" class="level3" data-number="11.2">
+<h3 data-number="11.2" class="anchored" data-anchor-id="clark-and-evans-test"><span class="header-section-number">11.2</span> Clark and Evans Test</h3>
+<section id="choa-chu-kang-planning-area" class="level4" data-number="11.2.1">
+<h4 data-number="11.2.1" class="anchored" data-anchor-id="choa-chu-kang-planning-area"><span class="header-section-number">11.2.1</span> Choa Chu Kang Planning Area</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>ce_ck <span class="ot">&lt;-</span> <span class="fu">clarkevans.test</span>(childcare_ck_ppp,</span>
@@ -1024,8 +1078,8 @@ alternative hypothesis: two-sided</code></pre>
 </div>
 </div>
 </section>
-<section id="tampines-planning-area" class="level4" data-number="10.2.2">
-<h4 data-number="10.2.2" class="anchored" data-anchor-id="tampines-planning-area"><span class="header-section-number">10.2.2</span> Tampines Planning Area</h4>
+<section id="tampines-planning-area" class="level4" data-number="11.2.2">
+<h4 data-number="11.2.2" class="anchored" data-anchor-id="tampines-planning-area"><span class="header-section-number">11.2.2</span> Tampines Planning Area</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
 <span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>ce_tm <span class="ot">&lt;-</span> <span class="fu">clarkevans.test</span>(childcare_tm_ppp,</span>
@@ -1060,8 +1114,8 @@ alternative hypothesis: two-sided</code></pre>
 </div>
 </section>
 </section>
-<section id="computing-kde-surfaces-by-planning-area" class="level3" data-number="10.3">
-<h3 data-number="10.3" class="anchored" data-anchor-id="computing-kde-surfaces-by-planning-area"><span class="header-section-number">10.3</span> Computing KDE Surfaces by Planning Area</h3>
+<section id="computing-kde-surfaces-by-planning-area" class="level3" data-number="11.3">
+<h3 data-number="11.3" class="anchored" data-anchor-id="computing-kde-surfaces-by-planning-area"><span class="header-section-number">11.3</span> Computing KDE Surfaces by Planning Area</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">density</span>(childcare_pg_ppp.km, </span>
@@ -1093,8 +1147,8 @@ alternative hypothesis: two-sided</code></pre>
 </div>
 </div>
 </section>
-<section id="my-enhanced-view" class="level3" data-number="10.4">
-<h3 data-number="10.4" class="anchored" data-anchor-id="my-enhanced-view"><span class="header-section-number">10.4</span> My Enhanced View</h3>
+<section id="my-enhanced-view" class="level3" data-number="11.4">
+<h3 data-number="11.4" class="anchored" data-anchor-id="my-enhanced-view"><span class="header-section-number">11.4</span> My Enhanced View</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>focus_areas <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(ck, tm)</span>
 <span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>focus_points <span class="ot">&lt;-</span> <span class="fu">st_filter</span>(childcare_sf, <span class="fu">st_union</span>(focus_areas))</span>
@@ -1135,12 +1189,29 @@ alternative hypothesis: two-sided</code></pre>
 </div>
 </section>
 </section>
-<section id="clark-evans-vs-kde" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="clark-evans-vs-kde"><span class="header-section-number">11</span> Clark-Evans vs KDE</h2>
+<section id="beyond-the-basic-density-surface" class="level2" data-number="12">
+<h2 data-number="12" class="anchored" data-anchor-id="beyond-the-basic-density-surface"><span class="header-section-number">12</span> Beyond the Basic Density Surface</h2>
+<p>The KDE map is visually strong, but I should not over-read it as a demand or accessibility map. It shows where childcare centres are concentrated, not whether the number of centres is enough for nearby children or whether families can reach them easily.</p>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>What I would check next
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The next step would be to bring in child population, residential land use, or walking-network distance. That would move the analysis from “where are centres dense?” to “where might service provision be relatively high or low compared with potential demand?”</p>
+</div>
+</div>
+</section>
+<section id="clark-evans-vs-kde" class="level2" data-number="13">
+<h2 data-number="13" class="anchored" data-anchor-id="clark-evans-vs-kde"><span class="header-section-number">13</span> Clark-Evans vs KDE</h2>
 <p>Clark-Evans gives a statistical check of nearest-neighbour spacing, while KDE gives a visual intensity surface. I would not treat them as substitutes. The test helps me ask whether the pattern departs from CSR, while KDE helps me inspect where concentrations are stronger.</p>
 </section>
-<section id="what-i-learned" class="level2" data-number="12">
-<h2 data-number="12" class="anchored" data-anchor-id="what-i-learned"><span class="header-section-number">12</span> What I Learned</h2>
+<section id="what-i-learned" class="level2" data-number="14">
+<h2 data-number="14" class="anchored" data-anchor-id="what-i-learned"><span class="header-section-number">14</span> What I Learned</h2>
 <ul>
 <li>CRS matters because the main calculations use distance.</li>
 <li><code>ppp</code> and <code>owin</code> are the key objects that let <code>spatstat</code> understand the point events and the analysis window.</li>
@@ -1148,12 +1219,12 @@ alternative hypothesis: two-sided</code></pre>
 <li>Changing the study window can change the interpretation, especially when comparing Singapore-wide and planning-area views.</li>
 </ul>
 </section>
-<section id="limitations" class="level2" data-number="13">
-<h2 data-number="13" class="anchored" data-anchor-id="limitations"><span class="header-section-number">13</span> Limitations</h2>
+<section id="limitations" class="level2" data-number="15">
+<h2 data-number="15" class="anchored" data-anchor-id="limitations"><span class="header-section-number">15</span> Limitations</h2>
 <p>The point pattern shows where childcare centres are located, but it does not directly explain the causes of clustering. CSR is also a simple null model, so the result should be read as a starting point rather than a full explanation of childcare service provision.</p>
 </section>
-<section id="references" class="level2" data-number="14">
-<h2 data-number="14" class="anchored" data-anchor-id="references"><span class="header-section-number">14</span> References</h2>
+<section id="references" class="level2" data-number="16">
+<h2 data-number="16" class="anchored" data-anchor-id="references"><span class="header-section-number">16</span> References</h2>
 <ul>
 <li>R for Geospatial Data Science and Analytics. Chapter 4: First-order Spatial Point Patterns Analysis Methods. <a href="https://r4gdsa.netlify.app/chap04" class="uri">https://r4gdsa.netlify.app/chap04</a></li>
 </ul>

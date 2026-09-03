@@ -41,6 +41,21 @@ Two geospatial datasets are used:
 
 The local project uses GeoJSON copies of both datasets in `Hands-on_Ex/Hands-on_Ex02/data`. I keep all paths relative to this chapter folder so the project can still render after being cloned.
 
+## How I Think About the Method Choices
+
+| Choice | Why it matters in this exercise | What I watch for |
+|---|---|---|
+| Study window | It defines where points are allowed to occur | Singapore-wide and planning-area results should not be treated as the same question |
+| Projected CRS | Distance calculations need metre-based coordinates | EPSG:3414 keeps nearest-neighbour and KDE distances meaningful |
+| Bandwidth | It controls how smooth the KDE surface becomes | A very smooth surface can hide local peaks; a very sharp one can over-emphasise noise |
+| Kernel | It changes how density is spread around each point | I compare kernels as a sensitivity check, not as the main conclusion |
+
+::: {.callout-note}
+### My learning point
+
+For first-order point pattern analysis, the study window and bandwidth feel just as important as the points themselves. The same childcare centres can look more clustered or more evenly spread depending on the scale at which I summarise them.
+:::
+
 ## Installing and Loading the R Packages
 
 ```{r}
@@ -622,6 +637,16 @@ tm_shape(focus_areas) +
 ### My finding from the focus map
 
 The focus map is useful because Choa Chu Kang and Tampines are easier to compare when they are shown together with the same symbol style. Tampines appears to have a more visibly distributed set of childcare centres, while Choa Chu Kang looks more constrained by its planning-area shape.
+:::
+
+## Beyond the Basic Density Surface
+
+The KDE map is visually strong, but I should not over-read it as a demand or accessibility map. It shows where childcare centres are concentrated, not whether the number of centres is enough for nearby children or whether families can reach them easily.
+
+::: {.callout-important}
+### What I would check next
+
+The next step would be to bring in child population, residential land use, or walking-network distance. That would move the analysis from "where are centres dense?" to "where might service provision be relatively high or low compared with potential demand?"
 :::
 
 ## Clark-Evans vs KDE

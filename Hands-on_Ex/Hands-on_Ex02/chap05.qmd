@@ -344,12 +344,18 @@ The L-function is helpful as a final check because it makes the K-function easie
 
 ## G, F, K and L: How I Distinguish Them
 
-| Function | What it focuses on | Intuition |
-|---|---|---|
-| G | event-to-event | nearest neighbour |
-| F | arbitrary location-to-event | empty space |
-| K | neighbours across distance | multi-scale clustering |
-| L | transformed K | easier interpretation |
+| Function | What it focuses on | Question I ask when reading it | What would suggest clustering |
+|---|---|---|---|
+| G | event-to-event | Are existing childcare centres close to other centres? | The observed curve rises faster than CSR at short distances |
+| F | arbitrary location-to-event | Are random locations in the planning area close to a centre? | Empty-space distances are shorter than expected under CSR |
+| K | neighbours across distance | Does clustering appear across wider distance bands? | The observed neighbour count is above the CSR envelope |
+| L | transformed K | Is the K-function departure easier to read visually? | `L(d)-r` stays above the reference/envelope over a distance range |
+
+::: {.callout-note}
+### My learning point
+
+I find the G- and F-functions more intuitive, but K and L are more useful for checking whether the conclusion holds beyond the nearest neighbour. That is why I would not rely on only one curve when making a statement about interaction.
+:::
 
 ## My Interpretation
 
@@ -365,6 +371,10 @@ Across these plots, I read the observed curves relative to the CSR line and simu
 ## Limitations
 
 CSR is a simple benchmark, and it does not account for population distribution, residential land use, transport access, or planning policy. The result is useful for describing spatial pattern, but not enough by itself to explain the causes of that pattern.
+
+## Reflection
+
+Compared with first-order KDE, second-order analysis made me think more carefully about distance ranges. A single statement like "the centres are clustered" is too broad unless I say at what distance and under which study window. The envelopes also helped me read the plots more cautiously because I could compare the observed curve with simulated CSR patterns rather than relying only on visual impression.
 
 ## References
 

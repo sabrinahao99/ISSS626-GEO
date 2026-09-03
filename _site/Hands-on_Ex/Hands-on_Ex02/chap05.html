@@ -251,7 +251,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#my-interpretation" id="toc-my-interpretation" class="nav-link" data-scroll-target="#my-interpretation"><span class="header-section-number">11</span> My Interpretation</a></li>
   <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned"><span class="header-section-number">12</span> What I Learned</a></li>
   <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">13</span> Limitations</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">14</span> References</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection"><span class="header-section-number">14</span> Reflection</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">15</span> References</a></li>
   </ul>
 </nav>
     </div>
@@ -891,36 +892,60 @@ Done.</code></pre>
 <section id="g-f-k-and-l-how-i-distinguish-them" class="level2" data-number="10">
 <h2 data-number="10" class="anchored" data-anchor-id="g-f-k-and-l-how-i-distinguish-them"><span class="header-section-number">10</span> G, F, K and L: How I Distinguish Them</h2>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Function</th>
 <th>What it focuses on</th>
-<th>Intuition</th>
+<th>Question I ask when reading it</th>
+<th>What would suggest clustering</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>G</td>
 <td>event-to-event</td>
-<td>nearest neighbour</td>
+<td>Are existing childcare centres close to other centres?</td>
+<td>The observed curve rises faster than CSR at short distances</td>
 </tr>
 <tr class="even">
 <td>F</td>
 <td>arbitrary location-to-event</td>
-<td>empty space</td>
+<td>Are random locations in the planning area close to a centre?</td>
+<td>Empty-space distances are shorter than expected under CSR</td>
 </tr>
 <tr class="odd">
 <td>K</td>
 <td>neighbours across distance</td>
-<td>multi-scale clustering</td>
+<td>Does clustering appear across wider distance bands?</td>
+<td>The observed neighbour count is above the CSR envelope</td>
 </tr>
 <tr class="even">
 <td>L</td>
 <td>transformed K</td>
-<td>easier interpretation</td>
+<td>Is the K-function departure easier to read visually?</td>
+<td><code>L(d)-r</code> stays above the reference/envelope over a distance range</td>
 </tr>
 </tbody>
 </table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>My learning point
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I find the G- and F-functions more intuitive, but K and L are more useful for checking whether the conclusion holds beyond the nearest neighbour. That is why I would not rely on only one curve when making a statement about interaction.</p>
+</div>
+</div>
 </section>
 <section id="my-interpretation" class="level2" data-number="11">
 <h2 data-number="11" class="anchored" data-anchor-id="my-interpretation"><span class="header-section-number">11</span> My Interpretation</h2>
@@ -939,8 +964,12 @@ Done.</code></pre>
 <h2 data-number="13" class="anchored" data-anchor-id="limitations"><span class="header-section-number">13</span> Limitations</h2>
 <p>CSR is a simple benchmark, and it does not account for population distribution, residential land use, transport access, or planning policy. The result is useful for describing spatial pattern, but not enough by itself to explain the causes of that pattern.</p>
 </section>
-<section id="references" class="level2" data-number="14">
-<h2 data-number="14" class="anchored" data-anchor-id="references"><span class="header-section-number">14</span> References</h2>
+<section id="reflection" class="level2" data-number="14">
+<h2 data-number="14" class="anchored" data-anchor-id="reflection"><span class="header-section-number">14</span> Reflection</h2>
+<p>Compared with first-order KDE, second-order analysis made me think more carefully about distance ranges. A single statement like “the centres are clustered” is too broad unless I say at what distance and under which study window. The envelopes also helped me read the plots more cautiously because I could compare the observed curve with simulated CSR patterns rather than relying only on visual impression.</p>
+</section>
+<section id="references" class="level2" data-number="15">
+<h2 data-number="15" class="anchored" data-anchor-id="references"><span class="header-section-number">15</span> References</h2>
 <ul>
 <li>R for Geospatial Data Science and Analytics. Chapter 5: 2nd Order Spatial Point Patterns Analysis Methods. <a href="https://r4gdsa.netlify.app/chap05" class="uri">https://r4gdsa.netlify.app/chap05</a></li>
 </ul>

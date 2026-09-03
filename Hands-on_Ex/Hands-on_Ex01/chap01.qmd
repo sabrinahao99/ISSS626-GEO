@@ -34,6 +34,22 @@ I use this page to reproduce the Chapter 1 workflow with the local data folder. 
 All data for this exercise is stored in `Hands-on_Ex/Hands-on_Ex01/data`, so the code below uses local relative paths such as `data/geospatial` and `data/aspatial/listings.csv`.
 :::
 
+## Spatial Data Types Used Here
+
+Before running the code, I found it useful to separate the data by spatial type because each type supports a different kind of question.
+
+| Spatial data type | Dataset in this exercise | How I use it |
+|---|---|---|
+| Points | Preschool locations and Airbnb listings | Represent individual facilities or listings |
+| Polygons | Planning subzones | Define administrative areas for counting and density |
+| Lines | Cycling paths | Represent a network-like feature for buffering |
+
+::: {.callout-note}
+## My Learning Point
+
+The same map can mix points, polygons, and lines, but the operations are not interchangeable. For example, `st_intersects()` answers a point-in-polygon question, while `st_buffer()` expands a line into an area that can be measured.
+:::
+
 ## Getting Started
 
 ```{r}
@@ -298,6 +314,10 @@ With the current preschool layer, Tampines East has the largest raw count in my 
 ## Takeaway
 
 The workflow shows why CRS checks and geometry operations are central to geospatial analysis. With the current preschool data, the areas with the highest raw counts are not always the same as the areas with the highest density, because compact subzones can have high service concentration even with moderate counts.
+
+## Reflection
+
+The most important lesson for me is that spatial analysis is not only about drawing data on a map. The geometry type, CRS, and spatial unit all affect what question the code is answering. I also realised that a result can be technically correct but still incomplete if I do not explain whether it is a count, density, buffer area, or spatial relationship.
 
 ## References
 
