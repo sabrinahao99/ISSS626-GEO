@@ -17,6 +17,8 @@ website:
             href: "Hands-on_Ex/Hands-on_Ex02/chap04.html"
           - text: "Exercise 2: Point Interaction"
             href: "Hands-on_Ex/Hands-on_Ex02/chap05.html"
+          - text: "Exercise 3: Space-Time Fires"
+            href: "Hands-on_Ex/Hands-on_Ex03/chap06.html"
       - text: "Take-home Exercise"
         href: "Take-home_Ex/index.qmd"
       - about.qmd

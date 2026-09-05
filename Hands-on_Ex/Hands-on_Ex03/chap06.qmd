@@ -1,0 +1,622 @@
+---
+title: "Spatio-Temporal Point Patterns Analysis"
+subtitle: "Hands-on Exercise 3"
+author: "Zhiyi Hao"
+date: "2026-09-05"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+library(sf)
+library(tidyverse)
+library(tmap)
+library(spatstat.geom)
+library(spatstat.explore)
+library(MASS)
+
+tmap_mode("plot")
+theme_set(theme_minimal(base_size = 12))
+```
+
+## Overview
+
+In this exercise, I extend point pattern analysis from a purely spatial question into a space-time question. The event data records MODIS active fire detections in Indonesia during 2023, and I focus on the Bangka-Belitung Islands so that the same workflow can be read as a compact case study.
+
+My main questions are:
+
+- Do the fire detections look evenly distributed across both space and time?
+- Which months show stronger clustering?
+- Does the day-of-year view add anything beyond the monthly view?
+
+::: {.callout-note}
+### Local implementation note
+
+The course page uses prepared files named `forestfires.csv` and `Kepulauan_Bangka_Belitung`. The original raw files were not exposed in the rendered course site repository, so I rebuilt the local data folder from public sources: NASA FIRMS country yearly summary for Indonesia and geoBoundaries Indonesia ADM1 boundary. The analysis code keeps the same course workflow, while the rendered findings reflect this local reproducible extract.
+:::
+
+## The Data
+
+The local data folder for this page contains:
+
+- `forestfires.csv`, a clipped 2023 MODIS fire detection table for Bangka-Belitung.
+- `Kepulauan_Bangka_Belitung.shp`, the local study area boundary.
+- `modis_2023_Indonesia.csv`, the downloaded FIRMS country-level source used to rebuild the local extract.
+
+```{r}
+#| label: data-audit
+fire_audit <- read_csv("data/rawdata/forestfires.csv", show_col_types = FALSE)
+
+tibble(
+  item = c("Fire detections", "First detection date", "Last detection date"),
+  value = c(
+    nrow(fire_audit),
+    as.character(min(fire_audit$acq_date)),
+    as.character(max(fire_audit$acq_date))
+  )
+)
+```
+
+::: {.callout-tip}
+### What I noticed
+
+The clipped local file has detections across almost the full year, but the counts are clearly not balanced across months. This already suggests that a monthly space-time view will be more informative than a single static map.
+:::
+
+## Installing and Loading the R Packages
+
+The reference workflow uses `sf`, `spatstat`, `sparr`, `tmap`, `stpp`, `tidyverse`, and `animation`.
+
+```{r}
+#| label: load-course-packages
+#| eval: false
+pacman::p_load(sf, spatstat, sparr, 
+               tmap, stpp, tidyverse,
+               animation)
+```
+
+```{r}
+#| label: load-render-packages
+pacman::p_load(sf, spatstat.geom, spatstat.explore,
+               tmap, tidyverse, MASS)
+```
+
+::: {.callout-note}
+### Reproducibility note
+
+`sparr` and `stpp` were installed locally, but both depend on `tcltk/XQuartz` on this machine. To keep the Quarto website rendering reliably, I show the original `sparr` and `stpp` code chunks as visible reference code and render equivalent static diagnostics with packages that work in the current environment.
+:::
+
+## Importing and Preparing Study Area
+
+### Importing study area
+
+```{r}
+#| label: read-kbb-original
+#| eval: false
+kbb <- st_read(dsn="chap06/data/rawdata",
+               layer = "Kepulauan_Bangka_Belitung") 
+```
+
+The local version uses the same layer name and is read from this exercise folder.
+
+```{r}
+#| label: read-kbb-local
+kbb <- st_read(dsn="data/rawdata",
+               layer = "Kepulauan_Bangka_Belitung",
+               quiet = TRUE)
+kbb
+```
+
+```{r}
+#| label: prepare-kbb
+kbb_sf <- st_read(dsn="data/rawdata",
+                  layer = "Kepulauan_Bangka_Belitung",
+                  quiet = TRUE) %>%
+  st_union() %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 32748)
+```
+
+### Converting OWIN
+
+```{r}
+#| label: kbb-owin
+kbb_owin <- as.owin(kbb_sf)
+kbb_owin
+```
+
+```{r}
+#| label: kbb-owin-class
+class(kbb_owin)
+```
+
+::: {.callout-tip}
+### My observation
+
+I transformed the boundary to EPSG:32748 before creating the `owin` object because the next steps use distance and density. Keeping the data in longitude and latitude would make the bandwidth values harder to interpret.
+:::
+
+## Importing and Preparing Forest Fire Data
+
+```{r}
+#| label: read-fire
+fire_sf <- read_csv("data/rawdata/forestfires.csv",
+                    show_col_types = FALSE) %>%
+  st_as_sf(coords = c("longitude", "latitude"),
+           crs = 4326) %>%
+  st_transform(crs = 32748)
+```
+
+```{r}
+#| label: prepare-fire-dates
+fire_sf <- fire_sf %>% 
+  mutate(DayofYear = yday(acq_date)) %>%
+  mutate(Month_num = month(acq_date)) %>%
+  mutate(Month_fac = month(acq_date, 
+                           label = TRUE, 
+                           abbr = FALSE))
+```
+
+```{r}
+#| label: fire-month-counts
+fire_sf %>%
+  st_drop_geometry() %>%
+  count(Month_fac, name = "detections") %>%
+  arrange(Month_fac)
+```
+
+::: {.callout-tip}
+### What I noticed
+
+The monthly table shows a strong dry-season pattern. In my local extract, August to November dominate the counts, while February and March are much quieter. That makes the time mark meaningful, not just a decorative field attached to each point.
+:::
+
+## Visualising the Fire Points
+
+### Overall plot
+
+```{r}
+#| label: fire-overall-map
+#| fig-cap: "Overall distribution of MODIS fire detections in Bangka-Belitung."
+tm_shape(kbb_sf) +
+  tm_polygons(fill = "#f4f1e8", col = "#516800", lwd = 0.7) +
+tm_shape(fire_sf) +
+  tm_dots(fill = "#c2410c", size = 0.05, fill_alpha = 0.65) +
+tm_layout(frame = FALSE)
+```
+
+::: {.callout-tip}
+### My observation
+
+The points are not spread like a regular grid. Several clusters sit inland, and the edge of the island has fewer detections. This is why I would not stop at a point map: visually dense patches can be affected by symbol overlap, so the density plots below are a better diagnostic.
+:::
+
+### Visualising geographic distribution of forest fires by month
+
+```{r}
+#| label: fire-month-map
+#| fig-width: 10
+#| fig-height: 8
+#| fig-cap: "Monthly distribution of 2023 fire detections."
+tm_shape(kbb_sf) +
+  tm_polygons(fill = "#f6f7ef", col = "#6b7d10", lwd = 0.5) +
+tm_shape(fire_sf) +
+  tm_dots(fill = "#b91c1c", size = 0.04, fill_alpha = 0.65) +
+tm_facets(by="Month_fac", 
+          free.coords=FALSE, 
+          drop.units = TRUE) +
+tm_layout(frame = FALSE)
+```
+
+::: {.callout-tip}
+### What I noticed
+
+The monthly facets make the seasonal shift much easier to see. The dense months are not just larger versions of the quiet months; the active areas become more continuous, especially around the second half of the year.
+:::
+
+## Computing STKDE by Month
+
+### Extracting forest fires by month
+
+```{r}
+#| label: fire-month-select
+fire_month <- fire_sf %>% 
+  dplyr::select(Month_num)
+```
+
+### Creating ppp
+
+```{r}
+#| label: fire-month-ppp
+fire_month_ppp <- as.ppp(fire_month)
+fire_month_ppp
+```
+
+```{r}
+#| label: fire-month-ppp-summary
+summary(fire_month_ppp)
+```
+
+```{r}
+#| label: fire-month-duplicates
+any(duplicated(fire_month_ppp))
+```
+
+### Including Owin object
+
+```{r}
+#| label: fire-month-owin
+fire_month_owin <- fire_month_ppp[kbb_owin]
+summary(fire_month_owin)
+```
+
+```{r}
+#| label: fire-month-owin-plot
+#| fig-cap: "Marked point pattern inside the study window."
+plot(fire_month_owin)
+```
+
+::: {.callout-tip}
+### My observation
+
+The `ppp` summary confirms that the marks are numeric months, which is exactly what `spattemp.density()` expects. The polygon window is also important: it prevents the sea and empty bounding-box space from being treated as part of the observation area.
+:::
+
+### Computing Spatio-temporal KDE
+
+This is the reference code for monthly STKDE.
+
+```{r}
+#| label: stkde-month-course
+#| eval: false
+st_kde <- spattemp.density(fire_month_owin)
+summary(st_kde)
+```
+
+### Plotting the spatio-temporal KDE object
+
+```{r}
+#| label: stkde-month-plot-course
+#| eval: false
+#| fig-width: 12
+#| fig-height: 10
+tims <- c(7,8,9,10,11,12)
+par(mfcol=c(2,3))
+for(i in tims){ 
+  plot(st_kde, i, 
+       override.par=FALSE, 
+       fix.range=TRUE, 
+       main=paste("KDE at month",i))
+}
+```
+
+For the rendered website, I use a static density surface by month. The goal is the same: compare how hotspots change across the temporal marks.
+
+```{r}
+#| label: monthly-density-alternative
+#| fig-width: 10
+#| fig-height: 8
+#| fig-cap: "Rendered monthly density surfaces for July to December."
+fire_xy <- fire_sf %>%
+  mutate(
+    x = st_coordinates(.)[, 1],
+    y = st_coordinates(.)[, 2]
+  ) %>%
+  st_drop_geometry()
+
+kbb_outline <- st_as_sf(kbb_sf)
+
+ggplot() +
+  geom_sf(data = kbb_outline, fill = "#f8faf5", colour = "#4d5f0c", linewidth = 0.35) +
+  stat_density_2d_filled(
+    data = filter(fire_xy, Month_num %in% 7:12),
+    aes(x = x, y = y, fill = after_stat(level)),
+    alpha = 0.72,
+    contour_var = "ndensity",
+    bins = 7
+  ) +
+  geom_point(
+    data = filter(fire_xy, Month_num %in% 7:12),
+    aes(x = x, y = y),
+    colour = "#7f1d1d",
+    alpha = 0.38,
+    size = 0.35
+  ) +
+  facet_wrap(~ Month_fac, ncol = 3) +
+  coord_sf(crs = st_crs(kbb_sf), datum = NA) +
+  scale_fill_manual(values = c("#edf8fb", "#ccece6", "#99d8c9", "#66c2a4", "#41ae76", "#238b45", "#005824")) +
+  labs(fill = "Relative\ndensity") +
+  theme(
+    legend.position = "right",
+    panel.grid.major = element_line(colour = "#e4ece7", linewidth = 0.25),
+    strip.text = element_text(face = "bold")
+  )
+```
+
+::: {.callout-tip}
+### What I noticed
+
+July starts to show visible clustering, but September and October are much stronger in both count and spatial continuity. By November, the activity is still high, yet it is less dominant than October. This looks like a concentrated burning season rather than random noise over the year.
+:::
+
+## Computing STKDE by Day of Year
+
+### Creating ppp object
+
+```{r}
+#| label: fire-yday-ppp
+fire_yday_ppp <- fire_sf %>% 
+  dplyr::select(DayofYear) %>%
+  as.ppp()
+```
+
+### Including Owin object
+
+```{r}
+#| label: fire-yday-owin
+fire_yday_owin <- fire_yday_ppp[kbb_owin]
+summary(fire_yday_owin)
+```
+
+### Computing day-of-year STKDE
+
+```{r}
+#| label: yday-stkde-course
+#| eval: false
+kde_yday <- spattemp.density(
+  fire_yday_owin)
+summary(kde_yday)
+```
+
+```{r}
+#| label: yday-stkde-plot-course
+#| eval: false
+plot(kde_yday)
+```
+
+The full course plot generates hundreds of daily frames. For my page, I show selected day-of-year windows so the temporal pattern is readable on a single screen.
+
+```{r}
+#| label: yday-density-alternative
+#| fig-width: 10
+#| fig-height: 7
+#| fig-cap: "Selected day-of-year periods, shown as density and point overlays."
+fire_periods <- fire_xy %>%
+  mutate(
+    period = case_when(
+      DayofYear <= 120 ~ "Days 1-120",
+      DayofYear <= 210 ~ "Days 121-210",
+      DayofYear <= 300 ~ "Days 211-300",
+      TRUE ~ "Days 301-365"
+    ),
+    period = factor(period, levels = c("Days 1-120", "Days 121-210", "Days 211-300", "Days 301-365"))
+  )
+
+ggplot() +
+  geom_sf(data = kbb_outline, fill = "#fbfbf3", colour = "#60710d", linewidth = 0.35) +
+  stat_density_2d_filled(
+    data = fire_periods,
+    aes(x = x, y = y, fill = after_stat(level)),
+    alpha = 0.72,
+    contour_var = "ndensity",
+    bins = 6
+  ) +
+  geom_point(
+    data = fire_periods,
+    aes(x = x, y = y),
+    colour = "#831843",
+    alpha = 0.35,
+    size = 0.32
+  ) +
+  facet_wrap(~ period, ncol = 2) +
+  coord_sf(crs = st_crs(kbb_sf), datum = NA) +
+  scale_fill_manual(values = c("#f7fcfd", "#d0ecf0", "#9bd5db", "#66b6c6", "#3288bd", "#0b4f6c")) +
+  labs(fill = "Relative\ndensity") +
+  theme(
+    legend.position = "right",
+    panel.grid.major = element_line(colour = "#e2eceb", linewidth = 0.25),
+    strip.text = element_text(face = "bold")
+  )
+```
+
+::: {.callout-tip}
+### My observation
+
+The day-of-year grouping sharpens the same story from the monthly map. The first 120 days are sparse; activity increases after mid-year and becomes most intense between roughly days 211 and 300. This makes the time component analytical, because the high-density areas appear during a specific part of the year rather than staying constant.
+:::
+
+## Computing STKDE by Day of Year: Improved Method
+
+The improved course step estimates better smoothing parameters using bootstrap selection, then reruns the daily STKDE with `h = 9000` and `lambda = 19`.
+
+```{r}
+#| label: yday-bootstrap-course
+#| eval: false
+set.seed(1234)
+BOOT.spattemp(fire_yday_owin)
+```
+
+```{r}
+#| label: yday-improved-course
+#| eval: false
+kde_yday <- spattemp.density(fire_yday_owin, 
+                             h = 9000, 
+                             lambda = 19)
+summary(kde_yday)
+```
+
+```{r}
+#| label: yday-improved-plot-course
+#| eval: false
+plot(kde_yday)
+```
+
+```{r}
+#| label: bandwidth-comparison-table
+tibble(
+  method = c("Automatic monthly density", "Automatic daily density", "Bootstrap-guided daily density"),
+  spatial_bandwidth = c("selected by sparr", "selected by sparr", "9000 metres"),
+  temporal_bandwidth = c("selected by sparr", "selected by sparr", "19 days"),
+  reading = c(
+    "Useful for coarse month-to-month comparison.",
+    "More detailed, but can create too many frames for a webpage.",
+    "More controlled smoothing and easier to compare across selected periods."
+  )
+)
+```
+
+::: {.callout-tip}
+### What I noticed
+
+The bootstrap-guided bandwidths are a useful reminder that space and time need different smoothing scales. A 9000 metre spatial bandwidth is still broad enough to show regional hotspots, while a 19 day temporal bandwidth avoids treating every nearby date as a completely separate pattern.
+:::
+
+## Spatio-temporal Point Patterns Analysis: stpp Methods
+
+### Preparing spatio-temporal point process object of stpp
+
+```{r}
+#| label: stpp-coordinates
+coords <- st_coordinates(fire_sf)
+```
+
+```{r}
+#| label: stpp-data-frame
+fire_df <- data.frame(
+  x = coords[, 1],  
+  y = coords[, 2],
+  t = fire_sf$`DayofYear`)
+```
+
+```{r}
+#| label: stpp-object-course
+#| eval: false
+fire_stpp <- as.3dpoints(fire_df)
+```
+
+```{r}
+#| label: stpp-class-course
+#| eval: false
+class(fire_stpp)
+```
+
+```{r}
+#| label: stpp-plot-course
+#| eval: false
+plot(fire_stpp)
+```
+
+The 3D point view can be approximated with a rendered space-time scatter plot.
+
+```{r}
+#| label: stpp-scatter-alternative
+#| fig-width: 8
+#| fig-height: 6
+#| fig-cap: "Space-time scatter view of fire detections."
+ggplot(fire_df, aes(x = x, y = y, colour = t)) +
+  geom_point(alpha = 0.58, size = 0.8) +
+  geom_sf(data = kbb_outline, inherit.aes = FALSE, fill = NA, colour = "#45520b", linewidth = 0.35) +
+  coord_sf(crs = st_crs(kbb_sf), datum = NA) +
+  scale_colour_viridis_c(option = "C", name = "Day of year") +
+  labs(x = "Easting", y = "Northing") +
+  theme(panel.grid.major = element_line(colour = "#e6eeec", linewidth = 0.25))
+```
+
+::: {.callout-tip}
+### My observation
+
+Colouring the points by day of year shows that later-year detections occupy many of the dense inland locations. I read this as a space-time concentration, not only a spatial cluster repeated uniformly across the year.
+:::
+
+### Computing spatio-temporal K-function
+
+```{r}
+#| label: stik-course
+#| eval: false
+kbb_stik <- STIKhat(fire_stpp)
+```
+
+```{r}
+#| label: plotk-course
+#| eval: false
+plotK(kbb_stik)
+```
+
+As a lightweight diagnostic, I count event pairs that are close in both space and time. This is not a replacement for `STIKhat()`, but it helps me read the same idea: whether many events occur near each other within short temporal lags.
+
+```{r}
+#| label: space-time-pair-summary
+sp_dist <- as.matrix(dist(as.matrix(fire_df[, c("x", "y")])))
+tm_dist <- as.matrix(dist(fire_df$t))
+upper_idx <- upper.tri(sp_dist)
+
+pair_summary <- expand_grid(
+  spatial_band = c(5000, 10000, 20000),
+  temporal_band = c(7, 14, 30)
+) %>%
+  mutate(
+    close_pairs = map2_int(
+      spatial_band,
+      temporal_band,
+      ~ sum(sp_dist[upper_idx] <= .x & tm_dist[upper_idx] <= .y)
+    ),
+    spatial_label = paste0(spatial_band / 1000, " km"),
+    temporal_label = paste0(temporal_band, " days")
+  )
+
+pair_summary %>%
+  dplyr::select(spatial_label, temporal_label, close_pairs) %>%
+  arrange(spatial_label, temporal_label)
+```
+
+```{r}
+#| label: space-time-pair-heatmap
+#| fig-width: 7
+#| fig-height: 5
+#| fig-cap: "Counts of fire-event pairs within selected spatial and temporal bands."
+ggplot(pair_summary, aes(x = temporal_label, y = spatial_label, fill = close_pairs)) +
+  geom_tile(colour = "white", linewidth = 0.8) +
+  geom_text(aes(label = close_pairs), colour = "white", fontface = "bold") +
+  scale_fill_gradient(low = "#a6c936", high = "#7f1d1d") +
+  labs(x = "Temporal distance", y = "Spatial distance", fill = "Pairs") +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_text(face = "bold")
+  )
+```
+
+::: {.callout-tip}
+### What I noticed
+
+The close-pair table grows quickly as the spatial and temporal windows widen, which is expected. The more useful detail is that there are already many pairs within 10 km and 14 days, so nearby fire detections are not only close on the map; they also tend to happen near each other in time.
+:::
+
+## Final Takeaway
+
+This exercise helped me see why spatio-temporal point pattern analysis needs both a spatial window and a time mark. The overall map suggests clustering, but the monthly and day-of-year views show when the clustering becomes strongest. In my local extract, the clearest signal appears after mid-year, with the strongest density around the late dry-season months.
+
+The rendered version also made me more careful about reproducibility. The original method is preserved, but package system dependencies matter: when a specialised package cannot run on a deployment machine, it is better to show the intended code clearly and add a stable diagnostic than to hide the problem.
+
+## References
+
+- Course source: [Spatio-Temporal Point Patterns Analysis](https://r4gdsa.netlify.app/chap06.html)
+- NASA FIRMS: [Archive Download](https://firms.modaps.eosdis.nasa.gov/download/) and public country yearly summary files.
+- geoBoundaries: [Indonesia ADM1 boundary](https://www.geoboundaries.org/)
