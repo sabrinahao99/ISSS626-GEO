@@ -1110,6 +1110,20 @@ Fraction of frame area: 0.159</code></pre>
 <h2 data-number="11" class="anchored" data-anchor-id="final-takeaway"><span class="header-section-number">11</span> Final Takeaway</h2>
 <p>This exercise helped me see why spatio-temporal point pattern analysis needs both a spatial window and a time mark. The overall map suggests clustering, but the monthly and day-of-year views show when the clustering becomes strongest. In my local extract, the clearest signal appears after mid-year, with the strongest density around the late dry-season months.</p>
 <p>The rendered version also made me more careful about reproducibility. The original method is preserved, but package system dependencies matter: when a specialised package cannot run on a deployment machine, it is better to show the intended code clearly and add a stable diagnostic than to hide the problem.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Beyond the Code: Time Marks Need a Scale
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>For spatio-temporal KDE, I should not treat <code>Month_num</code> and <code>DayofYear</code> as interchangeable time marks. Month is easier to communicate and gives a clean seasonal overview, but it hides within-month changes. Day of year is more detailed, but it creates many more time slices and needs stronger smoothing to avoid turning the page into noisy frame-by-frame output.</p>
+<p>The <code>lambda</code> value is therefore similar to bandwidth in space: it decides how much neighbouring time is allowed to influence a density estimate. In my interpretation, a monthly view is good for telling the broad fire-season story, while the day-of-year view is better for checking whether that story happens gradually or through shorter bursts of activity.</p>
+</div>
+</div>
 </section>
 <section id="references" class="level2" data-number="12">
 <h2 data-number="12" class="anchored" data-anchor-id="references"><span class="header-section-number">12</span> References</h2>

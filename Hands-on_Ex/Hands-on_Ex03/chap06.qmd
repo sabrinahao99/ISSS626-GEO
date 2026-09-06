@@ -615,6 +615,14 @@ This exercise helped me see why spatio-temporal point pattern analysis needs bot
 
 The rendered version also made me more careful about reproducibility. The original method is preserved, but package system dependencies matter: when a specialised package cannot run on a deployment machine, it is better to show the intended code clearly and add a stable diagnostic than to hide the problem.
 
+::: {.callout-tip}
+## Beyond the Code: Time Marks Need a Scale
+
+For spatio-temporal KDE, I should not treat `Month_num` and `DayofYear` as interchangeable time marks. Month is easier to communicate and gives a clean seasonal overview, but it hides within-month changes. Day of year is more detailed, but it creates many more time slices and needs stronger smoothing to avoid turning the page into noisy frame-by-frame output.
+
+The `lambda` value is therefore similar to bandwidth in space: it decides how much neighbouring time is allowed to influence a density estimate. In my interpretation, a monthly view is good for telling the broad fire-season story, while the day-of-year view is better for checking whether that story happens gradually or through shorter bursts of activity.
+:::
+
 ## References
 
 - Course source: [Spatio-Temporal Point Patterns Analysis](https://r4gdsa.netlify.app/chap06.html)

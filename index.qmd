@@ -8,98 +8,180 @@ format:
     number-sections: false
 ---
 
-::::::::::::::::: home-shell
-:::: home-banner
-::: hero-links
-[Home](index.html) [Geospatial Data](Hands-on_Ex/Hands-on_Ex01/chap01.html) [Thematic Mapping](Hands-on_Ex/Hands-on_Ex01/chap02.html) [Point Density](Hands-on_Ex/Hands-on_Ex02/chap04.html) [Point Interaction](Hands-on_Ex/Hands-on_Ex02/chap05.html) [Space-Time Fires](Hands-on_Ex/Hands-on_Ex03/chap06.html)
-:::
+```{=html}
+<div class="home-shell">
+  <section class="home-hero" aria-labelledby="home-title">
+    <nav class="hero-links" aria-label="Portfolio sections">
+      <a href="index.html" aria-current="page">Home</a>
+      <a href="Hands-on_Ex/Hands-on_Ex01/chap01.html">Geospatial Data</a>
+      <a href="Hands-on_Ex/Hands-on_Ex01/chap02.html">Thematic Mapping</a>
+      <a href="Hands-on_Ex/Hands-on_Ex02/chap04.html">Point Density</a>
+      <a href="Hands-on_Ex/Hands-on_Ex02/chap05.html">Point Interaction</a>
+      <a href="Hands-on_Ex/Hands-on_Ex03/chap06.html">Space-Time Fires</a>
+    </nav>
 
-# Welcome to My Geospatial Analytics Portfolio
+    <div class="hero-map-stage" aria-hidden="true">
+      <img src="images/home-singapore-map.png" alt="" class="hero-map-image">
+      <svg class="hero-route-layer" viewBox="0 0 1000 560" preserveAspectRatio="none">
+        <path class="hero-route hero-route-a" d="M110 335 C245 255, 360 285, 468 210 S720 210, 880 145" />
+        <path class="hero-route hero-route-b" d="M160 205 C310 165, 410 395, 560 330 S745 305, 900 380" />
+        <path class="hero-route hero-route-c" d="M245 420 C365 330, 482 445, 635 272 S805 230, 940 260" />
+      </svg>
+      <span class="map-node node-a"></span>
+      <span class="map-node node-b"></span>
+      <span class="map-node node-c"></span>
+      <span class="map-node node-d"></span>
+      <span class="map-node node-e"></span>
+      <span class="map-scan"></span>
+    </div>
 
-ISSS626 Geospatial Analytics and Applications · Zhiyi Hao
-::::
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="hero-kicker">MITB AI Track 2025 · ISSS626</p>
+        <h1 id="home-title">Geospatial Analytics Portfolio</h1>
+        <p class="hero-lead">A curated collection of R and Quarto workflows for spatial data science, thematic mapping, point pattern analysis, and space-time event exploration.</p>
+        <div class="hero-actions">
+          <a class="hero-button hero-button-primary" href="#coursework">Explore Workflows</a>
+          <a class="hero-button hero-button-ghost" href="about.html">About Sabrina</a>
+        </div>
+      </div>
 
-:::::::::::::: home-content
-::::::: home-side-menu
-::: {.home-side-item .active}
-[Geospatial Data Science](Hands-on_Ex/Hands-on_Ex01/chap01.html) 26 Aug
-:::
+      <aside class="hero-dashboard" aria-label="Portfolio snapshot">
+        <div class="dashboard-header">
+          <span>Analysis Snapshot</span>
+          <strong>2026</strong>
+        </div>
+        <div class="dashboard-metrics">
+          <div>
+            <strong>5</strong>
+            <span>Chapters</span>
+          </div>
+          <div>
+            <strong>3</strong>
+            <span>Exercises</span>
+          </div>
+          <div>
+            <strong>R</strong>
+            <span>R workflow</span>
+          </div>
+        </div>
+        <div class="mini-map-card">
+          <span class="pulse-dot dot-one"></span>
+          <span class="pulse-dot dot-two"></span>
+          <span class="pulse-dot dot-three"></span>
+          <span class="mini-route"></span>
+        </div>
+      </aside>
+    </div>
+  </section>
 
-::: home-side-item
-[Thematic Mapping](Hands-on_Ex/Hands-on_Ex01/chap02.html) 28 Aug
-:::
+  <section class="home-content" id="coursework">
+    <aside class="home-side-menu" aria-label="Exercise timeline">
+      <a class="home-side-item active" href="Hands-on_Ex/Hands-on_Ex01/chap01.html">
+        <span>Geospatial Data Science</span>
+        <time>26 Aug</time>
+      </a>
+      <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex01/chap02.html">
+        <span>Thematic Mapping</span>
+        <time>28 Aug</time>
+      </a>
+      <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex02/chap04.html">
+        <span>Point Density</span>
+        <time>30 Aug</time>
+      </a>
+      <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex02/chap05.html">
+        <span>Point Interaction</span>
+        <time>2 Sep</time>
+      </a>
+      <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex03/chap06.html">
+        <span>Space-Time Fires</span>
+        <time>5 Sep</time>
+      </a>
+    </aside>
 
-::: home-side-item
-[Point Density](Hands-on_Ex/Hands-on_Ex02/chap04.html) 30 Aug
-:::
+    <div class="home-main">
+      <p class="section-kicker">Coursework Overview</p>
+      <h2>From spatial layers to space-time evidence</h2>
+      <p>This portfolio brings together the main techniques I practised in ISSS626: importing spatial data, checking coordinate systems, building thematic maps, measuring point intensity, testing point interactions, and reading event patterns through time.</p>
+      <p>I shaped the homepage as a map-based entry point because the work is not just a set of files. Each chapter keeps the code visible, renders the analytical output, and records the observations I made while reading the maps and statistical results.</p>
 
-::: home-side-item
-[Point Interaction](Hands-on_Ex/Hands-on_Ex02/chap05.html) 2 Sep
-:::
+      <div class="workflow-strip" aria-label="Workflow summary">
+        <div>
+          <span>Input</span>
+          <strong>GeoJSON · SHP · CSV</strong>
+        </div>
+        <div>
+          <span>Processing</span>
+          <strong>sf · tidyverse · spatstat</strong>
+        </div>
+        <div>
+          <span>Output</span>
+          <strong>Maps · KDE · envelopes</strong>
+        </div>
+      </div>
 
-::: home-side-item
-[Space-Time Fires](Hands-on_Ex/Hands-on_Ex03/chap06.html) 5 Sep
-:::
-:::::::
+      <div class="exercise-grid">
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 1 · 26 Aug</p>
+          <h3>Geospatial Data Science</h3>
+          <p>Spatial layers, CRS transformation, point conversion, and basic geoprocessing.</p>
+          <div class="method-chips"><span>sf</span><span>CRS</span><span>geometry</span></div>
+          <a href="Hands-on_Ex/Hands-on_Ex01/chap01.html">Open Chapter 1</a>
+        </article>
 
-:::::::: home-main
-## Coursework Overview
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 1 · 28 Aug</p>
+          <h3>Thematic Mapping</h3>
+          <p>Population joins, choropleth classifications, facets, and dependency-ratio outliers.</p>
+          <div class="method-chips"><span>tmap</span><span>choropleth</span><span>facet</span></div>
+          <a href="Hands-on_Ex/Hands-on_Ex01/chap02.html">Open Chapter 2</a>
+        </article>
 
-This portfolio presents five hands-on geospatial analytics exercises completed with R and Quarto. The work starts from spatial data import and coordinate systems, moves into choropleth mapping, develops first-order and second-order spatial point pattern analysis for Singapore childcare centre locations, and then extends point pattern thinking into a spatio-temporal fire case study.
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 2 · 30 Aug</p>
+          <h3>Point Density</h3>
+          <p>Point pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.</p>
+          <div class="method-chips"><span>ppp</span><span>KDE</span><span>Clark-Evans</span></div>
+          <a href="Hands-on_Ex/Hands-on_Ex02/chap04.html">Open Chapter 4</a>
+        </article>
 
-I designed the site so each chapter can be read as a self-contained workflow: the code is visible, the maps are rendered in the page, and short observations are included after key outputs.
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 2 · 2 Sep</p>
+          <h3>Point Interaction</h3>
+          <p>G-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.</p>
+          <div class="method-chips"><span>G/F/K/L</span><span>CSR</span><span>envelope</span></div>
+          <a href="Hands-on_Ex/Hands-on_Ex02/chap05.html">Open Chapter 5</a>
+        </article>
 
-::::::: exercise-grid
-::: exercise-card
-[Hands-on Exercise 1 · 26 Aug]{.card-label}
+        <article class="exercise-card exercise-card-wide">
+          <p class="card-label">Hands-on Exercise 3 · 5 Sep</p>
+          <h3>Space-Time Fires</h3>
+          <p>MODIS fire detections, monthly and day-of-year density patterns, and space-time clustering diagnostics.</p>
+          <div class="method-chips"><span>STKDE</span><span>MODIS</span><span>space-time</span></div>
+          <a href="Hands-on_Ex/Hands-on_Ex03/chap06.html">Open Chapter 6</a>
+        </article>
+      </div>
+    </div>
+  </section>
+</div>
 
-### Geospatial Data Science
+<script>
+  (() => {
+    const hero = document.querySelector(".home-hero");
+    if (!hero || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-Spatial layers, CRS transformation, point conversion, and basic geoprocessing.
+    hero.addEventListener("pointermove", (event) => {
+      const rect = hero.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width - 0.5).toFixed(3);
+      const y = ((event.clientY - rect.top) / rect.height - 0.5).toFixed(3);
+      hero.style.setProperty("--move-x", x);
+      hero.style.setProperty("--move-y", y);
+    });
 
-[Open Chapter 1](Hands-on_Ex/Hands-on_Ex01/chap01.html)
-:::
-
-::: exercise-card
-[Hands-on Exercise 1 · 28 Aug]{.card-label}
-
-### Thematic Mapping
-
-Population joins, choropleth classifications, facets, and dependency-ratio outliers.
-
-[Open Chapter 2](Hands-on_Ex/Hands-on_Ex01/chap02.html)
-:::
-
-::: exercise-card
-[Hands-on Exercise 2 · 30 Aug]{.card-label}
-
-### Point Density
-
-Point pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.
-
-[Open Chapter 4](Hands-on_Ex/Hands-on_Ex02/chap04.html)
-:::
-
-::: exercise-card
-[Hands-on Exercise 2 · 2 Sep]{.card-label}
-
-### Point Interaction
-
-G-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.
-
-[Open Chapter 5](Hands-on_Ex/Hands-on_Ex02/chap05.html)
-:::
-
-::: exercise-card
-[Hands-on Exercise 3 · 5 Sep]{.card-label}
-
-### Space-Time Fires
-
-MODIS fire detections, monthly and day-of-year density patterns, and space-time clustering diagnostics.
-
-[Open Chapter 6](Hands-on_Ex/Hands-on_Ex03/chap06.html)
-:::
-:::::::
-::::::::
-::::::::::::::
-:::::::::::::::::
+    hero.addEventListener("pointerleave", () => {
+      hero.style.setProperty("--move-x", 0);
+      hero.style.setProperty("--move-y", 0);
+    });
+  })();
+</script>
+```

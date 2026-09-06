@@ -971,6 +971,20 @@ Done.</code></pre>
 <section id="reflection" class="level2" data-number="14">
 <h2 data-number="14" class="anchored" data-anchor-id="reflection"><span class="header-section-number">14</span> Reflection</h2>
 <p>Compared with first-order KDE, second-order analysis made me think more carefully about distance ranges. A single statement like “the centres are clustered” is too broad unless I say at what distance and under which study window. The envelopes also helped me read the plots more cautiously because I could compare the observed curve with simulated CSR patterns rather than relying only on visual impression.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Beyond the Code: <code>global = FALSE</code> and <code>global = TRUE</code>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The <code>global</code> choice in simulation envelopes is a good example of a small parameter that changes the meaning of the evidence. With pointwise envelopes, I can look at particular distances and ask where the observed curve moves outside the simulated range. That is helpful for exploration because the distance scale is visible.</p>
+<p>With simultaneous envelopes, the comparison is stricter because it controls the whole curve at once. I would use it when I want a more formal statement about whether the pattern departs from CSR overall. For this coursework page, I read pointwise-style results as a guide to interesting distance ranges, and simultaneous-style results as stronger support when making a final claim.</p>
+</div>
+</div>
 </section>
 <section id="references" class="level2" data-number="15">
 <h2 data-number="15" class="anchored" data-anchor-id="references"><span class="header-section-number">15</span> References</h2>

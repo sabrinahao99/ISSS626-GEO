@@ -855,6 +855,20 @@ Projected CRS: SVY21 / Singapore TM
 <section id="reflection" class="level2" data-number="12">
 <h2 data-number="12" class="anchored" data-anchor-id="reflection"><span class="header-section-number">12</span> Reflection</h2>
 <p>The most important lesson for me is that spatial analysis is not only about drawing data on a map. The geometry type, CRS, and spatial unit all affect what question the code is answering. I also realised that a result can be technically correct but still incomplete if I do not explain whether it is a count, density, buffer area, or spatial relationship.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Beyond the Code: CRS Is Not Just a Setting
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>One detail I would be more careful with after this exercise is the difference between assigning a CRS and transforming a CRS. <code>st_set_crs()</code> is only telling R what the coordinates already mean, while <code>st_transform()</code> actually recalculates the coordinates into another reference system. If I used the wrong one, the map might still draw, but the distance, area, and density calculations could become misleading.</p>
+<p>This also changes how I read the outputs. When I calculate preschool density or spatial intersections, I am not only checking whether the code runs; I am checking whether the geometry is in a coordinate system that matches the question. For Singapore analysis, projected metres are much easier to defend than raw longitude and latitude when area or distance is involved.</p>
+</div>
+</div>
 </section>
 <section id="references" class="level2" data-number="13">
 <h2 data-number="13" class="anchored" data-anchor-id="references"><span class="header-section-number">13</span> References</h2>

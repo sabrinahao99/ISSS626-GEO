@@ -319,6 +319,14 @@ The workflow shows why CRS checks and geometry operations are central to geospat
 
 The most important lesson for me is that spatial analysis is not only about drawing data on a map. The geometry type, CRS, and spatial unit all affect what question the code is answering. I also realised that a result can be technically correct but still incomplete if I do not explain whether it is a count, density, buffer area, or spatial relationship.
 
+::: {.callout-tip}
+## Beyond the Code: CRS Is Not Just a Setting
+
+One detail I would be more careful with after this exercise is the difference between assigning a CRS and transforming a CRS. `st_set_crs()` is only telling R what the coordinates already mean, while `st_transform()` actually recalculates the coordinates into another reference system. If I used the wrong one, the map might still draw, but the distance, area, and density calculations could become misleading.
+
+This also changes how I read the outputs. When I calculate preschool density or spatial intersections, I am not only checking whether the code runs; I am checking whether the geometry is in a coordinate system that matches the question. For Singapore analysis, projected metres are much easier to defend than raw longitude and latitude when area or distance is involved.
+:::
+
 ## References
 
 - R for Geospatial Data Science and Analytics, Chapter 1: [Geospatial Data Science with R](https://r4gdsa.netlify.app/chap01.html)

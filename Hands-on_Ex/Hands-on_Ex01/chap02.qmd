@@ -655,6 +655,14 @@ Different classification and layout choices can change how strongly a choropleth
 
 The extra checks changed how I read the choropleth maps. A map can look persuasive even when the classification, area size, or spatial unit is shaping the visual message. The shuffled map, area-bias table, and preschool-population comparison help me slow down and ask whether the pattern is genuinely spatial, visually exaggerated, or only a first descriptive clue.
 
+::: {.callout-tip}
+## Beyond the Code: Classification Is an Argument
+
+The part I kept thinking about is that `style = "quantile"`, `style = "jenks"`, and equal intervals can all use the same data but tell slightly different visual stories. Quantile is useful when I want every class to contain a similar number of subzones, but it can exaggerate small numeric differences. Jenks is better at following natural breaks, but the class boundaries are less intuitive to explain without the data beside the map.
+
+So I should not treat the classification argument inside `tm_fill()` as only a design choice. It is part of the analysis. If I were presenting one final map, I would show why that classification was chosen and check whether the main finding still holds when the style changes.
+:::
+
 ## References
 
 - R for Geospatial Data Science and Analytics, Chapter 2: [Thematic Mapping and GeoVisualisation with R](https://r4gdsa.netlify.app/chap02.html)

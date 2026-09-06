@@ -664,6 +664,14 @@ Clark-Evans gives a statistical check of nearest-neighbour spacing, while KDE gi
 
 The point pattern shows where childcare centres are located, but it does not directly explain the causes of clustering. CSR is also a simple null model, so the result should be read as a starting point rather than a full explanation of childcare service provision.
 
+::: {.callout-tip}
+## Beyond the Code: Bandwidth Changes the Story
+
+For KDE, I realised the bandwidth is not just a technical input. A smaller bandwidth makes local hotspots appear sharper, while a larger bandwidth smooths the same points into broader regional patterns. Both can be useful, but they answer different reading questions.
+
+I would use a sharper surface when I want to inspect very local concentration, such as whether centres bunch around a few neighbourhood nodes. I would use a smoother surface when the question is more about planning-area level intensity. This is why comparing `bw.diggle`, `bw.ppl`, and the fixed/adaptive KDE outputs matters: it helps me avoid presenting one attractive heatmap as if it were the only possible truth.
+:::
+
 ## References
 
 - R for Geospatial Data Science and Analytics. Chapter 4: First-order Spatial Point Patterns Analysis Methods. <https://r4gdsa.netlify.app/chap04>

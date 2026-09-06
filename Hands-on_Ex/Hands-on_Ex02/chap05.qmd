@@ -376,6 +376,14 @@ CSR is a simple benchmark, and it does not account for population distribution, 
 
 Compared with first-order KDE, second-order analysis made me think more carefully about distance ranges. A single statement like "the centres are clustered" is too broad unless I say at what distance and under which study window. The envelopes also helped me read the plots more cautiously because I could compare the observed curve with simulated CSR patterns rather than relying only on visual impression.
 
+::: {.callout-tip}
+## Beyond the Code: `global = FALSE` and `global = TRUE`
+
+The `global` choice in simulation envelopes is a good example of a small parameter that changes the meaning of the evidence. With pointwise envelopes, I can look at particular distances and ask where the observed curve moves outside the simulated range. That is helpful for exploration because the distance scale is visible.
+
+With simultaneous envelopes, the comparison is stricter because it controls the whole curve at once. I would use it when I want a more formal statement about whether the pattern departs from CSR overall. For this coursework page, I read pointwise-style results as a guide to interesting distance ranges, and simultaneous-style results as stronger support when making a final claim.
+:::
+
 ## References
 
 - R for Geospatial Data Science and Analytics. Chapter 5: 2nd Order Spatial Point Patterns Analysis Methods. <https://r4gdsa.netlify.app/chap05>
