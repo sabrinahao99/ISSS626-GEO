@@ -9,6 +9,7 @@ project:
     - Hands-on_Ex/Hands-on_Ex02/chap04.qmd
     - Hands-on_Ex/Hands-on_Ex02/chap05.qmd
     - Hands-on_Ex/Hands-on_Ex03/chap06.qmd
+    - Hands-on_Ex/Hands-on_Ex04/chap08.qmd
 
 website:
   title: "ISSS626"
@@ -28,6 +29,8 @@ website:
             href: "Hands-on_Ex/Hands-on_Ex02/chap05.html"
           - text: "Exercise 3: Space-Time Fires"
             href: "Hands-on_Ex/Hands-on_Ex03/chap06.html"
+          - text: "Exercise 4: Spatial Weights"
+            href: "Hands-on_Ex/Hands-on_Ex04/chap08.html"
       - text: "Take-home Exercise"
         href: "Take-home_Ex/index.qmd"
       - about.qmd

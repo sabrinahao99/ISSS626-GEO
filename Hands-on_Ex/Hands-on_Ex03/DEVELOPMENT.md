@@ -19,6 +19,7 @@ Exercise 3 extends spatial point pattern analysis into a space-time fire detecti
 - Preserved the course `sparr`, `stpp`, and `STIKhat()` reference code as visible chunks.
 - Added bandwidth comparison, space-time pair counts, a heatmap, and student observations.
 - Added local data provenance in `data/rawdata/README.md`.
+- Archived the supplied `data3.zip` Hunan package under `data/hunan/` for validation without changing the fire case study inputs.
 
 ## Render notes
 
