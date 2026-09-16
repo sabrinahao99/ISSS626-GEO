@@ -1,5 +1,14 @@
 project:
   type: website
+  render:
+    - index.qmd
+    - about.qmd
+    - Take-home_Ex/index.qmd
+    - Hands-on_Ex/Hands-on_Ex01/chap01.qmd
+    - Hands-on_Ex/Hands-on_Ex01/chap02.qmd
+    - Hands-on_Ex/Hands-on_Ex02/chap04.qmd
+    - Hands-on_Ex/Hands-on_Ex02/chap05.qmd
+    - Hands-on_Ex/Hands-on_Ex03/chap06.qmd
 
 website:
   title: "ISSS626"
