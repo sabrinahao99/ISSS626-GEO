@@ -36,6 +36,10 @@ tmap_mode("plot")
 
 ## Overview
 
+## The Study Area and Data
+
+### Getting Started
+
 This exercise uses the 88 county-level units in Hunan to define who is considered a neighbour. I use GDP per capita as the example indicator and follow the workflow from importing the data to calculating spatially lagged values.
 
 The main questions I keep in mind are:
@@ -50,7 +54,7 @@ The main questions I keep in mind are:
 The supplied `data4.zip` contains the same Hunan boundary and 2012 indicator table used in the course example. The files are stored locally under `Hands-on_Ex04/data/`, so every rendered result on this page is generated from the repository rather than an absolute computer path.
 :::
 
-## Getting the Data Into R
+## Getting the Data Into R Environment
 
 ### Loading packages
 
@@ -71,7 +75,7 @@ library(tidyverse)
 library(knitr)
 ```
 
-### Importing the boundary
+### Import shapefile into r environment
 
 ```{r}
 #| label: course-read-shapefile
@@ -90,7 +94,7 @@ hunan <- st_read(
 hunan
 ```
 
-### Importing the indicator table
+### Import csv file into r environment
 
 ```{r}
 #| label: course-read-csv
@@ -103,7 +107,7 @@ hunan2012 <- read_csv("chap08/data/aspatial/Hunan_2012.csv")
 hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv", show_col_types = FALSE)
 ```
 
-### Joining the attributes
+### Performing relational join
 
 ```{r}
 #| label: course-relational-join
@@ -144,7 +148,7 @@ head(hunan) %>%
 The join keeps one row for each county and adds `GDPPC` to the spatial layer. The geometry is still in WGS 84, which is suitable for this first map. I keep a projected copy for distance-based calculations later in the page.
 :::
 
-## Visualising Regional Development
+## Visualising Regional Development Indicator
 
 ```{r}
 #| label: course-basemap
@@ -178,9 +182,9 @@ tm_shape(hunan) +
 The highest GDPPC values are concentrated around a small number of counties, while many western and southern counties sit in lower classes. The map gives the variable a spatial shape, yet it does not tell me whether neighbouring counties are similar enough to support a clustering claim. That is the reason for constructing weights before calculating autocorrelation statistics.
 :::
 
-## Contiguity Spatial Weights
+## Computing Contiguity Spatial Weights
 
-### Queen neighbours
+### Computing (QUEEN) contiguity based neighbours
 
 ```{r}
 #| label: course-queen-neighbours
@@ -252,7 +256,7 @@ queen_gdppc
 str(wm_q)
 ```
 
-### Rook neighbours
+### Creating (ROOK) contiguity based neighbours
 
 ```{r}
 #| label: course-rook-neighbours
@@ -274,7 +278,7 @@ rook_summary
 Queen contiguity counts a shared corner as a connection. Rook contiguity requires a shared boundary segment, so it usually produces fewer links. The choice changes the question: Queen captures broader contact, while Rook focuses on direct edge-sharing neighbours.
 :::
 
-### Visualising contiguity
+### Visualising contiguity weights
 
 ```{r}
 #| label: course-centroid-longitude
@@ -292,6 +296,11 @@ latitude <- map_dbl(hunan$geometry, ~st_centroid(.x)[[2]])
 #| label: course-centroid-coordinates
 #| eval: false
 coords <- cbind(longitude, latitude)
+```
+
+```{r}
+#| label: course-centroid-head
+#| eval: false
 head(coords)
 ```
 
@@ -302,12 +311,16 @@ coords <- st_coordinates(centroids)
 head(coords)
 ```
 
+#### Plotting Queen contiguity based neighbours map
+
 ```{r}
 #| label: course-queen-plot
 #| eval: false
 plot(hunan$geometry, border="lightgrey")
 plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col= "red")
 ```
+
+#### Plotting Rook contiguity based neighbours map
 
 ```{r}
 #| label: course-rook-plot
@@ -316,14 +329,16 @@ plot(hunan$geometry, border="lightgrey")
 plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
 
+#### Plotting both Queen and Rook contiguity based neighbours maps
+
 ```{r}
 #| label: contiguity-comparison
 #| fig-cap: "Queen and Rook contiguity links drawn between county centroids."
 par(mfrow = c(1, 2))
 plot(hunan$geometry, border = "lightgrey", main = "Queen Contiguity")
-plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col = "#7fae15")
+plot(wm_q, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 plot(hunan$geometry, border = "lightgrey", main = "Rook Contiguity")
-plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "#2b8c76")
+plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 par(mfrow = c(1, 1))
 ```
 
@@ -337,9 +352,9 @@ plot(hunan$geometry, border="lightgrey", main="Rook Contiguity")
 plot(wm_r, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
 
-## Distance-Based Neighbours
+## Computing distance based neighbours
 
-### Checking the cut-off
+### Determine the cut-off distance
 
 The original exercise checks the nearest-neighbour distances with geographic coordinates.
 
@@ -360,6 +375,8 @@ k1_m <- knn2nb(knearneigh(coords_m))
 k1dists_m <- unlist(nbdists(k1_m, coords_m, longlat = FALSE))
 summary(k1dists_m)
 ```
+
+### Computing fixed distance weight matrix
 
 ```{r}
 #| label: course-distance-neighbours
@@ -414,6 +431,11 @@ distance_frequency
 #| eval: false
 n_comp <- n.comp.nb(wm_d62)
 n_comp$nc
+```
+
+```{r}
+#| label: course-component-table
+#| eval: false
 table(n_comp$comp.id)
 ```
 
@@ -427,6 +449,8 @@ tibble(
 )
 ```
 
+#### Plotting fixed distance weight matrix
+
 ```{r}
 #| label: course-distance-plot
 #| eval: false
@@ -438,9 +462,9 @@ plot(k1, coords, add=TRUE, col="red", length=0.08)
 ```{r}
 #| label: distance-neighbour-map
 #| fig-cap: "Projected distance links within 62 km, with one-nearest-neighbour links highlighted."
-plot(st_geometry(hunan_m), border = "#d5ded2", main = "Distance-based neighbours")
-plot(wm_d62, coords_m, add = TRUE, col = "#8aae1b")
-plot(k1_m, coords_m, add = TRUE, col = "#b54b4b", length = 0.08)
+plot(st_geometry(hunan_m), border="lightgrey")
+plot(wm_d62, coords_m, add=TRUE)
+plot(k1_m, coords_m, add=TRUE, col="red", length=0.08)
 ```
 
 ```{r}
@@ -453,14 +477,26 @@ plot(hunan$geometry, border="lightgrey", main="Distance link")
 plot(wm_d62, coords, add=TRUE, pch = 19, cex = 0.6)
 ```
 
-### Adaptive neighbours
+### Computing adaptive distance weight matrix
+
+#### Plotting distance based neighbours
 
 ```{r}
 #| label: course-six-neighbours
 #| eval: false
 knn6 <- knn2nb(knearneigh(coords, k=6))
 knn6
+```
+
+```{r}
+#| label: course-six-neighbours-structure
+#| eval: false
 str(knn6)
+```
+
+```{r}
+#| label: course-six-neighbours-plot
+#| eval: false
 plot(hunan$geometry, border="lightgrey")
 plot(knn6, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
@@ -481,7 +517,7 @@ tibble(
 The distance rule uses one global radius, so dense and sparse parts of the province can receive very different numbers of neighbours. The six-nearest-neighbour rule keeps the neighbour count stable and gives every county a comparable local sample. It changes the meaning of proximity from a fixed geography to a fixed amount of information.
 :::
 
-## Weights Based on Inverse Distance
+## Weights based on IDW
 
 ```{r}
 #| label: course-idw-distances
@@ -498,7 +534,7 @@ ids_m <- lapply(dist_m, function(x) 1 / x)
 summary(unlist(ids_m))
 ```
 
-## Row-Standardised Weights
+## Row-standardised Weights Matrix
 
 ```{r}
 #| label: course-row-standardised-weights
@@ -555,15 +591,23 @@ summary(unlist(rswm_ids$weights))
 Row-standardisation makes each county's neighbour contributions sum to one. A county with five neighbours gives each one-fifth of the total weight, while a county with two neighbours gives each one-half. This creates an average-like spatial lag and prevents counties with many neighbours from automatically dominating the calculation.
 :::
 
-## Applying Spatial Weight Matrices
+## Application of Spatial Weight Matrix
 
-### Spatial lag with row-standardised weights
+### Spatial lag with row-standardized weights
 
 ```{r}
 #| label: course-row-lag
 #| eval: false
 GDPPC.lag <- lag.listw(rswm_q, hunan$GDPPC)
 GDPPC.lag
+```
+
+```{r}
+#| label: course-neighbour-gdppc-repeat
+#| eval: false
+nb1 <- wm_q[[1]]
+nb1 <- hunan$GDPPC[nb1]
+nb1
 ```
 
 ```{r}
@@ -606,7 +650,7 @@ lag_gdppc <- qtm(hunan, "lag GDPPC")
 tmap_arrange(gdppc, lag_gdppc, asp=1, ncol=2)
 ```
 
-### Spatial lag as a sum of neighbouring values
+### Spatial lag as a sum of neighboring values
 
 ```{r}
 #| label: course-binary-weights
@@ -671,7 +715,17 @@ tmap_arrange(gdppc, lag_sum_gdppc, asp=1, ncol=2)
 #| label: course-self-neighbours
 #| eval: false
 wm_qs <- include.self(wm_q)
+```
+
+```{r}
+#| label: course-self-neighbours-first
+#| eval: false
 wm_qs[[1]]
+```
+
+```{r}
+#| label: course-self-neighbours-listw
+#| eval: false
 wm_qs <- nb2listw(wm_qs)
 wm_qs
 ```

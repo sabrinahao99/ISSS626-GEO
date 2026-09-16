@@ -24,17 +24,17 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview
+## Learning Outcome
 
 I use this page to reproduce the Chapter 1 workflow with the local data folder. My focus is on the basic geospatial steps: importing layers, checking CRS, converting tabular coordinates into `sf`, and doing simple geometry operations.
 
 ::: {.callout-note}
-## Local Implementation Note
+**Local implementation note.**
 
 All data for this exercise is stored in `Hands-on_Ex/Hands-on_Ex01/data`, so the code below uses local relative paths such as `data/geospatial` and `data/aspatial/listings.csv`.
 :::
 
-## Spatial Data Types Used Here
+## Data Acquisition
 
 Before running the code, I found it useful to separate the data by spatial type because each type supports a different kind of question.
 
@@ -44,11 +44,17 @@ Before running the code, I found it useful to separate the data by spatial type 
 | Polygons | Planning subzones | Define administrative areas for counting and density |
 | Lines | Cycling paths | Represent a network-like feature for buffering |
 
+### Extracting the geospatial data sets
+
 ::: {.callout-note}
-## My Learning Point
+**My learning point.**
 
 The same map can mix points, polygons, and lines, but the operations are not interchangeable. For example, `st_intersects()` answers a point-in-polygon question, while `st_buffer()` expands a line into an area that can be measured.
 :::
+
+### Extracting the aspatial data set
+
+The listing table is kept in the local `data/aspatial` folder and is introduced again when it is converted into a spatial layer.
 
 ## Getting Started
 
@@ -66,6 +72,8 @@ pacman::p_load(sf, tidyverse)
 
 The first step is to bring the Singapore planning subzone boundary, cycling path layer, and preschool point layer into R. The Master Plan 2014 boundary and cycling path files are read as vector layers, while the preschool layer is read from the local KML derived from the downloaded GeoJSON.
 
+### Importing polygon feature data in shapefile format
+
 ```{r}
 mpsz = st_read(dsn = "data/geospatial", 
                layer = "MP14_SUBZONE_WEB_PL",
@@ -78,6 +86,8 @@ mpsz = st_read(dsn = "data/geospatial",
 mpsz = st_read(dsn = "chap01/data/geospatial",
                   layer = "MP14_SUBZONE_WEB_PL")
 ```
+
+### Importing polyline feature data in shapefile form
 
 ```{r}
 cyclingpath = st_read(dsn = "data/geospatial", 
@@ -96,6 +106,8 @@ cyclingpath = st_read(dsn = "chap01/data/geospatial",
 cyclingpath <- st_set_crs(cyclingpath, 3414)
 ```
 
+### Importing GIS data in kml format
+
 ```{r}
 preschool = st_read("data/geospatial/PreSchoolsLocation.kml",
                     quiet = TRUE) %>%
@@ -112,19 +124,27 @@ preschool = st_read("chap01/data/geospatial/PreSchoolsLocation.kml") %>%
 
 The geometry column tells us what spatial type is stored in each object. For the planning subzones, the geometry is polygon-based because each row represents an areal unit.
 
+## Checking the Content of A Simple Feature Data Frame
+
+### Working with st_geometry()
+
 ```{r}
 st_geometry(mpsz)
 ```
+
+### Working with glimpse()
 
 ```{r}
 glimpse(mpsz)
 ```
 
+### Working with head()
+
 ```{r}
 head(mpsz, n=5)
 ```
 
-## Visualising Simple Feature Objects
+## Plotting the Geospatial Data
 
 The default `plot()` method is a quick diagnostic view. It is not a publication map, but it is useful for confirming that the geometries and selected attributes look sensible.
 
@@ -147,9 +167,11 @@ plot(st_geometry(mpsz))
 plot(st_geometry(preschool), add = TRUE)
 ```
 
-## Checking Coordinate Reference Systems
+## Working with Projection
 
 Distance and area calculations should be done in a projected coordinate system. For Singapore, SVY21 / EPSG:3414 is appropriate because its units are metres.
+
+### Assigning EPSG code to a simple feature data frame
 
 ```{r}
 st_crs(mpsz)
@@ -162,6 +184,8 @@ mpsz <- st_set_crs(mpsz, 3414)
 ```{r}
 st_crs(mpsz)
 ```
+
+### Transforming the projection of preschool from wgs84 to svy21.
 
 ```{r}
 preschool <- st_transform(preschool, crs = 3414)
@@ -178,9 +202,11 @@ plot(st_geometry(preschool), add = TRUE)
 The first overlay makes the preschool points look misplaced because the layers start in different coordinate systems. After transforming to SVY21, the points line up with the subzone boundary, which confirms why CRS checking cannot be skipped.
 :::
 
-## Importing Aspatial Data
+## Importing and Converting An Aspatial Data
 
 The Airbnb listings file is a CSV table with longitude and latitude columns. It starts as non-spatial data, then becomes an `sf` point layer after assigning WGS84 coordinates and transforming to SVY21.
+
+### Importing the aspatial data
 
 ```{r}
 listings <- read_csv("data/aspatial/listings.csv")
@@ -195,6 +221,8 @@ listings <- read_csv("chap01/data/aspatial/listings.csv")
 ```{r}
 list(listings)
 ```
+
+### Creating a simple feature data frame from an aspatial data frame
 
 ```{r}
 listings_sf <- st_as_sf(listings, 
@@ -213,9 +241,15 @@ glimpse(listings_sf)
 This step reminded me that a table with longitude and latitude is not yet a spatial layer until the coordinates and CRS are declared. After conversion, the geometry column becomes part of the data, so later spatial operations can use the Airbnb records in the same way as other point layers.
 :::
 
-## Geoprocessing With Buffer
+## Geoprocessing with sf package
+
+### Use case 1: Land acquisition analysis
+
+#### The scenario
 
 This section creates a 5 metre buffer around cycling paths. The result is useful for asking how much land area is covered by a narrow corridor around the cycling network.
+
+#### The solution
 
 ```{r}
 buffer_cycling <- st_buffer(cyclingpath, 
@@ -273,9 +307,13 @@ plot(st_geometry(buffer_cycling_selected), col = "lightblue", add = TRUE)
 The cycling path layer is a current local download, so the buffered area should be read as my reproducible result from this dataset.
 :::
 
-## Point-in-Polygon Counting
+### Use case 2: To determine the number of pre-schools by planning subzone
+
+#### The scenario
 
 The subzone polygon layer can be used to count how many preschool points fall inside each subzone.
+
+#### The solution
 
 ```{r}
 mpsz$`PreSch Count`<- lengths(st_intersects(mpsz, preschool))

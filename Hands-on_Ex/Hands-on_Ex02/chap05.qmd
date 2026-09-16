@@ -30,7 +30,7 @@ knitr::opts_chunk$set(
 
 This page continues from the Chapter 4 preparation and focuses on Choa Chu Kang and Tampines. I use G-, F-, K-, and L-functions to compare how childcare centre locations behave across distance.
 
-## The Data
+## The data
 
 The same two local GeoJSON datasets are used:
 
@@ -39,7 +39,7 @@ The same two local GeoJSON datasets are used:
 
 The Chapter 5 analysis focuses on the Choa Chu Kang and Tampines planning areas, using the point pattern objects prepared in the same way as Chapter 4.
 
-## Installing and Loading the R Packages
+## Installing and Loading the R packages
 
 ```{r}
 #| label: ch05-packages
@@ -111,9 +111,9 @@ The observed curve is compared with what complete spatial randomness would look 
 The G-function is event-to-event. I read it as a nearest-neighbour view: if the observed curve rises faster than the CSR expectation, many events have close neighbours.
 :::
 
-### Choa Chu Kang Planning Area
+### Choa Chu Kang planning area
 
-#### Computing G-function Estimation
+#### Computing G-function estimation
 
 ```{r}
 #| label: ch05-g-ck
@@ -133,9 +133,9 @@ G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
 plot(G_CK.csr)
 ```
 
-### Tampines Planning Area
+### Tampines planning area
 
-#### Computing G-function Estimation
+#### Computing G-function estimation
 
 ```{r}
 #| label: ch05-g-tm
@@ -169,9 +169,9 @@ The G-function is the easiest one for me to connect to nearest-neighbour cluster
 The F-function is location-to-event. Instead of starting from an existing childcare centre, it starts from arbitrary locations in the study area and asks how far those locations are from the nearest centre.
 :::
 
-### Choa Chu Kang Planning Area
+### Choa Chu Kang planning area
 
-#### Computing F-function Estimation
+#### Computing F-function estimation
 
 ```{r}
 #| label: ch05-f-ck
@@ -191,9 +191,9 @@ F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
 plot(F_CK.csr)
 ```
 
-### Tampines Planning Area
+### Tampines planning area
 
-#### Computing F-function Estimation
+#### Computing F-function estimation
 
 ```{r}
 #| label: ch05-f-tm
@@ -227,9 +227,9 @@ The F-function adds a different perspective because it starts from empty locatio
 The K-function is more multi-scale. It counts neighbours within increasing distance bands, so it is useful when clustering may happen at some distances but not others.
 :::
 
-### Choa Chu Kang Planning Area
+### Choa Chu Kang planning area
 
-#### Computing K-fucntion Estimate
+#### Computing K-fucntion estimate
 
 ```{r}
 #| label: ch05-k-ck
@@ -257,9 +257,9 @@ K_ck.csr <- envelope(childcare_ck_ppp, Kest,
 plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
 
-### Tampines Planning Area
+### Tampines planning area
 
-#### Computing K-fucntion Estimation
+#### Computing K-function estimation
 
 ```{r}
 #| label: ch05-k-tm
@@ -304,9 +304,9 @@ The K-function helps me avoid making only a nearest-neighbour statement. I read 
 The L-function is a transformed version of K. I find it easier to read because the CSR reference is closer to a flat zero line after plotting `L(d)-r`.
 :::
 
-### Choa Chu Kang Planning Area
+### Choa Chu Kang planning area
 
-#### Computing L Fucntion Estimation
+#### Computing L Fucntion estimation
 
 ```{r}
 #| label: ch05-l-ck
@@ -335,9 +335,9 @@ L_ck.csr <- envelope(childcare_ck_ppp, Lest,
 plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
 ```
 
-### Tampines Planning Area
+### Tampines planning area
 
-#### Computing L-fucntion Estimate
+#### Computing L-fucntion estimate
 
 ```{r}
 #| label: ch05-l-tm
@@ -422,6 +422,6 @@ The `global` choice in simulation envelopes is a good example of a small paramet
 With simultaneous envelopes, the comparison is stricter because it controls the whole curve at once. I would use it when I want a more formal statement about whether the pattern departs from CSR overall. For this coursework page, I read pointwise-style results as a guide to interesting distance ranges, and simultaneous-style results as stronger support when making a final claim.
 :::
 
-## References
+## Reference
 
 - R for Geospatial Data Science and Analytics. Chapter 5: 2nd Order Spatial Point Patterns Analysis Methods. <https://r4gdsa.netlify.app/chap05>

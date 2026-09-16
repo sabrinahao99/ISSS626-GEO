@@ -26,21 +26,31 @@ knitr::opts_chunk$set(
 
 ## Overview
 
+### Survival Tip
+
+I read the function description before changing the map settings, especially for classification and legend arguments.
+
 This page presents my thematic mapping workflow for Singapore's 2024 subzone population data. I prepare the boundary and population table first, then use `tmap` to see how classification, borders, palettes, facets, and outlier highlighting change the story of the same dependency-ratio data.
 
 ::: {.callout-note}
-## Local Implementation Note
+**Local implementation note.**
 
 The local boundary data is stored as GeoJSON, so the useful planning-area fields are already separate columns. The helper function below is kept for reproducibility when a boundary file contains a `Description` field.
 :::
 
-## Installing and Loading the R Packages
+## Getting Started
 
 ```{r}
 pacman::p_load(sf, tmap, tidyverse, rvest)
 ```
 
-## Importing and Preparing the Boundary Layer
+## Importing Data into R
+
+### The Data
+
+The boundary layer and the 2024 population table are the two datasets used for the choropleth maps.
+
+### Importing Geospatial Data into R
 
 ```{r}
 mpsz <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson",
@@ -55,6 +65,8 @@ mpsz <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojs
 mpsz <- st_read("chap02/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>%
   st_transform(crs = 3414)
 ```
+
+#### Tidying data
 
 ```{r}
 extract_kml_field <- function(html_text, field_name) {
@@ -90,10 +102,21 @@ if ("Description" %in% names(mpsz)) {
 ```
 
 ```{r}
+#| label: course-chap02-tidy-mpsz
+#| eval: false
+mpsz <- mpsz %>% mutate(
+  REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
+  PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
+  SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
+  SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
+) %>% select(-Name, -Description) %>% relocate(geometry, .after = last_col())
+```
+
+```{r}
 mpsz
 ```
 
-## Importing and Preparing the Population Data
+### Importing Attribute Data into R
 
 The SingStat population table is aspatial. It needs to be summarised by planning area, subzone, and age group before joining to the subzone boundary.
 
@@ -106,6 +129,10 @@ popdata <- read_csv("data/aspatial/respopagesextod2024.csv")
 #| eval: false
 popdata <- read_csv("chap02/data/aspatial/respopagesextod2024.csv")
 ```
+
+### Data Preparation
+
+#### Data wrangling
 
 ```{r}
 young_age <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19")
@@ -169,6 +196,8 @@ popdata2024 <- popdata2024 %>%
   filter(`ECONOMY ACTIVE` > 0)
 ```
 
+#### Joining the attribute data and geospatial data
+
 ```{r}
 mpsz_pop2024 <- left_join(mpsz, 
                           popdata2024, 
@@ -186,7 +215,9 @@ write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
 write_rds(mpsz_pop2024, "chap02/data/rds/mpsz_pop2024.rds")
 ```
 
-## A Quick Choropleth Map
+## Choropleth Mapping Geospatial Data Using tmap
+
+### Plotting a choropleth map quickly by using qtm()
 
 ```{r}
 tmap_mode("plot")
@@ -200,7 +231,7 @@ qtm(shp = mpsz_pop2024,
 The quick map is useful as a first check because it confirms that the joined attribute can be mapped immediately. At the same time, it feels too plain for communication: the legend, classification, borders, and layout still need design work before the map can support a clear interpretation.
 :::
 
-## Designing the Map
+### Creating a choropleth map by using tmap’s elements
 
 The next map uses a fuller `tmap` composition: filled polygons, title, border, compass, scale bar, grid, and data credits.
 
@@ -250,19 +281,25 @@ tm_shape(mpsz_pop2024) +
 The dependency ratio map is sensitive to classification. I find the quantile map useful for comparison because each class has a similar number of subzones, but it can also make small numeric differences look more dramatic.
 :::
 
-## Choropleth Mapping Choices
+### Creating a choropleth map by using tmap’s elements
 
 The following blocks show how small `tmap` design choices change the same spatial pattern.
+
+#### Drawing a base map
 
 ```{r}
 tm_shape(mpsz_pop2024) +
   tm_polygons()
 ```
 
+#### Drawing a choropleth map using tm_polygons()
+
 ```{r}
 tm_shape(mpsz_pop2024)+
   tm_polygons(fill = "DEPENDENCY")
 ```
+
+#### Drawing a choropleth map using tm_fill() and *tm_border()**
 
 ```{r}
 tm_shape(mpsz_pop2024)+
@@ -282,6 +319,10 @@ tm_shape(mpsz_pop2024)+
              lwd = 0.1,
              lty = "dashed")
 ```
+
+### Data classification methods of tmap
+
+#### Plotting choropleth maps with built-in classification methods
 
 ```{r}
 tm_shape(mpsz_pop2024) +
@@ -305,6 +346,8 @@ tm_shape(mpsz_pop2024) +
 summary(mpsz_pop2024$DEPENDENCY)
 ```
 
+#### Plotting choropleth map with custome break
+
 ```{r}
 tm_shape(mpsz_pop2024)+
   tm_polygons(fill = "DEPENDENCY",
@@ -312,6 +355,10 @@ tm_shape(mpsz_pop2024)+
                 breaks = c(0, 0.60, 0.70, 0.80, 0.90, 1.00))) +
   tm_borders(fill_alpha = 0.5)
 ```
+
+### Colour Scheme
+
+#### Using ColourBrewer palette
 
 ```{r}
 tm_shape(mpsz_pop2024) +
@@ -333,6 +380,10 @@ tm_shape(mpsz_pop2024) +
   tm_borders(fill_alpha = 0.5)
 ```
 
+### Map Layout
+
+#### Cartographic Furniture
+
 ```{r}
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
@@ -346,6 +397,8 @@ tm_shape(mpsz_pop2024) +
   tm_credits("Source: data.gov.sg & singstat",
              position = c("left", "bottom"))
 ```
+
+#### Map Legend
 
 ```{r}
 tm_shape(mpsz_pop2024) +
@@ -363,6 +416,8 @@ tm_shape(mpsz_pop2024) +
   tm_credits("Source: data.gov.sg & singstat",
              position = c("left", "bottom"))
 ```
+
+#### Map style
 
 ```{r}
 tm_shape(mpsz_pop2024) +
@@ -406,9 +461,11 @@ tm_shape(mpsz_pop2024) +
 Mapping young and aged population side by side makes the dependency ratio more understandable. Instead of treating dependency as one abstract number, I can see that it is produced by two different age structures, and those two patterns do not always peak in the same places.
 :::
 
-## Small Multiple Maps
+## Drawing Small Multiple Choropleth Maps
 
 Small multiples make it easier to compare young and aged population patterns without changing datasets between plots.
+
+### By assigning multiple values to at least one of the aesthetic arguments
 
 ```{r}
 youngmap <- tm_shape(mpsz_pop2024)+ 
@@ -438,6 +495,8 @@ agedmap <- tm_shape(mpsz_pop2024)+
 tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
 ```
 
+### By arrange multiples choropleth maps in a grid layout
+
 ```{r}
 tm_shape(mpsz_pop2024) +
   tm_fill(fill = "DEPENDENCY",
@@ -454,6 +513,8 @@ tm_shape(mpsz_pop2024) +
             title.size = 1.1) +
   tm_borders(fill_alpha = 0.5)
 ```
+
+### By defining a group-by variable in tm_facets()
 
 ```{r}
 #| label: course-chap02-facet-map
@@ -480,7 +541,7 @@ tm_shape(mpsz_pop2024) +
 The regional facets are helpful because Singapore-wide maps can make smaller regions hard to compare. With `free.coords = TRUE`, each region gets more visual space, so I can inspect internal variation within regions rather than only noticing the largest polygons on the full island map.
 :::
 
-## Mapping the Central Region
+## Mappping Spatial Object Meeting a Selection Criterion
 
 ```{r}
 mpsz_pop2024 %>%
@@ -554,7 +615,7 @@ tm_shape(region_selected,
   tm_borders(col = "red", lwd = 2)
 ```
 
-## Interactive Mapping Code
+## Creating Interactive Map
 
 For the website version, I render this inspection step in plot mode. The important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.
 
@@ -735,6 +796,8 @@ area_bias_summary
 In my output, the least-populated half of subzones takes up `r area_bias_summary$value[1]`% of the mapped land area but contains only `r area_bias_summary$value[2]`% of the population. That means the eye can easily overweight large, sparsely populated subzones. For population mapping, I should be careful not to read visual area as population importance.
 :::
 
+## Complementing Thematic Map with Statistical Chart
+
 ### Does Preschool Provision Broadly Follow Young Population?
 
 ```{r}
@@ -810,7 +873,13 @@ The part I kept thinking about is that `style = "quantile"`, `style = "jenks"`, 
 So I should not treat the classification argument inside `tm_fill()` as only a design choice. It is part of the analysis. If I were presenting one final map, I would show why that classification was chosen and check whether the main finding still holds when the style changes.
 :::
 
-## References
+## Reference
+
+### All about tmap package
+
+### Geospatial data wrangling
+
+### Data wrangling
 
 - R for Geospatial Data Science and Analytics, Chapter 2: [Thematic Mapping and GeoVisualisation with R](https://r4gdsa.netlify.app/chap02.html)
 - data.gov.sg: [Master Plan 2019 Subzone Boundary No Sea](https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view)

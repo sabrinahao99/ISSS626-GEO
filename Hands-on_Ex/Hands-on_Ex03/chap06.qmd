@@ -48,6 +48,8 @@ My main questions are:
 
 ## Learning Outcome
 
+### The research questions
+
 The workflow is designed to answer two questions about the fire events:
 
 - Are the fire locations spatially and spatio-temporally independent?
@@ -61,7 +63,7 @@ I use the monthly and day-of-year views as complementary checks. The first gives
 The course page uses prepared files named `forestfires.csv` and `Kepulauan_Bangka_Belitung`. The original raw files were not exposed in the rendered course site repository, so I rebuilt the local data folder from public sources: NASA FIRMS country yearly summary for Indonesia and geoBoundaries Indonesia ADM1 boundary. The analysis code keeps the same course workflow, while the rendered findings reflect this local reproducible extract.
 :::
 
-## The Data
+## The data
 
 The local data folder for this page contains:
 
@@ -70,7 +72,7 @@ The local data folder for this page contains:
 - `modis_2023_Indonesia.csv`, the downloaded FIRMS country-level source used to rebuild the local extract.
 
 ```{r}
-#| label: data-audit
+#| label: data-summary
 fire_audit <- read_csv("data/rawdata/forestfires.csv", show_col_types = FALSE)
 
 tibble(
@@ -89,7 +91,7 @@ tibble(
 The clipped local file has detections across almost the full year, but the counts are clearly not balanced across months. This already suggests that a monthly space-time view will be more informative than a single static map.
 :::
 
-## Installing and Loading the R Packages
+## Installing and Loading the R packages
 
 The reference workflow uses `sf`, `spatstat`, `sparr`, `tmap`, `stpp`, `tidyverse`, and `animation`.
 
@@ -173,7 +175,7 @@ class(kbb_owin)
 I transformed the boundary to EPSG:32748 before creating the `owin` object because the next steps use distance and density. Keeping the data in longitude and latitude would make the bandwidth values harder to interpret.
 :::
 
-## Importing and Preparing Forest Fire Data
+## Importing and Preparing Forest Fire data
 
 ```{r}
 #| label: read-fire
@@ -246,7 +248,7 @@ tm_layout(frame = FALSE)
 The points are not spread like a regular grid. Several clusters sit inland, and the edge of the island has fewer detections. This is why I would not stop at a point map: visually dense patches can be affected by symbol overlap, so the density plots below are a better diagnostic.
 :::
 
-### Visualising geographic distribution of forest fires by month
+### Visuaising geographic distribution of forest fires by month
 
 ```{r}
 #| label: course-fire-month-map
@@ -440,7 +442,7 @@ fire_yday_owin <- fire_yday_ppp[kbb_owin]
 summary(fire_yday_owin)
 ```
 
-### Computing day-of-year STKDE
+### Computing spatio-temporal KDE
 
 ```{r}
 #| label: yday-stkde-course
@@ -507,7 +509,7 @@ ggplot() +
 The day-of-year grouping sharpens the same story from the monthly map. The first 120 days are sparse; activity increases after mid-year and becomes most intense between roughly days 211 and 300. This makes the time component analytical, because the high-density areas appear during a specific part of the year rather than staying constant.
 :::
 
-## Computing STKDE by Day of Year: Improved Method
+## Computing STKDE by Day of Year: Improved method
 
 The improved course step estimates better smoothing parameters using bootstrap selection, then reruns the daily STKDE with `h = 9000` and `lambda = 19`.
 
@@ -526,6 +528,8 @@ kde_yday <- spattemp.density(fire_yday_owin,
                              lambda = 19)
 summary(kde_yday)
 ```
+
+### Plotting the output spatio-temporal KDE
 
 ```{r}
 #| label: yday-improved-plot-course
@@ -553,7 +557,7 @@ tibble(
 The bootstrap-guided bandwidths are a useful reminder that space and time need different smoothing scales. A 9000 metre spatial bandwidth is still broad enough to show regional hotspots, while a 19 day temporal bandwidth avoids treating every nearby date as a completely separate pattern.
 :::
 
-## Spatio-temporal Point Patterns Analysis: stpp Methods
+## Spatio-temporal Point Patterns Analysis: stpp methods
 
 ### Preparing spatio-temporal point process object of stpp
 
@@ -632,7 +636,7 @@ ggplot(fire_df, aes(x = x, y = y, colour = t)) +
 Colouring the points by day of year shows that later-year detections occupy many of the dense inland locations. I read this as a space-time concentration, not only a spatial cluster repeated uniformly across the year.
 :::
 
-### Computing spatio-temporal K-function
+### Computing spatio-temporal k-function
 
 ```{r}
 #| label: stik-course
@@ -650,7 +654,7 @@ plotK(kbb_stik, n = 20,
       L = TRUE, type = "contour")
 ```
 
-### Reading the space-time K-function
+### Guide to interpret the plot
 
 High contour values at small spatial and temporal distances suggest that events occur close together in both space and time. Flat or low contours suggest a weaker signal at those distances. The rate at which contours change along the two axes helps identify the spatial and temporal extent of the concentration.
 
@@ -717,7 +721,7 @@ For spatio-temporal KDE, I should not treat `Month_num` and `DayofYear` as inter
 The `lambda` value is therefore similar to bandwidth in space: it decides how much neighbouring time is allowed to influence a density estimate. In my interpretation, a monthly view is good for telling the broad fire-season story, while the day-of-year view is better for checking whether that story happens gradually or through shorter bursts of activity.
 :::
 
-## References
+## Reference
 
 - Course source: [Spatio-Temporal Point Patterns Analysis](https://r4gdsa.netlify.app/chap06.html)
 - Hall, P. (1990). [Using the Bootstrap to Estimate Mean Squared Error and Select Smoothing Parameter in Nonparametric Problems](https://core.ac.uk/works/48942826).
