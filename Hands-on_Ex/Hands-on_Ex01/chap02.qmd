@@ -50,6 +50,13 @@ mpsz <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojs
 ```
 
 ```{r}
+#| label: course-chap02-read-mpsz
+#| eval: false
+mpsz <- st_read("chap02/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
 extract_kml_field <- function(html_text, field_name) {
   if (is.na(html_text) || html_text == "") return(NA_character_)
   
@@ -95,6 +102,12 @@ popdata <- read_csv("data/aspatial/respopagesextod2024.csv")
 ```
 
 ```{r}
+#| label: course-chap02-read-popdata
+#| eval: false
+popdata <- read_csv("chap02/data/aspatial/respopagesextod2024.csv")
+```
+
+```{r}
 young_age <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19")
 active_age <- c("20_to_24", "25_to_29", "30_to_34", "35_to_39",
                 "40_to_44", "45_to_49", "50_to_54", "55_to_59",
@@ -119,9 +132,40 @@ popdata2024 <- popdata %>%
 ```
 
 ```{r}
+#| label: course-chap02-popdata-summary
+#| eval: false
+popdata2024 <- popdata %>%
+  group_by(PA, SZ, AG) %>%
+  summarise(`POP` = sum(`Pop`)) %>%
+  ungroup()%>%
+  pivot_wider(names_from=AG,
+              values_from=POP) %>%
+  mutate(YOUNG = rowSums(.[3:6])
+         +rowSums(.[12])) %>%
+mutate(`ECONOMY ACTIVE` = rowSums(.[7:11])+
+rowSums(.[13:15]))%>%
+mutate(`AGED`=rowSums(.[16:21])) %>%
+mutate(`TOTAL`=rowSums(.[3:21])) %>%
+mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
+ /`ECONOMY ACTIVE`) %>%
+  select(`PA`, `SZ`, `YOUNG`,
+       `ECONOMY ACTIVE`, `AGED`,
+       `TOTAL`, `DEPENDENCY`)
+```
+
+```{r}
 popdata2024 <- popdata2024 %>%
   mutate(PA = toupper(PA),
          SZ = toupper(SZ)) %>%
+  filter(`ECONOMY ACTIVE` > 0)
+```
+
+```{r}
+#| label: course-chap02-popdata-filter
+#| eval: false
+popdata2024 <- popdata2024 %>%
+  mutate_at(.vars = vars(PA, SZ),
+          .funs = list(toupper)) %>%
   filter(`ECONOMY ACTIVE` > 0)
 ```
 
@@ -134,6 +178,12 @@ mpsz_pop2024 <- left_join(mpsz,
 ```{r}
 dir.create("data/rds", recursive = TRUE, showWarnings = FALSE)
 write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
+```
+
+```{r}
+#| label: course-chap02-write-rds
+#| eval: false
+write_rds(mpsz_pop2024, "chap02/data/rds/mpsz_pop2024.rds")
 ```
 
 ## A Quick Choropleth Map
@@ -170,6 +220,27 @@ tm_shape(mpsz_pop2024) +
   tm_scalebar() +
   tm_grid(alpha =0.2) +
   tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authority (URA)\n and Population data from Department of Statistics DOS", 
+             position = c("left", "bottom"))
+```
+
+```{r}
+#| label: course-chap02-dependency-map
+#| eval: false
+tm_shape(mpsz_pop2024) +
+  tm_polygons(fill = "DEPENDENCY",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "Dependency ratio")) +
+  tm_title("Distribution of Dependency Ratio by planning subzone") +
+  tm_layout(frame = TRUE) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type="8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha =0.2) +
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS",
              position = c("left", "bottom"))
 ```
 
@@ -384,6 +455,25 @@ tm_shape(mpsz_pop2024) +
   tm_borders(fill_alpha = 0.5)
 ```
 
+```{r}
+#| label: course-chap02-facet-map
+#| eval: false
+tm_shape(mpsz_pop2024) +
+  tm_fill(fill = "DEPENDENCY",
+          fill.scale = tm_scale_intervals(
+            style = "quantile",
+            values = "brewer.blues")) +
+  tm_facets(by = "REGION_N",
+            nrow = 2,
+            ncols = 3,
+            free.coords=TRUE,
+            drop.units=TRUE) +
+  tm_layout(legend.show = TRUE,
+            title.position = c("center", "center"),
+            title.size = 20) +
+  tm_borders(fill_alpha = 0.5)
+```
+
 ::: {.callout-tip}
 ## My Reading of the Facets
 
@@ -442,6 +532,28 @@ tm_shape(outlier_sf) +
   tm_layout(asp = 0.8)
 ```
 
+```{r}
+#| label: course-chap02-central-outliers-view
+#| eval: false
+region_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+region_bbox <- st_bbox(region_selected)
+stats <- boxplot.stats(region_selected$DEPENDENCY)
+outlier_vals <- stats$out
+outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+tmap_mode("view")
+tm_shape(region_selected,
+         bbox = region_bbox) +
+  tm_fill("DEPENDENCY",
+          id = "SUBZONE_N",
+          popup.vars = c(
+            "Name" = "SUBZONE_N",
+            "Dependency" = "DEPENDENCY")) +
+  tm_borders() +
+  tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2)
+```
+
 ## Interactive Mapping Code
 
 For the website version, I render this inspection step in plot mode. The important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.
@@ -468,6 +580,12 @@ tm_shape(region_selected,
   tm_shape(outlier_sf) +
   tm_borders(col = "red", lwd = 2) +
 tm_layout(frame = FALSE)
+```
+
+```{r}
+#| label: course-chap02-plot-mode-after-view
+#| eval: false
+tmap_mode("plot")
 ```
 
 ::: {.callout-note}
@@ -502,6 +620,35 @@ tm_shape(region_selected,
   tm_shape(outlier_sf) +
   tm_borders(col = "red", lwd = 2) +
   tm_view(set_zoom_limits = c(12,14))
+```
+
+```{r}
+#| label: course-chap02-central-outliers-zoom
+#| eval: false
+region_selected <- mpsz_pop2024 %>%
+  filter(REGION_N == "CENTRAL REGION")
+region_bbox <- st_bbox(region_selected)
+stats <- boxplot.stats(region_selected$DEPENDENCY)
+outlier_vals <- stats$out
+outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+tmap_mode("view")
+tm_shape(region_selected,
+         bbox = region_bbox) +
+  tm_fill("DEPENDENCY",
+          id = "SUBZONE_N",
+          popup.vars = c(
+            "Name" = "SUBZONE_N",
+            "Dependency" = "DEPENDENCY")) +
+  tm_borders() +
+  tm_shape(outlier_sf) +
+  tm_borders(col = "red", lwd = 2) +
+  tm_view(set_zoom_limits = c(12,14))
+```
+
+```{r}
+#| label: course-chap02-plot-mode-final
+#| eval: false
+tmap_mode("plot")
 ```
 
 ```{r}

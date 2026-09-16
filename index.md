@@ -11,6 +11,7 @@ This index records the structure of the ISSS626 geospatial analytics coursework 
 | Hands-on Exercise 2 | `Hands-on_Ex/Hands-on_Ex02/chap04.qmd`, `Hands-on_Ex/Hands-on_Ex02/chap05.qmd` |
 | Hands-on Exercise 3 | `Hands-on_Ex/Hands-on_Ex03/chap06.qmd` |
 | Hands-on Exercise 4 | `Hands-on_Ex/Hands-on_Ex04/chap08.qmd` |
+| Code audit | `COURSE_CODE_AUDIT.md` |
 | Rendered website | `_site/` |
 
 Exercise 3 uses local MODIS fire detections and the Bangka-Belitung study boundary stored in `Hands-on_Ex/Hands-on_Ex03/data/rawdata/`.

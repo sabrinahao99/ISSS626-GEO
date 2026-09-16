@@ -64,6 +64,13 @@ pacman::p_load(sf, terra, spatstat,
                tmap, rvest, tidyverse)
 ```
 
+```{r}
+#| label: course-chap04-packages
+#| eval: false
+pacman::p_load(sf, terra, spatstat,
+               tmap, tidyverse)
+```
+
 ## Importing and Wrangling Geospatial Data Sets
 
 ::: callout-note
@@ -77,6 +84,13 @@ The local working datasets are stored as GeoJSON, with the useful boundary attri
 mpsz_sf <- st_read("data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson",
                    quiet = TRUE) %>% 
   st_zm(drop = TRUE, what = "ZM") %>% 
+  st_transform(crs = 3414)
+```
+
+```{r}
+#| label: course-chap04-read-mpsz
+#| eval: false
+mpsz_sf <- st_read("chap04/data/MasterPlan2019SubzoneBoundaryNoSea.geojson") %>%
   st_transform(crs = 3414)
 ```
 
@@ -124,9 +138,25 @@ mpsz_cl <- mpsz_sf %>%
 ```
 
 ```{r}
+#| label: course-chap04-clean-mpsz
+#| eval: false
+mpsz_cl <- mpsz_sf %>%
+  filter(SUBZONE_N != "SOUTHERN GROUP",
+         PLN_AREA_N != "WESTERN ISLANDS",
+         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
+```
+
+```{r}
 #| label: ch04-save-mpsz
 write_rds(mpsz_cl, 
           "data/mpsz_cl.rds")
+```
+
+```{r}
+#| label: course-chap04-save-mpsz
+#| eval: false
+write_rds(mpsz_cl,
+          "chap04/data/mpsz_cl.rds")
 ```
 
 ```{r}
@@ -134,6 +164,13 @@ write_rds(mpsz_cl,
 childcare_sf <- st_read("data/ChildCareServices.geojson",
                         quiet = TRUE) %>% 
   st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
+```
+
+```{r}
+#| label: course-chap04-read-childcare
+#| eval: false
+childcare_sf <- st_read("chap04/data/ChildCareServices.geojson") %>%
   st_transform(crs = 3414)
 ```
 
@@ -148,6 +185,14 @@ The projected CRS is important here because the point pattern methods below use 
 tmap_mode('plot')
 tm_shape(childcare_sf)+
   tm_dots(size = 0.015)
+```
+
+```{r}
+#| label: course-chap04-map-childcare-view
+#| eval: false
+tmap_mode('view')
+tm_shape(childcare_sf)+
+  tm_dots()
 ```
 
 ```{r}
@@ -220,6 +265,15 @@ ce_sg <- clarkevans.test(childcareSG_ppp,
 ce_sg
 ```
 
+```{r}
+#| label: course-chap04-ce-clustered
+#| eval: false
+clarkevans.test(childcareSG_ppp,
+                correction="none",
+                clipregion= sg_owin,
+                alternative=c("clustered"))
+```
+
 ### Perform the Clark-Evans Test With CSR
 
 ```{r}
@@ -232,6 +286,17 @@ ce_sg_mc <- clarkevans.test(childcareSG_ppp,
                 method="MonteCarlo",
                 nsim=99)
 ce_sg_mc
+```
+
+```{r}
+#| label: course-chap04-ce-montecarlo
+#| eval: false
+clarkevans.test(childcareSG_ppp,
+                correction="none",
+                clipregion= sg_owin,
+                alternative=c("clustered"),
+                method="MonteCarlo",
+                nsim=99)
 ```
 
 ::: callout-tip

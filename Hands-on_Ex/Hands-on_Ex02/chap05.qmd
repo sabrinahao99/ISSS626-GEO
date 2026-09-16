@@ -245,6 +245,14 @@ K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
 ```
 
 ```{r}
+#| label: course-chap05-k-ck-envelope
+#| eval: false
+K_ck.csr <- envelope(childcare_ck_ppp, Kest,
+                     nsim = 99, rank = 1,
+                     global=FALSE)
+```
+
+```{r}
 #| label: ch05-plot-k-ck-envelope
 plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
@@ -266,6 +274,14 @@ plot(K_tm, . -r ~ r,
 ```{r}
 #| label: ch05-k-tm-envelope
 K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
+```
+
+```{r}
+#| label: course-chap05-k-tm-envelope
+#| eval: false
+K_tm.csr <- envelope(childcare_tm_ppp, Kest,
+                     nsim = 99, rank = 1,
+                     global=FALSE)
 ```
 
 ```{r}
@@ -307,6 +323,14 @@ L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
 ```
 
 ```{r}
+#| label: course-chap05-l-ck-envelope
+#| eval: false
+L_ck.csr <- envelope(childcare_ck_ppp, Lest,
+                     nsim = 99, rank = 1,
+                     global=FALSE)
+```
+
+```{r}
 #| label: ch05-plot-l-ck-envelope
 plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
 ```
@@ -331,6 +355,14 @@ L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
 ```
 
 ```{r}
+#| label: course-chap05-l-tm-envelope
+#| eval: false
+L_tm.csr <- envelope(childcare_tm_ppp, Lest,
+                     nsim = 99, rank = 1,
+                     global=FALSE)
+```
+
+```{r}
 #| label: ch05-plot-l-tm-envelope
 plot(L_tm.csr, . - r ~ r, 
      xlab="d", ylab="L(d)-r", xlim=c(0,500))
@@ -340,6 +372,12 @@ plot(L_tm.csr, . - r ~ r,
 ### My finding from the L-function
 
 The L-function is helpful as a final check because it makes the K-function easier to read visually. When the transformed curve moves away from the zero reference and outside the simulation envelope, I treat that distance range as stronger evidence of departure from CSR.
+:::
+
+::: {.callout-important}
+### What the four plots show together
+
+The rendered envelopes make Tampines the clearest case of departure from CSR. Its K- and L-function curves remain well above the simulated range across much of the plotted distance. Its F-function drops below the lower envelope at larger distances. Choa Chu Kang is more distance-dependent. The early G-function departure is noticeable. Its K- and L-function curves stay closer to the envelope for longer. I describe Tampines as having the stronger multi-scale interaction signal.
 :::
 
 ## G, F, K and L: How I Distinguish Them
