@@ -8,11 +8,14 @@ format:
     toc: true
     toc-depth: 4
     code-fold: false
+    number-offset: 5
 execute:
   echo: true
   warning: false
   message: false
 ---
+
+# Spatio-Temporal Point Patterns Analysis {.course-chapter-title}
 
 ```{r}
 #| label: setup
@@ -340,7 +343,7 @@ The `ppp` summary confirms that the marks are numeric months, which is exactly w
 
 ### Computing Spatio-temporal KDE
 
-This is the reference code for monthly STKDE.
+Next, `spattemp.density()` of the `sparr` package is used to compute the STKDE.
 
 ```{r}
 #| label: stkde-month-course
@@ -349,7 +352,29 @@ st_kde <- spattemp.density(fire_month_owin)
 summary(st_kde)
 ```
 
+<pre class="course-console-output">Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+    h = 15102.47 (spatial)
+    lambda = 0.0304 (temporal)
+
+No. of observations
+    741
+
+Spatial bound
+    Type: polygonal
+    2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+    [1, 12]
+
+Evaluation
+    128 x 128 x 12 trivariate lattice
+    Density range: [1.233458e-27, 8.202976e-10]</pre>
+
 ### Plotting the spatio-temporal KDE object
+
+In the code chunk below, `plot()` of R base is used to show the KDE between July 2023 and December 2023.
 
 ```{r}
 #| label: stkde-month-plot-course

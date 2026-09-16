@@ -198,50 +198,53 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">1</span> Overview</a></li>
-  <li><a href="#learning-outcome" id="toc-learning-outcome" class="nav-link" data-scroll-target="#learning-outcome"><span class="header-section-number">2</span> Learning Outcome</a>
+  <li><a href="#spatio-temporal-point-patterns-analysis" id="toc-spatio-temporal-point-patterns-analysis" class="nav-link active" data-scroll-target="#spatio-temporal-point-patterns-analysis"><span class="header-section-number">6</span> Spatio-Temporal Point Patterns Analysis</a>
   <ul>
-  <li><a href="#the-research-questions" id="toc-the-research-questions" class="nav-link" data-scroll-target="#the-research-questions"><span class="header-section-number">2.1</span> The research questions</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">6.1</span> Overview</a></li>
+  <li><a href="#learning-outcome" id="toc-learning-outcome" class="nav-link" data-scroll-target="#learning-outcome"><span class="header-section-number">6.2</span> Learning Outcome</a>
+  <ul class="collapse">
+  <li><a href="#the-research-questions" id="toc-the-research-questions" class="nav-link" data-scroll-target="#the-research-questions"><span class="header-section-number">6.2.1</span> The research questions</a></li>
   </ul></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">3</span> The data</a></li>
-  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages"><span class="header-section-number">4</span> Installing and Loading the R packages</a></li>
-  <li><a href="#importing-and-preparing-study-area" id="toc-importing-and-preparing-study-area" class="nav-link" data-scroll-target="#importing-and-preparing-study-area"><span class="header-section-number">5</span> Importing and Preparing Study Area</a>
-  <ul>
-  <li><a href="#importing-study-area" id="toc-importing-study-area" class="nav-link" data-scroll-target="#importing-study-area"><span class="header-section-number">5.1</span> Importing study area</a></li>
-  <li><a href="#converting-owin" id="toc-converting-owin" class="nav-link" data-scroll-target="#converting-owin"><span class="header-section-number">5.2</span> Converting OWIN</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">6.3</span> The data</a></li>
+  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages"><span class="header-section-number">6.4</span> Installing and Loading the R packages</a></li>
+  <li><a href="#importing-and-preparing-study-area" id="toc-importing-and-preparing-study-area" class="nav-link" data-scroll-target="#importing-and-preparing-study-area"><span class="header-section-number">6.5</span> Importing and Preparing Study Area</a>
+  <ul class="collapse">
+  <li><a href="#importing-study-area" id="toc-importing-study-area" class="nav-link" data-scroll-target="#importing-study-area"><span class="header-section-number">6.5.1</span> Importing study area</a></li>
+  <li><a href="#converting-owin" id="toc-converting-owin" class="nav-link" data-scroll-target="#converting-owin"><span class="header-section-number">6.5.2</span> Converting OWIN</a></li>
   </ul></li>
-  <li><a href="#importing-and-preparing-forest-fire-data" id="toc-importing-and-preparing-forest-fire-data" class="nav-link" data-scroll-target="#importing-and-preparing-forest-fire-data"><span class="header-section-number">6</span> Importing and Preparing Forest Fire data</a></li>
-  <li><a href="#visualising-the-fire-points" id="toc-visualising-the-fire-points" class="nav-link" data-scroll-target="#visualising-the-fire-points"><span class="header-section-number">7</span> Visualising the Fire Points</a>
-  <ul>
-  <li><a href="#overall-plot" id="toc-overall-plot" class="nav-link" data-scroll-target="#overall-plot"><span class="header-section-number">7.1</span> Overall plot</a></li>
-  <li><a href="#visuaising-geographic-distribution-of-forest-fires-by-month" id="toc-visuaising-geographic-distribution-of-forest-fires-by-month" class="nav-link" data-scroll-target="#visuaising-geographic-distribution-of-forest-fires-by-month"><span class="header-section-number">7.2</span> Visuaising geographic distribution of forest fires by month</a></li>
+  <li><a href="#importing-and-preparing-forest-fire-data" id="toc-importing-and-preparing-forest-fire-data" class="nav-link" data-scroll-target="#importing-and-preparing-forest-fire-data"><span class="header-section-number">6.6</span> Importing and Preparing Forest Fire data</a></li>
+  <li><a href="#visualising-the-fire-points" id="toc-visualising-the-fire-points" class="nav-link" data-scroll-target="#visualising-the-fire-points"><span class="header-section-number">6.7</span> Visualising the Fire Points</a>
+  <ul class="collapse">
+  <li><a href="#overall-plot" id="toc-overall-plot" class="nav-link" data-scroll-target="#overall-plot"><span class="header-section-number">6.7.1</span> Overall plot</a></li>
+  <li><a href="#visuaising-geographic-distribution-of-forest-fires-by-month" id="toc-visuaising-geographic-distribution-of-forest-fires-by-month" class="nav-link" data-scroll-target="#visuaising-geographic-distribution-of-forest-fires-by-month"><span class="header-section-number">6.7.2</span> Visuaising geographic distribution of forest fires by month</a></li>
   </ul></li>
-  <li><a href="#computing-stkde-by-month" id="toc-computing-stkde-by-month" class="nav-link" data-scroll-target="#computing-stkde-by-month"><span class="header-section-number">8</span> Computing STKDE by Month</a>
-  <ul>
-  <li><a href="#extracting-forest-fires-by-month" id="toc-extracting-forest-fires-by-month" class="nav-link" data-scroll-target="#extracting-forest-fires-by-month"><span class="header-section-number">8.1</span> Extracting forest fires by month</a></li>
-  <li><a href="#creating-ppp" id="toc-creating-ppp" class="nav-link" data-scroll-target="#creating-ppp"><span class="header-section-number">8.2</span> Creating ppp</a></li>
-  <li><a href="#including-owin-object" id="toc-including-owin-object" class="nav-link" data-scroll-target="#including-owin-object"><span class="header-section-number">8.3</span> Including Owin object</a></li>
-  <li><a href="#computing-spatio-temporal-kde" id="toc-computing-spatio-temporal-kde" class="nav-link" data-scroll-target="#computing-spatio-temporal-kde"><span class="header-section-number">8.4</span> Computing Spatio-temporal KDE</a></li>
-  <li><a href="#plotting-the-spatio-temporal-kde-object" id="toc-plotting-the-spatio-temporal-kde-object" class="nav-link" data-scroll-target="#plotting-the-spatio-temporal-kde-object"><span class="header-section-number">8.5</span> Plotting the spatio-temporal KDE object</a></li>
+  <li><a href="#computing-stkde-by-month" id="toc-computing-stkde-by-month" class="nav-link" data-scroll-target="#computing-stkde-by-month"><span class="header-section-number">6.8</span> Computing STKDE by Month</a>
+  <ul class="collapse">
+  <li><a href="#extracting-forest-fires-by-month" id="toc-extracting-forest-fires-by-month" class="nav-link" data-scroll-target="#extracting-forest-fires-by-month"><span class="header-section-number">6.8.1</span> Extracting forest fires by month</a></li>
+  <li><a href="#creating-ppp" id="toc-creating-ppp" class="nav-link" data-scroll-target="#creating-ppp"><span class="header-section-number">6.8.2</span> Creating ppp</a></li>
+  <li><a href="#including-owin-object" id="toc-including-owin-object" class="nav-link" data-scroll-target="#including-owin-object"><span class="header-section-number">6.8.3</span> Including Owin object</a></li>
+  <li><a href="#computing-spatio-temporal-kde" id="toc-computing-spatio-temporal-kde" class="nav-link" data-scroll-target="#computing-spatio-temporal-kde"><span class="header-section-number">6.8.4</span> Computing Spatio-temporal KDE</a></li>
+  <li><a href="#plotting-the-spatio-temporal-kde-object" id="toc-plotting-the-spatio-temporal-kde-object" class="nav-link" data-scroll-target="#plotting-the-spatio-temporal-kde-object"><span class="header-section-number">6.8.5</span> Plotting the spatio-temporal KDE object</a></li>
   </ul></li>
-  <li><a href="#computing-stkde-by-day-of-year" id="toc-computing-stkde-by-day-of-year" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year"><span class="header-section-number">9</span> Computing STKDE by Day of Year</a>
-  <ul>
-  <li><a href="#creating-ppp-object" id="toc-creating-ppp-object" class="nav-link" data-scroll-target="#creating-ppp-object"><span class="header-section-number">9.1</span> Creating ppp object</a></li>
-  <li><a href="#including-owin-object-1" id="toc-including-owin-object-1" class="nav-link" data-scroll-target="#including-owin-object-1"><span class="header-section-number">9.2</span> Including Owin object</a></li>
-  <li><a href="#computing-spatio-temporal-kde-1" id="toc-computing-spatio-temporal-kde-1" class="nav-link" data-scroll-target="#computing-spatio-temporal-kde-1"><span class="header-section-number">9.3</span> Computing spatio-temporal KDE</a></li>
+  <li><a href="#computing-stkde-by-day-of-year" id="toc-computing-stkde-by-day-of-year" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year"><span class="header-section-number">6.9</span> Computing STKDE by Day of Year</a>
+  <ul class="collapse">
+  <li><a href="#creating-ppp-object" id="toc-creating-ppp-object" class="nav-link" data-scroll-target="#creating-ppp-object"><span class="header-section-number">6.9.1</span> Creating ppp object</a></li>
+  <li><a href="#including-owin-object-1" id="toc-including-owin-object-1" class="nav-link" data-scroll-target="#including-owin-object-1"><span class="header-section-number">6.9.2</span> Including Owin object</a></li>
+  <li><a href="#computing-spatio-temporal-kde-1" id="toc-computing-spatio-temporal-kde-1" class="nav-link" data-scroll-target="#computing-spatio-temporal-kde-1"><span class="header-section-number">6.9.3</span> Computing spatio-temporal KDE</a></li>
   </ul></li>
-  <li><a href="#computing-stkde-by-day-of-year-improved-method" id="toc-computing-stkde-by-day-of-year-improved-method" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year-improved-method"><span class="header-section-number">10</span> Computing STKDE by Day of Year: Improved method</a>
-  <ul>
-  <li><a href="#plotting-the-output-spatio-temporal-kde" id="toc-plotting-the-output-spatio-temporal-kde" class="nav-link" data-scroll-target="#plotting-the-output-spatio-temporal-kde"><span class="header-section-number">10.1</span> Plotting the output spatio-temporal KDE</a></li>
+  <li><a href="#computing-stkde-by-day-of-year-improved-method" id="toc-computing-stkde-by-day-of-year-improved-method" class="nav-link" data-scroll-target="#computing-stkde-by-day-of-year-improved-method"><span class="header-section-number">6.10</span> Computing STKDE by Day of Year: Improved method</a>
+  <ul class="collapse">
+  <li><a href="#plotting-the-output-spatio-temporal-kde" id="toc-plotting-the-output-spatio-temporal-kde" class="nav-link" data-scroll-target="#plotting-the-output-spatio-temporal-kde"><span class="header-section-number">6.10.1</span> Plotting the output spatio-temporal KDE</a></li>
   </ul></li>
-  <li><a href="#spatio-temporal-point-patterns-analysis-stpp-methods" id="toc-spatio-temporal-point-patterns-analysis-stpp-methods" class="nav-link" data-scroll-target="#spatio-temporal-point-patterns-analysis-stpp-methods"><span class="header-section-number">11</span> Spatio-temporal Point Patterns Analysis: stpp methods</a>
-  <ul>
-  <li><a href="#preparing-spatio-temporal-point-process-object-of-stpp" id="toc-preparing-spatio-temporal-point-process-object-of-stpp" class="nav-link" data-scroll-target="#preparing-spatio-temporal-point-process-object-of-stpp"><span class="header-section-number">11.1</span> Preparing spatio-temporal point process object of stpp</a></li>
-  <li><a href="#computing-spatio-temporal-k-function" id="toc-computing-spatio-temporal-k-function" class="nav-link" data-scroll-target="#computing-spatio-temporal-k-function"><span class="header-section-number">11.2</span> Computing spatio-temporal k-function</a></li>
-  <li><a href="#guide-to-interpret-the-plot" id="toc-guide-to-interpret-the-plot" class="nav-link" data-scroll-target="#guide-to-interpret-the-plot"><span class="header-section-number">11.3</span> Guide to interpret the plot</a></li>
+  <li><a href="#spatio-temporal-point-patterns-analysis-stpp-methods" id="toc-spatio-temporal-point-patterns-analysis-stpp-methods" class="nav-link" data-scroll-target="#spatio-temporal-point-patterns-analysis-stpp-methods"><span class="header-section-number">6.11</span> Spatio-temporal Point Patterns Analysis: stpp methods</a>
+  <ul class="collapse">
+  <li><a href="#preparing-spatio-temporal-point-process-object-of-stpp" id="toc-preparing-spatio-temporal-point-process-object-of-stpp" class="nav-link" data-scroll-target="#preparing-spatio-temporal-point-process-object-of-stpp"><span class="header-section-number">6.11.1</span> Preparing spatio-temporal point process object of stpp</a></li>
+  <li><a href="#computing-spatio-temporal-k-function" id="toc-computing-spatio-temporal-k-function" class="nav-link" data-scroll-target="#computing-spatio-temporal-k-function"><span class="header-section-number">6.11.2</span> Computing spatio-temporal k-function</a></li>
+  <li><a href="#guide-to-interpret-the-plot" id="toc-guide-to-interpret-the-plot" class="nav-link" data-scroll-target="#guide-to-interpret-the-plot"><span class="header-section-number">6.11.3</span> Guide to interpret the plot</a></li>
   </ul></li>
-  <li><a href="#final-takeaway" id="toc-final-takeaway" class="nav-link" data-scroll-target="#final-takeaway"><span class="header-section-number">12</span> Final Takeaway</a></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">13</span> Reference</a></li>
+  <li><a href="#final-takeaway" id="toc-final-takeaway" class="nav-link" data-scroll-target="#final-takeaway"><span class="header-section-number">6.12</span> Final Takeaway</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">6.13</span> Reference</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -280,8 +283,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="overview" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="overview"><span class="header-section-number">1</span> Overview</h2>
+<section id="spatio-temporal-point-patterns-analysis" class="level1 course-chapter-title" data-number="6">
+<h1 class="course-chapter-title" data-number="6"><span class="header-section-number">6</span> Spatio-Temporal Point Patterns Analysis</h1>
+<section id="overview" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">6.1</span> Overview</h2>
 <p>In this exercise, I extend point pattern analysis from a purely spatial question into a space-time question. The event data records MODIS active fire detections in Indonesia during 2023, and I focus on the Bangka-Belitung Islands so that the same workflow can be read as a compact case study.</p>
 <p>My main questions are:</p>
 <ul>
@@ -290,10 +295,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Does the day-of-year view add anything beyond the monthly view?</li>
 </ul>
 </section>
-<section id="learning-outcome" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="learning-outcome"><span class="header-section-number">2</span> Learning Outcome</h2>
-<section id="the-research-questions" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="the-research-questions"><span class="header-section-number">2.1</span> The research questions</h3>
+<section id="learning-outcome" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="learning-outcome"><span class="header-section-number">6.2</span> Learning Outcome</h2>
+<section id="the-research-questions" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="the-research-questions"><span class="header-section-number">6.2.1</span> The research questions</h3>
 <p>The workflow is designed to answer two questions about the fire events:</p>
 <ul>
 <li>Are the fire locations spatially and spatio-temporally independent?</li>
@@ -315,8 +320,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="the-data" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="the-data"><span class="header-section-number">3</span> The data</h2>
+<section id="the-data" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="the-data"><span class="header-section-number">6.3</span> The data</h2>
 <p>The local data folder for this page contains:</p>
 <ul>
 <li><code>forestfires.csv</code>, a clipped 2023 MODIS fire detection table for Bangka-Belitung.</li>
@@ -357,8 +362,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="installing-and-loading-the-r-packages" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="installing-and-loading-the-r-packages"><span class="header-section-number">4</span> Installing and Loading the R packages</h2>
+<section id="installing-and-loading-the-r-packages" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="installing-and-loading-the-r-packages"><span class="header-section-number">6.4</span> Installing and Loading the R packages</h2>
 <p>The reference workflow uses <code>sf</code>, <code>spatstat</code>, <code>sparr</code>, <code>tmap</code>, <code>stpp</code>, <code>tidyverse</code>, and <code>animation</code>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spatstat, sparr, </span>
@@ -383,10 +388,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="importing-and-preparing-study-area" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="importing-and-preparing-study-area"><span class="header-section-number">5</span> Importing and Preparing Study Area</h2>
-<section id="importing-study-area" class="level3" data-number="5.1">
-<h3 data-number="5.1" class="anchored" data-anchor-id="importing-study-area"><span class="header-section-number">5.1</span> Importing study area</h3>
+<section id="importing-and-preparing-study-area" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="importing-and-preparing-study-area"><span class="header-section-number">6.5</span> Importing and Preparing Study Area</h2>
+<section id="importing-study-area" class="level3" data-number="6.5.1">
+<h3 data-number="6.5.1" class="anchored" data-anchor-id="importing-study-area"><span class="header-section-number">6.5.1</span> Importing study area</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>kbb <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="at">dsn=</span><span class="st">"chap06/data/rawdata"</span>,</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">layer =</span> <span class="st">"Kepulauan_Bangka_Belitung"</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -425,8 +430,8 @@ Geodetic CRS:  WGS 84
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">32748</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="converting-owin" class="level3" data-number="5.2">
-<h3 data-number="5.2" class="anchored" data-anchor-id="converting-owin"><span class="header-section-number">5.2</span> Converting OWIN</h3>
+<section id="converting-owin" class="level3" data-number="6.5.2">
+<h3 data-number="6.5.2" class="anchored" data-anchor-id="converting-owin"><span class="header-section-number">6.5.2</span> Converting OWIN</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>kbb_owin <span class="ot">&lt;-</span> <span class="fu">as.owin</span>(kbb_sf)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>kbb_owin</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -456,8 +461,8 @@ enclosing rectangle: [512196.8, 975593.4] x [9634134, 9868989] units</code></pre
 </div>
 </section>
 </section>
-<section id="importing-and-preparing-forest-fire-data" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="importing-and-preparing-forest-fire-data"><span class="header-section-number">6</span> Importing and Preparing Forest Fire data</h2>
+<section id="importing-and-preparing-forest-fire-data" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="importing-and-preparing-forest-fire-data"><span class="header-section-number">6.6</span> Importing and Preparing Forest Fire data</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fire_sf <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/rawdata/forestfires.csv"</span>,</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">%&gt;%</span></span>
@@ -516,10 +521,10 @@ enclosing rectangle: [512196.8, 975593.4] x [9634134, 9868989] units</code></pre
 </div>
 </div>
 </section>
-<section id="visualising-the-fire-points" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="visualising-the-fire-points"><span class="header-section-number">7</span> Visualising the Fire Points</h2>
-<section id="overall-plot" class="level3" data-number="7.1">
-<h3 data-number="7.1" class="anchored" data-anchor-id="overall-plot"><span class="header-section-number">7.1</span> Overall plot</h3>
+<section id="visualising-the-fire-points" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="visualising-the-fire-points"><span class="header-section-number">6.7</span> Visualising the Fire Points</h2>
+<section id="overall-plot" class="level3" data-number="6.7.1">
+<h3 data-number="6.7.1" class="anchored" data-anchor-id="overall-plot"><span class="header-section-number">6.7.1</span> Overall plot</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf)<span class="sc">+</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
@@ -555,8 +560,8 @@ enclosing rectangle: [512196.8, 975593.4] x [9634134, 9868989] units</code></pre
 </div>
 </div>
 </section>
-<section id="visuaising-geographic-distribution-of-forest-fires-by-month" class="level3" data-number="7.2">
-<h3 data-number="7.2" class="anchored" data-anchor-id="visuaising-geographic-distribution-of-forest-fires-by-month"><span class="header-section-number">7.2</span> Visuaising geographic distribution of forest fires by month</h3>
+<section id="visuaising-geographic-distribution-of-forest-fires-by-month" class="level3" data-number="6.7.2">
+<h3 data-number="6.7.2" class="anchored" data-anchor-id="visuaising-geographic-distribution-of-forest-fires-by-month"><span class="header-section-number">6.7.2</span> Visuaising geographic distribution of forest fires by month</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(kbb_sf)<span class="sc">+</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>() <span class="sc">+</span></span>
@@ -599,10 +604,10 @@ enclosing rectangle: [512196.8, 975593.4] x [9634134, 9868989] units</code></pre
 </div>
 </section>
 </section>
-<section id="computing-stkde-by-month" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="computing-stkde-by-month"><span class="header-section-number">8</span> Computing STKDE by Month</h2>
-<section id="extracting-forest-fires-by-month" class="level3" data-number="8.1">
-<h3 data-number="8.1" class="anchored" data-anchor-id="extracting-forest-fires-by-month"><span class="header-section-number">8.1</span> Extracting forest fires by month</h3>
+<section id="computing-stkde-by-month" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="computing-stkde-by-month"><span class="header-section-number">6.8</span> Computing STKDE by Month</h2>
+<section id="extracting-forest-fires-by-month" class="level3" data-number="6.8.1">
+<h3 data-number="6.8.1" class="anchored" data-anchor-id="extracting-forest-fires-by-month"><span class="header-section-number">6.8.1</span> Extracting forest fires by month</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fire_month <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(Month_num)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -612,8 +617,8 @@ enclosing rectangle: [512196.8, 975593.4] x [9634134, 9868989] units</code></pre
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Month_num)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="creating-ppp" class="level3" data-number="8.2">
-<h3 data-number="8.2" class="anchored" data-anchor-id="creating-ppp"><span class="header-section-number">8.2</span> Creating ppp</h3>
+<section id="creating-ppp" class="level3" data-number="6.8.2">
+<h3 data-number="6.8.2" class="anchored" data-anchor-id="creating-ppp"><span class="header-section-number">6.8.2</span> Creating ppp</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>fire_month_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(fire_month)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>fire_month_ppp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -648,8 +653,8 @@ Window area = 63659700000 square units</code></pre>
 </div>
 </div>
 </section>
-<section id="including-owin-object" class="level3" data-number="8.3">
-<h3 data-number="8.3" class="anchored" data-anchor-id="including-owin-object"><span class="header-section-number">8.3</span> Including Owin object</h3>
+<section id="including-owin-object" class="level3" data-number="6.8.3">
+<h3 data-number="6.8.3" class="anchored" data-anchor-id="including-owin-object"><span class="header-section-number">6.8.3</span> Including Owin object</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fire_month_owin <span class="ot">&lt;-</span> fire_month_ppp[kbb_owin]</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_month_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -744,16 +749,36 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </div>
 </section>
-<section id="computing-spatio-temporal-kde" class="level3" data-number="8.4">
-<h3 data-number="8.4" class="anchored" data-anchor-id="computing-spatio-temporal-kde"><span class="header-section-number">8.4</span> Computing Spatio-temporal KDE</h3>
-<p>This is the reference code for monthly STKDE.</p>
+<section id="computing-spatio-temporal-kde" class="level3" data-number="6.8.4">
+<h3 data-number="6.8.4" class="anchored" data-anchor-id="computing-spatio-temporal-kde"><span class="header-section-number">6.8.4</span> Computing Spatio-temporal KDE</h3>
+<p>Next, <code>spattemp.density()</code> of the <code>sparr</code> package is used to compute the STKDE.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>st_kde <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(fire_month_owin)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(st_kde)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<pre class="course-console-output">Spatiotemporal Kernel Density Estimate
+
+Bandwidths
+    h = 15102.47 (spatial)
+    lambda = 0.0304 (temporal)
+
+No. of observations
+    741
+
+Spatial bound
+    Type: polygonal
+    2D enclosure: [512066.8, 705559.4] x [9655398, 9834006]
+
+Temporal bound
+    [1, 12]
+
+Evaluation
+    128 x 128 x 12 trivariate lattice
+    Density range: [1.233458e-27, 8.202976e-10]</pre>
 </section>
-<section id="plotting-the-spatio-temporal-kde-object" class="level3" data-number="8.5">
-<h3 data-number="8.5" class="anchored" data-anchor-id="plotting-the-spatio-temporal-kde-object"><span class="header-section-number">8.5</span> Plotting the spatio-temporal KDE object</h3>
+<section id="plotting-the-spatio-temporal-kde-object" class="level3" data-number="6.8.5">
+<h3 data-number="6.8.5" class="anchored" data-anchor-id="plotting-the-spatio-temporal-kde-object"><span class="header-section-number">6.8.5</span> Plotting the spatio-temporal KDE object</h3>
+<p>In the code chunk below, <code>plot()</code> of R base is used to show the KDE between July 2023 and December 2023.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>tims <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>,<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfcol=</span><span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">3</span>))</span>
@@ -824,10 +849,10 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </section>
 </section>
-<section id="computing-stkde-by-day-of-year" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="computing-stkde-by-day-of-year"><span class="header-section-number">9</span> Computing STKDE by Day of Year</h2>
-<section id="creating-ppp-object" class="level3" data-number="9.1">
-<h3 data-number="9.1" class="anchored" data-anchor-id="creating-ppp-object"><span class="header-section-number">9.1</span> Creating ppp object</h3>
+<section id="computing-stkde-by-day-of-year" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="computing-stkde-by-day-of-year"><span class="header-section-number">6.9</span> Computing STKDE by Day of Year</h2>
+<section id="creating-ppp-object" class="level3" data-number="6.9.1">
+<h3 data-number="6.9.1" class="anchored" data-anchor-id="creating-ppp-object"><span class="header-section-number">6.9.1</span> Creating ppp object</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fire_yday_ppp <span class="ot">&lt;-</span> fire_sf <span class="sc">%&gt;%</span> </span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(DayofYear) <span class="sc">%&gt;%</span></span>
@@ -839,8 +864,8 @@ Fraction of frame area: 0.159</code></pre>
 <span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.ppp</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="including-owin-object-1" class="level3" data-number="9.2">
-<h3 data-number="9.2" class="anchored" data-anchor-id="including-owin-object-1"><span class="header-section-number">9.2</span> Including Owin object</h3>
+<section id="including-owin-object-1" class="level3" data-number="6.9.2">
+<h3 data-number="6.9.2" class="anchored" data-anchor-id="including-owin-object-1"><span class="header-section-number">6.9.2</span> Including Owin object</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>fire_yday_owin <span class="ot">&lt;-</span> fire_yday_ppp[kbb_owin]</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fire_yday_owin)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -911,8 +936,8 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </div>
 </section>
-<section id="computing-spatio-temporal-kde-1" class="level3" data-number="9.3">
-<h3 data-number="9.3" class="anchored" data-anchor-id="computing-spatio-temporal-kde-1"><span class="header-section-number">9.3</span> Computing spatio-temporal KDE</h3>
+<section id="computing-spatio-temporal-kde-1" class="level3" data-number="6.9.3">
+<h3 data-number="6.9.3" class="anchored" data-anchor-id="computing-spatio-temporal-kde-1"><span class="header-section-number">6.9.3</span> Computing spatio-temporal KDE</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>kde_yday <span class="ot">&lt;-</span> <span class="fu">spattemp.density</span>(</span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  fire_yday_owin)</span>
@@ -983,8 +1008,8 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </section>
 </section>
-<section id="computing-stkde-by-day-of-year-improved-method" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="computing-stkde-by-day-of-year-improved-method"><span class="header-section-number">10</span> Computing STKDE by Day of Year: Improved method</h2>
+<section id="computing-stkde-by-day-of-year-improved-method" class="level2" data-number="6.10">
+<h2 data-number="6.10" class="anchored" data-anchor-id="computing-stkde-by-day-of-year-improved-method"><span class="header-section-number">6.10</span> Computing STKDE by Day of Year: Improved method</h2>
 <p>The improved course step estimates better smoothing parameters using bootstrap selection, then reruns the daily STKDE with <code>h = 9000</code> and <code>lambda = 19</code>.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
@@ -996,8 +1021,8 @@ Fraction of frame area: 0.159</code></pre>
 <span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">lambda =</span> <span class="dv">19</span>)</span>
 <span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(kde_yday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="plotting-the-output-spatio-temporal-kde" class="level3" data-number="10.1">
-<h3 data-number="10.1" class="anchored" data-anchor-id="plotting-the-output-spatio-temporal-kde"><span class="header-section-number">10.1</span> Plotting the output spatio-temporal KDE</h3>
+<section id="plotting-the-output-spatio-temporal-kde" class="level3" data-number="6.10.1">
+<h3 data-number="6.10.1" class="anchored" data-anchor-id="plotting-the-output-spatio-temporal-kde"><span class="header-section-number">6.10.1</span> Plotting the output spatio-temporal KDE</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(kde_yday)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1036,10 +1061,10 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </section>
 </section>
-<section id="spatio-temporal-point-patterns-analysis-stpp-methods" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="spatio-temporal-point-patterns-analysis-stpp-methods"><span class="header-section-number">11</span> Spatio-temporal Point Patterns Analysis: stpp methods</h2>
-<section id="preparing-spatio-temporal-point-process-object-of-stpp" class="level3" data-number="11.1">
-<h3 data-number="11.1" class="anchored" data-anchor-id="preparing-spatio-temporal-point-process-object-of-stpp"><span class="header-section-number">11.1</span> Preparing spatio-temporal point process object of stpp</h3>
+<section id="spatio-temporal-point-patterns-analysis-stpp-methods" class="level2" data-number="6.11">
+<h2 data-number="6.11" class="anchored" data-anchor-id="spatio-temporal-point-patterns-analysis-stpp-methods"><span class="header-section-number">6.11</span> Spatio-temporal Point Patterns Analysis: stpp methods</h2>
+<section id="preparing-spatio-temporal-point-process-object-of-stpp" class="level3" data-number="6.11.1">
+<h3 data-number="6.11.1" class="anchored" data-anchor-id="preparing-spatio-temporal-point-process-object-of-stpp"><span class="header-section-number">6.11.1</span> Preparing spatio-temporal point process object of stpp</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> <span class="fu">st_coordinates</span>(fire_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -1106,8 +1131,8 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </div>
 </section>
-<section id="computing-spatio-temporal-k-function" class="level3" data-number="11.2">
-<h3 data-number="11.2" class="anchored" data-anchor-id="computing-spatio-temporal-k-function"><span class="header-section-number">11.2</span> Computing spatio-temporal k-function</h3>
+<section id="computing-spatio-temporal-k-function" class="level3" data-number="6.11.2">
+<h3 data-number="6.11.2" class="anchored" data-anchor-id="computing-spatio-temporal-k-function"><span class="header-section-number">6.11.2</span> Computing spatio-temporal k-function</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>kbb_stik <span class="ot">&lt;-</span> <span class="fu">STIKhat</span>(fire_stpp,</span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">s.region =</span> s_region_matrix,</span>
@@ -1119,8 +1144,8 @@ Fraction of frame area: 0.159</code></pre>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">L =</span> <span class="cn">TRUE</span>, <span class="at">type =</span> <span class="st">"contour"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="guide-to-interpret-the-plot" class="level3" data-number="11.3">
-<h3 data-number="11.3" class="anchored" data-anchor-id="guide-to-interpret-the-plot"><span class="header-section-number">11.3</span> Guide to interpret the plot</h3>
+<section id="guide-to-interpret-the-plot" class="level3" data-number="6.11.3">
+<h3 data-number="6.11.3" class="anchored" data-anchor-id="guide-to-interpret-the-plot"><span class="header-section-number">6.11.3</span> Guide to interpret the plot</h3>
 <p>High contour values at small spatial and temporal distances suggest that events occur close together in both space and time. Flat or low contours suggest a weaker signal at those distances. The rate at which contours change along the two axes helps identify the spatial and temporal extent of the concentration.</p>
 <p>As a lightweight diagnostic, I count event pairs that are close in both space and time. This is not a replacement for <code>STIKhat()</code>, but it helps me read the same idea: whether many events occur near each other within short temporal lags.</p>
 <div class="cell" data-layout-align="center">
@@ -1194,8 +1219,8 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </section>
 </section>
-<section id="final-takeaway" class="level2" data-number="12">
-<h2 data-number="12" class="anchored" data-anchor-id="final-takeaway"><span class="header-section-number">12</span> Final Takeaway</h2>
+<section id="final-takeaway" class="level2" data-number="6.12">
+<h2 data-number="6.12" class="anchored" data-anchor-id="final-takeaway"><span class="header-section-number">6.12</span> Final Takeaway</h2>
 <p>This exercise helped me see why spatio-temporal point pattern analysis needs both a spatial window and a time mark. The overall map suggests clustering, but the monthly and day-of-year views show when the clustering becomes strongest. In my local extract, the clearest signal appears after mid-year, with the strongest density around the late dry-season months.</p>
 <p>The rendered version also made me more careful about reproducibility. The original method is preserved, but package system dependencies matter: when a specialised package cannot run on a deployment machine, it is better to show the intended code clearly and add a stable diagnostic than to hide the problem.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
@@ -1213,8 +1238,8 @@ Fraction of frame area: 0.159</code></pre>
 </div>
 </div>
 </section>
-<section id="reference" class="level2" data-number="13">
-<h2 data-number="13" class="anchored" data-anchor-id="reference"><span class="header-section-number">13</span> Reference</h2>
+<section id="reference" class="level2" data-number="6.13">
+<h2 data-number="6.13" class="anchored" data-anchor-id="reference"><span class="header-section-number">6.13</span> Reference</h2>
 <ul>
 <li>Course source: <a href="https://r4gdsa.netlify.app/chap06.html">Spatio-Temporal Point Patterns Analysis</a></li>
 <li>Hall, P. (1990). <a href="https://core.ac.uk/works/48942826">Using the Bootstrap to Estimate Mean Squared Error and Select Smoothing Parameter in Nonparametric Problems</a>.</li>
@@ -1223,6 +1248,7 @@ Fraction of frame area: 0.159</code></pre>
 </ul>
 
 
+</section>
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->

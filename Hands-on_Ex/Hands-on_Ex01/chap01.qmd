@@ -10,7 +10,10 @@ execute:
 format:
   html:
     code-fold: false
+    number-offset: 0
 ---
+
+# Geospatial Data Science with R {.course-chapter-title}
 
 ```{r}
 #| label: setup

@@ -198,75 +198,78 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview"><span class="header-section-number">1</span> Overview</a>
+  <li><a href="#thematic-mapping-and-geovisualisation-with-r" id="toc-thematic-mapping-and-geovisualisation-with-r" class="nav-link active" data-scroll-target="#thematic-mapping-and-geovisualisation-with-r"><span class="header-section-number">2</span> Thematic Mapping and GeoVisualisation with R</a>
   <ul>
-  <li><a href="#survival-tip" id="toc-survival-tip" class="nav-link" data-scroll-target="#survival-tip"><span class="header-section-number">1.1</span> Survival Tip</a></li>
-  </ul></li>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started"><span class="header-section-number">2</span> Getting Started</a></li>
-  <li><a href="#importing-data-into-r" id="toc-importing-data-into-r" class="nav-link" data-scroll-target="#importing-data-into-r"><span class="header-section-number">3</span> Importing Data into R</a>
-  <ul>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">3.1</span> The Data</a></li>
-  <li><a href="#importing-geospatial-data-into-r" id="toc-importing-geospatial-data-into-r" class="nav-link" data-scroll-target="#importing-geospatial-data-into-r"><span class="header-section-number">3.2</span> Importing Geospatial Data into R</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">2.1</span> Overview</a>
   <ul class="collapse">
-  <li><a href="#tidying-data" id="toc-tidying-data" class="nav-link" data-scroll-target="#tidying-data"><span class="header-section-number">3.2.1</span> Tidying data</a></li>
+  <li><a href="#survival-tip" id="toc-survival-tip" class="nav-link" data-scroll-target="#survival-tip"><span class="header-section-number">2.1.1</span> Survival Tip</a></li>
   </ul></li>
-  <li><a href="#importing-attribute-data-into-r" id="toc-importing-attribute-data-into-r" class="nav-link" data-scroll-target="#importing-attribute-data-into-r"><span class="header-section-number">3.3</span> Importing Attribute Data into R</a></li>
-  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">3.4</span> Data Preparation</a>
+  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started"><span class="header-section-number">2.2</span> Getting Started</a></li>
+  <li><a href="#importing-data-into-r" id="toc-importing-data-into-r" class="nav-link" data-scroll-target="#importing-data-into-r"><span class="header-section-number">2.3</span> Importing Data into R</a>
   <ul class="collapse">
-  <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling"><span class="header-section-number">3.4.1</span> Data wrangling</a></li>
-  <li><a href="#joining-the-attribute-data-and-geospatial-data" id="toc-joining-the-attribute-data-and-geospatial-data" class="nav-link" data-scroll-target="#joining-the-attribute-data-and-geospatial-data"><span class="header-section-number">3.4.2</span> Joining the attribute data and geospatial data</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap"><span class="header-section-number">4</span> Choropleth Mapping Geospatial Data Using tmap</a>
-  <ul>
-  <li><a href="#plotting-a-choropleth-map-quickly-by-using-qtm" id="toc-plotting-a-choropleth-map-quickly-by-using-qtm" class="nav-link" data-scroll-target="#plotting-a-choropleth-map-quickly-by-using-qtm"><span class="header-section-number">4.1</span> Plotting a choropleth map quickly by using qtm()</a></li>
-  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements" id="toc-creating-a-choropleth-map-by-using-tmaps-elements" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements"><span class="header-section-number">4.2</span> Creating a choropleth map by using tmap’s elements</a></li>
-  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements-1" id="toc-creating-a-choropleth-map-by-using-tmaps-elements-1" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements-1"><span class="header-section-number">4.3</span> Creating a choropleth map by using tmap’s elements</a>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">2.3.1</span> The Data</a></li>
+  <li><a href="#importing-geospatial-data-into-r" id="toc-importing-geospatial-data-into-r" class="nav-link" data-scroll-target="#importing-geospatial-data-into-r"><span class="header-section-number">2.3.2</span> Importing Geospatial Data into R</a>
   <ul class="collapse">
-  <li><a href="#drawing-a-base-map" id="toc-drawing-a-base-map" class="nav-link" data-scroll-target="#drawing-a-base-map"><span class="header-section-number">4.3.1</span> Drawing a base map</a></li>
-  <li><a href="#drawing-a-choropleth-map-using-tm_polygons" id="toc-drawing-a-choropleth-map-using-tm_polygons" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_polygons"><span class="header-section-number">4.3.2</span> Drawing a choropleth map using tm_polygons()</a></li>
-  <li><a href="#drawing-a-choropleth-map-using-tm_fill-and-tm_border" id="toc-drawing-a-choropleth-map-using-tm_fill-and-tm_border" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_fill-and-tm_border"><span class="header-section-number">4.3.3</span> Drawing a choropleth map using tm_fill() and *tm_border()**</a></li>
+  <li><a href="#tidying-data" id="toc-tidying-data" class="nav-link" data-scroll-target="#tidying-data"><span class="header-section-number">2.3.2.1</span> Tidying data</a></li>
   </ul></li>
-  <li><a href="#data-classification-methods-of-tmap" id="toc-data-classification-methods-of-tmap" class="nav-link" data-scroll-target="#data-classification-methods-of-tmap"><span class="header-section-number">4.4</span> Data classification methods of tmap</a>
+  <li><a href="#importing-attribute-data-into-r" id="toc-importing-attribute-data-into-r" class="nav-link" data-scroll-target="#importing-attribute-data-into-r"><span class="header-section-number">2.3.3</span> Importing Attribute Data into R</a></li>
+  <li><a href="#data-preparation" id="toc-data-preparation" class="nav-link" data-scroll-target="#data-preparation"><span class="header-section-number">2.3.4</span> Data Preparation</a>
   <ul class="collapse">
-  <li><a href="#plotting-choropleth-maps-with-built-in-classification-methods" id="toc-plotting-choropleth-maps-with-built-in-classification-methods" class="nav-link" data-scroll-target="#plotting-choropleth-maps-with-built-in-classification-methods"><span class="header-section-number">4.4.1</span> Plotting choropleth maps with built-in classification methods</a></li>
-  <li><a href="#plotting-choropleth-map-with-custome-break" id="toc-plotting-choropleth-map-with-custome-break" class="nav-link" data-scroll-target="#plotting-choropleth-map-with-custome-break"><span class="header-section-number">4.4.2</span> Plotting choropleth map with custome break</a></li>
+  <li><a href="#data-wrangling" id="toc-data-wrangling" class="nav-link" data-scroll-target="#data-wrangling"><span class="header-section-number">2.3.4.1</span> Data wrangling</a></li>
+  <li><a href="#joining-the-attribute-data-and-geospatial-data" id="toc-joining-the-attribute-data-and-geospatial-data" class="nav-link" data-scroll-target="#joining-the-attribute-data-and-geospatial-data"><span class="header-section-number">2.3.4.2</span> Joining the attribute data and geospatial data</a></li>
   </ul></li>
-  <li><a href="#colour-scheme" id="toc-colour-scheme" class="nav-link" data-scroll-target="#colour-scheme"><span class="header-section-number">4.5</span> Colour Scheme</a>
+  </ul></li>
+  <li><a href="#choropleth-mapping-geospatial-data-using-tmap" id="toc-choropleth-mapping-geospatial-data-using-tmap" class="nav-link" data-scroll-target="#choropleth-mapping-geospatial-data-using-tmap"><span class="header-section-number">2.4</span> Choropleth Mapping Geospatial Data Using tmap</a>
   <ul class="collapse">
-  <li><a href="#using-colourbrewer-palette" id="toc-using-colourbrewer-palette" class="nav-link" data-scroll-target="#using-colourbrewer-palette"><span class="header-section-number">4.5.1</span> Using ColourBrewer palette</a></li>
-  </ul></li>
-  <li><a href="#map-layout" id="toc-map-layout" class="nav-link" data-scroll-target="#map-layout"><span class="header-section-number">4.6</span> Map Layout</a>
+  <li><a href="#plotting-a-choropleth-map-quickly-by-using-qtm" id="toc-plotting-a-choropleth-map-quickly-by-using-qtm" class="nav-link" data-scroll-target="#plotting-a-choropleth-map-quickly-by-using-qtm"><span class="header-section-number">2.4.1</span> Plotting a choropleth map quickly by using qtm()</a></li>
+  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements" id="toc-creating-a-choropleth-map-by-using-tmaps-elements" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements"><span class="header-section-number">2.4.2</span> Creating a choropleth map by using tmap’s elements</a></li>
+  <li><a href="#creating-a-choropleth-map-by-using-tmaps-elements-1" id="toc-creating-a-choropleth-map-by-using-tmaps-elements-1" class="nav-link" data-scroll-target="#creating-a-choropleth-map-by-using-tmaps-elements-1"><span class="header-section-number">2.4.3</span> Creating a choropleth map by using tmap’s elements</a>
   <ul class="collapse">
-  <li><a href="#cartographic-furniture" id="toc-cartographic-furniture" class="nav-link" data-scroll-target="#cartographic-furniture"><span class="header-section-number">4.6.1</span> Cartographic Furniture</a></li>
-  <li><a href="#map-legend" id="toc-map-legend" class="nav-link" data-scroll-target="#map-legend"><span class="header-section-number">4.6.2</span> Map Legend</a></li>
-  <li><a href="#map-style" id="toc-map-style" class="nav-link" data-scroll-target="#map-style"><span class="header-section-number">4.6.3</span> Map style</a></li>
+  <li><a href="#drawing-a-base-map" id="toc-drawing-a-base-map" class="nav-link" data-scroll-target="#drawing-a-base-map"><span class="header-section-number">2.4.3.1</span> Drawing a base map</a></li>
+  <li><a href="#drawing-a-choropleth-map-using-tm_polygons" id="toc-drawing-a-choropleth-map-using-tm_polygons" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_polygons"><span class="header-section-number">2.4.3.2</span> Drawing a choropleth map using tm_polygons()</a></li>
+  <li><a href="#drawing-a-choropleth-map-using-tm_fill-and-tm_border" id="toc-drawing-a-choropleth-map-using-tm_fill-and-tm_border" class="nav-link" data-scroll-target="#drawing-a-choropleth-map-using-tm_fill-and-tm_border"><span class="header-section-number">2.4.3.3</span> Drawing a choropleth map using tm_fill() and *tm_border()**</a></li>
+  </ul></li>
+  <li><a href="#data-classification-methods-of-tmap" id="toc-data-classification-methods-of-tmap" class="nav-link" data-scroll-target="#data-classification-methods-of-tmap"><span class="header-section-number">2.4.4</span> Data classification methods of tmap</a>
+  <ul class="collapse">
+  <li><a href="#plotting-choropleth-maps-with-built-in-classification-methods" id="toc-plotting-choropleth-maps-with-built-in-classification-methods" class="nav-link" data-scroll-target="#plotting-choropleth-maps-with-built-in-classification-methods"><span class="header-section-number">2.4.4.1</span> Plotting choropleth maps with built-in classification methods</a></li>
+  <li><a href="#plotting-choropleth-map-with-custome-break" id="toc-plotting-choropleth-map-with-custome-break" class="nav-link" data-scroll-target="#plotting-choropleth-map-with-custome-break"><span class="header-section-number">2.4.4.2</span> Plotting choropleth map with custome break</a></li>
+  </ul></li>
+  <li><a href="#colour-scheme" id="toc-colour-scheme" class="nav-link" data-scroll-target="#colour-scheme"><span class="header-section-number">2.4.5</span> Colour Scheme</a>
+  <ul class="collapse">
+  <li><a href="#using-colourbrewer-palette" id="toc-using-colourbrewer-palette" class="nav-link" data-scroll-target="#using-colourbrewer-palette"><span class="header-section-number">2.4.5.1</span> Using ColourBrewer palette</a></li>
+  </ul></li>
+  <li><a href="#map-layout" id="toc-map-layout" class="nav-link" data-scroll-target="#map-layout"><span class="header-section-number">2.4.6</span> Map Layout</a>
+  <ul class="collapse">
+  <li><a href="#cartographic-furniture" id="toc-cartographic-furniture" class="nav-link" data-scroll-target="#cartographic-furniture"><span class="header-section-number">2.4.6.1</span> Cartographic Furniture</a></li>
+  <li><a href="#map-legend" id="toc-map-legend" class="nav-link" data-scroll-target="#map-legend"><span class="header-section-number">2.4.6.2</span> Map Legend</a></li>
+  <li><a href="#map-style" id="toc-map-style" class="nav-link" data-scroll-target="#map-style"><span class="header-section-number">2.4.6.3</span> Map style</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#drawing-small-multiple-choropleth-maps" id="toc-drawing-small-multiple-choropleth-maps" class="nav-link" data-scroll-target="#drawing-small-multiple-choropleth-maps"><span class="header-section-number">5</span> Drawing Small Multiple Choropleth Maps</a>
-  <ul>
-  <li><a href="#by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments" id="toc-by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments" class="nav-link" data-scroll-target="#by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments"><span class="header-section-number">5.1</span> By assigning multiple values to at least one of the aesthetic arguments</a></li>
-  <li><a href="#by-arrange-multiples-choropleth-maps-in-a-grid-layout" id="toc-by-arrange-multiples-choropleth-maps-in-a-grid-layout" class="nav-link" data-scroll-target="#by-arrange-multiples-choropleth-maps-in-a-grid-layout"><span class="header-section-number">5.2</span> By arrange multiples choropleth maps in a grid layout</a></li>
-  <li><a href="#by-defining-a-group-by-variable-in-tm_facets" id="toc-by-defining-a-group-by-variable-in-tm_facets" class="nav-link" data-scroll-target="#by-defining-a-group-by-variable-in-tm_facets"><span class="header-section-number">5.3</span> By defining a group-by variable in tm_facets()</a></li>
+  <li><a href="#drawing-small-multiple-choropleth-maps" id="toc-drawing-small-multiple-choropleth-maps" class="nav-link" data-scroll-target="#drawing-small-multiple-choropleth-maps"><span class="header-section-number">2.5</span> Drawing Small Multiple Choropleth Maps</a>
+  <ul class="collapse">
+  <li><a href="#by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments" id="toc-by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments" class="nav-link" data-scroll-target="#by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments"><span class="header-section-number">2.5.1</span> By assigning multiple values to at least one of the aesthetic arguments</a></li>
+  <li><a href="#by-arrange-multiples-choropleth-maps-in-a-grid-layout" id="toc-by-arrange-multiples-choropleth-maps-in-a-grid-layout" class="nav-link" data-scroll-target="#by-arrange-multiples-choropleth-maps-in-a-grid-layout"><span class="header-section-number">2.5.2</span> By arrange multiples choropleth maps in a grid layout</a></li>
+  <li><a href="#by-defining-a-group-by-variable-in-tm_facets" id="toc-by-defining-a-group-by-variable-in-tm_facets" class="nav-link" data-scroll-target="#by-defining-a-group-by-variable-in-tm_facets"><span class="header-section-number">2.5.3</span> By defining a group-by variable in tm_facets()</a></li>
   </ul></li>
-  <li><a href="#mappping-spatial-object-meeting-a-selection-criterion" id="toc-mappping-spatial-object-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mappping-spatial-object-meeting-a-selection-criterion"><span class="header-section-number">6</span> Mappping Spatial Object Meeting a Selection Criterion</a></li>
-  <li><a href="#creating-interactive-map" id="toc-creating-interactive-map" class="nav-link" data-scroll-target="#creating-interactive-map"><span class="header-section-number">7</span> Creating Interactive Map</a></li>
-  <li><a href="#beyond-the-basic-choropleth" id="toc-beyond-the-basic-choropleth" class="nav-link" data-scroll-target="#beyond-the-basic-choropleth"><span class="header-section-number">8</span> Beyond the Basic Choropleth</a>
-  <ul>
-  <li><a href="#same-values-shuffled-locations" id="toc-same-values-shuffled-locations" class="nav-link" data-scroll-target="#same-values-shuffled-locations"><span class="header-section-number">8.1</span> Same Values, Shuffled Locations</a></li>
-  <li><a href="#visual-area-bias" id="toc-visual-area-bias" class="nav-link" data-scroll-target="#visual-area-bias"><span class="header-section-number">8.2</span> Visual Area Bias</a></li>
+  <li><a href="#mappping-spatial-object-meeting-a-selection-criterion" id="toc-mappping-spatial-object-meeting-a-selection-criterion" class="nav-link" data-scroll-target="#mappping-spatial-object-meeting-a-selection-criterion"><span class="header-section-number">2.6</span> Mappping Spatial Object Meeting a Selection Criterion</a></li>
+  <li><a href="#creating-interactive-map" id="toc-creating-interactive-map" class="nav-link" data-scroll-target="#creating-interactive-map"><span class="header-section-number">2.7</span> Creating Interactive Map</a></li>
+  <li><a href="#beyond-the-basic-choropleth" id="toc-beyond-the-basic-choropleth" class="nav-link" data-scroll-target="#beyond-the-basic-choropleth"><span class="header-section-number">2.8</span> Beyond the Basic Choropleth</a>
+  <ul class="collapse">
+  <li><a href="#same-values-shuffled-locations" id="toc-same-values-shuffled-locations" class="nav-link" data-scroll-target="#same-values-shuffled-locations"><span class="header-section-number">2.8.1</span> Same Values, Shuffled Locations</a></li>
+  <li><a href="#visual-area-bias" id="toc-visual-area-bias" class="nav-link" data-scroll-target="#visual-area-bias"><span class="header-section-number">2.8.2</span> Visual Area Bias</a></li>
   </ul></li>
-  <li><a href="#complementing-thematic-map-with-statistical-chart" id="toc-complementing-thematic-map-with-statistical-chart" class="nav-link" data-scroll-target="#complementing-thematic-map-with-statistical-chart"><span class="header-section-number">9</span> Complementing Thematic Map with Statistical Chart</a>
-  <ul>
-  <li><a href="#does-preschool-provision-broadly-follow-young-population" id="toc-does-preschool-provision-broadly-follow-young-population" class="nav-link" data-scroll-target="#does-preschool-provision-broadly-follow-young-population"><span class="header-section-number">9.1</span> Does Preschool Provision Broadly Follow Young Population?</a></li>
+  <li><a href="#complementing-thematic-map-with-statistical-chart" id="toc-complementing-thematic-map-with-statistical-chart" class="nav-link" data-scroll-target="#complementing-thematic-map-with-statistical-chart"><span class="header-section-number">2.9</span> Complementing Thematic Map with Statistical Chart</a>
+  <ul class="collapse">
+  <li><a href="#does-preschool-provision-broadly-follow-young-population" id="toc-does-preschool-provision-broadly-follow-young-population" class="nav-link" data-scroll-target="#does-preschool-provision-broadly-follow-young-population"><span class="header-section-number">2.9.1</span> Does Preschool Provision Broadly Follow Young Population?</a></li>
   </ul></li>
-  <li><a href="#takeaway" id="toc-takeaway" class="nav-link" data-scroll-target="#takeaway"><span class="header-section-number">10</span> Takeaway</a></li>
-  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection"><span class="header-section-number">11</span> Reflection</a></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">12</span> Reference</a>
-  <ul>
-  <li><a href="#all-about-tmap-package" id="toc-all-about-tmap-package" class="nav-link" data-scroll-target="#all-about-tmap-package"><span class="header-section-number">12.1</span> All about tmap package</a></li>
-  <li><a href="#geospatial-data-wrangling" id="toc-geospatial-data-wrangling" class="nav-link" data-scroll-target="#geospatial-data-wrangling"><span class="header-section-number">12.2</span> Geospatial data wrangling</a></li>
-  <li><a href="#data-wrangling-1" id="toc-data-wrangling-1" class="nav-link" data-scroll-target="#data-wrangling-1"><span class="header-section-number">12.3</span> Data wrangling</a></li>
+  <li><a href="#takeaway" id="toc-takeaway" class="nav-link" data-scroll-target="#takeaway"><span class="header-section-number">2.10</span> Takeaway</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection"><span class="header-section-number">2.11</span> Reflection</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">2.12</span> Reference</a>
+  <ul class="collapse">
+  <li><a href="#all-about-tmap-package" id="toc-all-about-tmap-package" class="nav-link" data-scroll-target="#all-about-tmap-package"><span class="header-section-number">2.12.1</span> All about tmap package</a></li>
+  <li><a href="#geospatial-data-wrangling" id="toc-geospatial-data-wrangling" class="nav-link" data-scroll-target="#geospatial-data-wrangling"><span class="header-section-number">2.12.2</span> Geospatial data wrangling</a></li>
+  <li><a href="#data-wrangling-1" id="toc-data-wrangling-1" class="nav-link" data-scroll-target="#data-wrangling-1"><span class="header-section-number">2.12.3</span> Data wrangling</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -306,10 +309,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="overview" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="overview"><span class="header-section-number">1</span> Overview</h2>
-<section id="survival-tip" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="survival-tip"><span class="header-section-number">1.1</span> Survival Tip</h3>
+<section id="thematic-mapping-and-geovisualisation-with-r" class="level1 course-chapter-title" data-number="2">
+<h1 class="course-chapter-title" data-number="2"><span class="header-section-number">2</span> Thematic Mapping and GeoVisualisation with R</h1>
+<section id="overview" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">2.1</span> Overview</h2>
+<section id="survival-tip" class="level3" data-number="2.1.1">
+<h3 data-number="2.1.1" class="anchored" data-anchor-id="survival-tip"><span class="header-section-number">2.1.1</span> Survival Tip</h3>
 <p>I read the function description before changing the map settings, especially for classification and legend arguments.</p>
 <p>This page presents my thematic mapping workflow for Singapore’s 2024 subzone population data. I prepare the boundary and population table first, then use <code>tmap</code> to see how classification, borders, palettes, facets, and outlier highlighting change the story of the same dependency-ratio data.</p>
 <div class="callout callout-style-default callout-note callout-titled">
@@ -328,20 +333,20 @@ Note
 </div>
 </section>
 </section>
-<section id="getting-started" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="getting-started"><span class="header-section-number">2</span> Getting Started</h2>
+<section id="getting-started" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="getting-started"><span class="header-section-number">2.2</span> Getting Started</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, tmap, tidyverse, rvest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="importing-data-into-r" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="importing-data-into-r"><span class="header-section-number">3</span> Importing Data into R</h2>
-<section id="the-data" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="the-data"><span class="header-section-number">3.1</span> The Data</h3>
+<section id="importing-data-into-r" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="importing-data-into-r"><span class="header-section-number">2.3</span> Importing Data into R</h2>
+<section id="the-data" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="the-data"><span class="header-section-number">2.3.1</span> The Data</h3>
 <p>The boundary layer and the 2024 population table are the two datasets used for the choropleth maps.</p>
 </section>
-<section id="importing-geospatial-data-into-r" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="importing-geospatial-data-into-r"><span class="header-section-number">3.2</span> Importing Geospatial Data into R</h3>
+<section id="importing-geospatial-data-into-r" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="importing-geospatial-data-into-r"><span class="header-section-number">2.3.2</span> Importing Geospatial Data into R</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson"</span>,</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
@@ -352,8 +357,8 @@ Note
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mpsz <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"chap02/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="tidying-data" class="level4" data-number="3.2.1">
-<h4 data-number="3.2.1" class="anchored" data-anchor-id="tidying-data"><span class="header-section-number">3.2.1</span> Tidying data</h4>
+<section id="tidying-data" class="level4" data-number="2.3.2.1">
+<h4 data-number="2.3.2.1" class="anchored" data-anchor-id="tidying-data"><span class="header-section-number">2.3.2.1</span> Tidying data</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>extract_kml_field <span class="ot">&lt;-</span> <span class="cf">function</span>(html_text, field_name) {</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">is.na</span>(html_text) <span class="sc">||</span> html_text <span class="sc">==</span> <span class="st">""</span>) <span class="fu">return</span>(<span class="cn">NA_character_</span>)</span>
@@ -428,8 +433,8 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="importing-attribute-data-into-r" class="level3" data-number="3.3">
-<h3 data-number="3.3" class="anchored" data-anchor-id="importing-attribute-data-into-r"><span class="header-section-number">3.3</span> Importing Attribute Data into R</h3>
+<section id="importing-attribute-data-into-r" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="importing-attribute-data-into-r"><span class="header-section-number">2.3.3</span> Importing Attribute Data into R</h3>
 <p>The SingStat population table is aspatial. It needs to be summarised by planning area, subzone, and age group before joining to the subzone boundary.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>popdata <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/aspatial/respopagesextod2024.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -438,10 +443,10 @@ First 10 features:
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>popdata <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"chap02/data/aspatial/respopagesextod2024.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="data-preparation" class="level3" data-number="3.4">
-<h3 data-number="3.4" class="anchored" data-anchor-id="data-preparation"><span class="header-section-number">3.4</span> Data Preparation</h3>
-<section id="data-wrangling" class="level4" data-number="3.4.1">
-<h4 data-number="3.4.1" class="anchored" data-anchor-id="data-wrangling"><span class="header-section-number">3.4.1</span> Data wrangling</h4>
+<section id="data-preparation" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="data-preparation"><span class="header-section-number">2.3.4</span> Data Preparation</h3>
+<section id="data-wrangling" class="level4" data-number="2.3.4.1">
+<h4 data-number="2.3.4.1" class="anchored" data-anchor-id="data-wrangling"><span class="header-section-number">2.3.4.1</span> Data wrangling</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>young_age <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"0_to_4"</span>, <span class="st">"5_to_9"</span>, <span class="st">"10_to_14"</span>, <span class="st">"15_to_19"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>active_age <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"20_to_24"</span>, <span class="st">"25_to_29"</span>, <span class="st">"30_to_34"</span>, <span class="st">"35_to_39"</span>,</span>
@@ -497,8 +502,8 @@ First 10 features:
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="st">`</span><span class="at">ECONOMY ACTIVE</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="joining-the-attribute-data-and-geospatial-data" class="level4" data-number="3.4.2">
-<h4 data-number="3.4.2" class="anchored" data-anchor-id="joining-the-attribute-data-and-geospatial-data"><span class="header-section-number">3.4.2</span> Joining the attribute data and geospatial data</h4>
+<section id="joining-the-attribute-data-and-geospatial-data" class="level4" data-number="2.3.4.2">
+<h4 data-number="2.3.4.2" class="anchored" data-anchor-id="joining-the-attribute-data-and-geospatial-data"><span class="header-section-number">2.3.4.2</span> Joining the attribute data and geospatial data</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mpsz_pop2024 <span class="ot">&lt;-</span> <span class="fu">left_join</span>(mpsz, </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                          popdata2024, </span>
@@ -514,10 +519,10 @@ First 10 features:
 </section>
 </section>
 </section>
-<section id="choropleth-mapping-geospatial-data-using-tmap" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="choropleth-mapping-geospatial-data-using-tmap"><span class="header-section-number">4</span> Choropleth Mapping Geospatial Data Using tmap</h2>
-<section id="plotting-a-choropleth-map-quickly-by-using-qtm" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="plotting-a-choropleth-map-quickly-by-using-qtm"><span class="header-section-number">4.1</span> Plotting a choropleth map quickly by using qtm()</h3>
+<section id="choropleth-mapping-geospatial-data-using-tmap" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="choropleth-mapping-geospatial-data-using-tmap"><span class="header-section-number">2.4</span> Choropleth Mapping Geospatial Data Using tmap</h2>
+<section id="plotting-a-choropleth-map-quickly-by-using-qtm" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="plotting-a-choropleth-map-quickly-by-using-qtm"><span class="header-section-number">2.4.1</span> Plotting a choropleth map quickly by using qtm()</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tmap_mode</span>(<span class="st">"plot"</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">qtm</span>(<span class="at">shp =</span> mpsz_pop2024, </span>
@@ -544,8 +549,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="creating-a-choropleth-map-by-using-tmaps-elements" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="creating-a-choropleth-map-by-using-tmaps-elements"><span class="header-section-number">4.2</span> Creating a choropleth map by using tmap’s elements</h3>
+<section id="creating-a-choropleth-map-by-using-tmaps-elements" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="creating-a-choropleth-map-by-using-tmaps-elements"><span class="header-section-number">2.4.2</span> Creating a choropleth map by using tmap’s elements</h3>
 <p>The next map uses a fuller <code>tmap</code> composition: filled polygons, title, border, compass, scale bar, grid, and data credits.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
@@ -604,11 +609,11 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="creating-a-choropleth-map-by-using-tmaps-elements-1" class="level3" data-number="4.3">
-<h3 data-number="4.3" class="anchored" data-anchor-id="creating-a-choropleth-map-by-using-tmaps-elements-1"><span class="header-section-number">4.3</span> Creating a choropleth map by using tmap’s elements</h3>
+<section id="creating-a-choropleth-map-by-using-tmaps-elements-1" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="creating-a-choropleth-map-by-using-tmaps-elements-1"><span class="header-section-number">2.4.3</span> Creating a choropleth map by using tmap’s elements</h3>
 <p>The following blocks show how small <code>tmap</code> design choices change the same spatial pattern.</p>
-<section id="drawing-a-base-map" class="level4" data-number="4.3.1">
-<h4 data-number="4.3.1" class="anchored" data-anchor-id="drawing-a-base-map"><span class="header-section-number">4.3.1</span> Drawing a base map</h4>
+<section id="drawing-a-base-map" class="level4" data-number="2.4.3.1">
+<h4 data-number="2.4.3.1" class="anchored" data-anchor-id="drawing-a-base-map"><span class="header-section-number">2.4.3.1</span> Drawing a base map</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -621,8 +626,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="drawing-a-choropleth-map-using-tm_polygons" class="level4" data-number="4.3.2">
-<h4 data-number="4.3.2" class="anchored" data-anchor-id="drawing-a-choropleth-map-using-tm_polygons"><span class="header-section-number">4.3.2</span> Drawing a choropleth map using tm_polygons()</h4>
+<section id="drawing-a-choropleth-map-using-tm_polygons" class="level4" data-number="2.4.3.2">
+<h4 data-number="2.4.3.2" class="anchored" data-anchor-id="drawing-a-choropleth-map-using-tm_polygons"><span class="header-section-number">2.4.3.2</span> Drawing a choropleth map using tm_polygons()</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024)<span class="sc">+</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -635,8 +640,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="drawing-a-choropleth-map-using-tm_fill-and-tm_border" class="level4" data-number="4.3.3">
-<h4 data-number="4.3.3" class="anchored" data-anchor-id="drawing-a-choropleth-map-using-tm_fill-and-tm_border"><span class="header-section-number">4.3.3</span> Drawing a choropleth map using tm_fill() and *tm_border()**</h4>
+<section id="drawing-a-choropleth-map-using-tm_fill-and-tm_border" class="level4" data-number="2.4.3.3">
+<h4 data-number="2.4.3.3" class="anchored" data-anchor-id="drawing-a-choropleth-map-using-tm_fill-and-tm_border"><span class="header-section-number">2.4.3.3</span> Drawing a choropleth map using tm_fill() and *tm_border()**</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024)<span class="sc">+</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="st">"DEPENDENCY"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -676,10 +681,10 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="data-classification-methods-of-tmap" class="level3" data-number="4.4">
-<h3 data-number="4.4" class="anchored" data-anchor-id="data-classification-methods-of-tmap"><span class="header-section-number">4.4</span> Data classification methods of tmap</h3>
-<section id="plotting-choropleth-maps-with-built-in-classification-methods" class="level4" data-number="4.4.1">
-<h4 data-number="4.4.1" class="anchored" data-anchor-id="plotting-choropleth-maps-with-built-in-classification-methods"><span class="header-section-number">4.4.1</span> Plotting choropleth maps with built-in classification methods</h4>
+<section id="data-classification-methods-of-tmap" class="level3" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="data-classification-methods-of-tmap"><span class="header-section-number">2.4.4</span> Data classification methods of tmap</h3>
+<section id="plotting-choropleth-maps-with-built-in-classification-methods" class="level4" data-number="2.4.4.1">
+<h4 data-number="2.4.4.1" class="anchored" data-anchor-id="plotting-choropleth-maps-with-built-in-classification-methods"><span class="header-section-number">2.4.4.1</span> Plotting choropleth maps with built-in classification methods</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -718,8 +723,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="plotting-choropleth-map-with-custome-break" class="level4" data-number="4.4.2">
-<h4 data-number="4.4.2" class="anchored" data-anchor-id="plotting-choropleth-map-with-custome-break"><span class="header-section-number">4.4.2</span> Plotting choropleth map with custome break</h4>
+<section id="plotting-choropleth-map-with-custome-break" class="level4" data-number="2.4.4.2">
+<h4 data-number="2.4.4.2" class="anchored" data-anchor-id="plotting-choropleth-map-with-custome-break"><span class="header-section-number">2.4.4.2</span> Plotting choropleth map with custome break</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024)<span class="sc">+</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -736,10 +741,10 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="colour-scheme" class="level3" data-number="4.5">
-<h3 data-number="4.5" class="anchored" data-anchor-id="colour-scheme"><span class="header-section-number">4.5</span> Colour Scheme</h3>
-<section id="using-colourbrewer-palette" class="level4" data-number="4.5.1">
-<h4 data-number="4.5.1" class="anchored" data-anchor-id="using-colourbrewer-palette"><span class="header-section-number">4.5.1</span> Using ColourBrewer palette</h4>
+<section id="colour-scheme" class="level3" data-number="2.4.5">
+<h3 data-number="2.4.5" class="anchored" data-anchor-id="colour-scheme"><span class="header-section-number">2.4.5</span> Colour Scheme</h3>
+<section id="using-colourbrewer-palette" class="level4" data-number="2.4.5.1">
+<h4 data-number="2.4.5.1" class="anchored" data-anchor-id="using-colourbrewer-palette"><span class="header-section-number">2.4.5.1</span> Using ColourBrewer palette</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -774,10 +779,10 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="map-layout" class="level3" data-number="4.6">
-<h3 data-number="4.6" class="anchored" data-anchor-id="map-layout"><span class="header-section-number">4.6</span> Map Layout</h3>
-<section id="cartographic-furniture" class="level4" data-number="4.6.1">
-<h4 data-number="4.6.1" class="anchored" data-anchor-id="cartographic-furniture"><span class="header-section-number">4.6.1</span> Cartographic Furniture</h4>
+<section id="map-layout" class="level3" data-number="2.4.6">
+<h3 data-number="2.4.6" class="anchored" data-anchor-id="map-layout"><span class="header-section-number">2.4.6</span> Map Layout</h3>
+<section id="cartographic-furniture" class="level4" data-number="2.4.6.1">
+<h4 data-number="2.4.6.1" class="anchored" data-anchor-id="cartographic-furniture"><span class="header-section-number">2.4.6.1</span> Cartographic Furniture</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -799,8 +804,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="map-legend" class="level4" data-number="4.6.2">
-<h4 data-number="4.6.2" class="anchored" data-anchor-id="map-legend"><span class="header-section-number">4.6.2</span> Map Legend</h4>
+<section id="map-legend" class="level4" data-number="2.4.6.2">
+<h4 data-number="2.4.6.2" class="anchored" data-anchor-id="map-legend"><span class="header-section-number">2.4.6.2</span> Map Legend</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -825,8 +830,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="map-style" class="level4" data-number="4.6.3">
-<h4 data-number="4.6.3" class="anchored" data-anchor-id="map-style"><span class="header-section-number">4.6.3</span> Map style</h4>
+<section id="map-style" class="level4" data-number="2.4.6.3">
+<h4 data-number="2.4.6.3" class="anchored" data-anchor-id="map-style"><span class="header-section-number">2.4.6.3</span> Map style</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -897,11 +902,11 @@ First 10 features:
 </section>
 </section>
 </section>
-<section id="drawing-small-multiple-choropleth-maps" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="drawing-small-multiple-choropleth-maps"><span class="header-section-number">5</span> Drawing Small Multiple Choropleth Maps</h2>
+<section id="drawing-small-multiple-choropleth-maps" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="drawing-small-multiple-choropleth-maps"><span class="header-section-number">2.5</span> Drawing Small Multiple Choropleth Maps</h2>
 <p>Small multiples make it easier to compare young and aged population patterns without changing datasets between plots.</p>
-<section id="by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments" class="level3" data-number="5.1">
-<h3 data-number="5.1" class="anchored" data-anchor-id="by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments"><span class="header-section-number">5.1</span> By assigning multiple values to at least one of the aesthetic arguments</h3>
+<section id="by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments"><span class="header-section-number">2.5.1</span> By assigning multiple values to at least one of the aesthetic arguments</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>youngmap <span class="ot">&lt;-</span> <span class="fu">tm_shape</span>(mpsz_pop2024)<span class="sc">+</span> </span>
 <span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_polygons</span>(<span class="at">fill =</span> <span class="st">"YOUNG"</span>,</span>
@@ -937,8 +942,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="by-arrange-multiples-choropleth-maps-in-a-grid-layout" class="level3" data-number="5.2">
-<h3 data-number="5.2" class="anchored" data-anchor-id="by-arrange-multiples-choropleth-maps-in-a-grid-layout"><span class="header-section-number">5.2</span> By arrange multiples choropleth maps in a grid layout</h3>
+<section id="by-arrange-multiples-choropleth-maps-in-a-grid-layout" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="by-arrange-multiples-choropleth-maps-in-a-grid-layout"><span class="header-section-number">2.5.2</span> By arrange multiples choropleth maps in a grid layout</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -963,8 +968,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="by-defining-a-group-by-variable-in-tm_facets" class="level3" data-number="5.3">
-<h3 data-number="5.3" class="anchored" data-anchor-id="by-defining-a-group-by-variable-in-tm_facets"><span class="header-section-number">5.3</span> By defining a group-by variable in tm_facets()</h3>
+<section id="by-defining-a-group-by-variable-in-tm_facets" class="level3" data-number="2.5.3">
+<h3 data-number="2.5.3" class="anchored" data-anchor-id="by-defining-a-group-by-variable-in-tm_facets"><span class="header-section-number">2.5.3</span> By defining a group-by variable in tm_facets()</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tm_shape</span>(mpsz_pop2024) <span class="sc">+</span></span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_fill</span>(<span class="at">fill =</span> <span class="st">"DEPENDENCY"</span>,</span>
@@ -996,8 +1001,8 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="mappping-spatial-object-meeting-a-selection-criterion" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="mappping-spatial-object-meeting-a-selection-criterion"><span class="header-section-number">6</span> Mappping Spatial Object Meeting a Selection Criterion</h2>
+<section id="mappping-spatial-object-meeting-a-selection-criterion" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="mappping-spatial-object-meeting-a-selection-criterion"><span class="header-section-number">2.6</span> Mappping Spatial Object Meeting a Selection Criterion</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>mpsz_pop2024 <span class="sc">%&gt;%</span></span>
 <span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(REGION_N <span class="sc">==</span> <span class="st">"CENTRAL REGION"</span>) <span class="sc">%&gt;%</span></span>
@@ -1086,8 +1091,8 @@ First 10 features:
 <span id="cb44-17"><a href="#cb44-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tm_borders</span>(<span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="creating-interactive-map" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="creating-interactive-map"><span class="header-section-number">7</span> Creating Interactive Map</h2>
+<section id="creating-interactive-map" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="creating-interactive-map"><span class="header-section-number">2.7</span> Creating Interactive Map</h2>
 <p>For the website version, I render this inspection step in plot mode. The important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.</p>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>region_selected <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
@@ -1208,11 +1213,11 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="beyond-the-basic-choropleth" class="level2" data-number="8">
-<h2 data-number="8" class="anchored" data-anchor-id="beyond-the-basic-choropleth"><span class="header-section-number">8</span> Beyond the Basic Choropleth</h2>
+<section id="beyond-the-basic-choropleth" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="beyond-the-basic-choropleth"><span class="header-section-number">2.8</span> Beyond the Basic Choropleth</h2>
 <p>The maps above describe where dependency ratio is high or low. I also wanted to check how much of the story comes from the spatial arrangement itself, not just the distribution of the numbers.</p>
-<section id="same-values-shuffled-locations" class="level3" data-number="8.1">
-<h3 data-number="8.1" class="anchored" data-anchor-id="same-values-shuffled-locations"><span class="header-section-number">8.1</span> Same Values, Shuffled Locations</h3>
+<section id="same-values-shuffled-locations" class="level3" data-number="2.8.1">
+<h3 data-number="2.8.1" class="anchored" data-anchor-id="same-values-shuffled-locations"><span class="header-section-number">2.8.1</span> Same Values, Shuffled Locations</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">626</span>)</span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1262,8 +1267,8 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="visual-area-bias" class="level3" data-number="8.2">
-<h3 data-number="8.2" class="anchored" data-anchor-id="visual-area-bias"><span class="header-section-number">8.2</span> Visual Area Bias</h3>
+<section id="visual-area-bias" class="level3" data-number="2.8.2">
+<h3 data-number="2.8.2" class="anchored" data-anchor-id="visual-area-bias"><span class="header-section-number">2.8.2</span> Visual Area Bias</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>valid_pop_area <span class="ot">&lt;-</span> mpsz_pop2024 <span class="sc">%&gt;%</span></span>
 <span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(TOTAL), TOTAL <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">%&gt;%</span></span>
@@ -1308,10 +1313,10 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="complementing-thematic-map-with-statistical-chart" class="level2" data-number="9">
-<h2 data-number="9" class="anchored" data-anchor-id="complementing-thematic-map-with-statistical-chart"><span class="header-section-number">9</span> Complementing Thematic Map with Statistical Chart</h2>
-<section id="does-preschool-provision-broadly-follow-young-population" class="level3" data-number="9.1">
-<h3 data-number="9.1" class="anchored" data-anchor-id="does-preschool-provision-broadly-follow-young-population"><span class="header-section-number">9.1</span> Does Preschool Provision Broadly Follow Young Population?</h3>
+<section id="complementing-thematic-map-with-statistical-chart" class="level2" data-number="2.9">
+<h2 data-number="2.9" class="anchored" data-anchor-id="complementing-thematic-map-with-statistical-chart"><span class="header-section-number">2.9</span> Complementing Thematic Map with Statistical Chart</h2>
+<section id="does-preschool-provision-broadly-follow-young-population" class="level3" data-number="2.9.1">
+<h3 data-number="2.9.1" class="anchored" data-anchor-id="does-preschool-provision-broadly-follow-young-population"><span class="header-section-number">2.9.1</span> Does Preschool Provision Broadly Follow Young Population?</h3>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>preschool2019 <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/geospatial/PreSchoolsLocation.geojson"</span>,</span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
@@ -1385,12 +1390,12 @@ First 10 features:
 </div>
 </section>
 </section>
-<section id="takeaway" class="level2" data-number="10">
-<h2 data-number="10" class="anchored" data-anchor-id="takeaway"><span class="header-section-number">10</span> Takeaway</h2>
+<section id="takeaway" class="level2" data-number="2.10">
+<h2 data-number="2.10" class="anchored" data-anchor-id="takeaway"><span class="header-section-number">2.10</span> Takeaway</h2>
 <p>Different classification and layout choices can change how strongly a choropleth map communicates spatial contrast. For this dependency-ratio example, the same joined dataset supports overview mapping, regional comparison, and focused outlier inspection. I would use the Jenks or quantile versions for exploration, then refine the legend and annotations depending on the final story.</p>
 </section>
-<section id="reflection" class="level2" data-number="11">
-<h2 data-number="11" class="anchored" data-anchor-id="reflection"><span class="header-section-number">11</span> Reflection</h2>
+<section id="reflection" class="level2" data-number="2.11">
+<h2 data-number="2.11" class="anchored" data-anchor-id="reflection"><span class="header-section-number">2.11</span> Reflection</h2>
 <p>The extra checks changed how I read the choropleth maps. A map can look persuasive even when the classification, area size, or spatial unit is shaping the visual message. The shuffled map, area-bias table, and preschool-population comparison help me slow down and ask whether the pattern is genuinely spatial, visually exaggerated, or only a first descriptive clue.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -1407,16 +1412,16 @@ First 10 features:
 </div>
 </div>
 </section>
-<section id="reference" class="level2" data-number="12">
-<h2 data-number="12" class="anchored" data-anchor-id="reference"><span class="header-section-number">12</span> Reference</h2>
-<section id="all-about-tmap-package" class="level3" data-number="12.1">
-<h3 data-number="12.1" class="anchored" data-anchor-id="all-about-tmap-package"><span class="header-section-number">12.1</span> All about tmap package</h3>
+<section id="reference" class="level2" data-number="2.12">
+<h2 data-number="2.12" class="anchored" data-anchor-id="reference"><span class="header-section-number">2.12</span> Reference</h2>
+<section id="all-about-tmap-package" class="level3" data-number="2.12.1">
+<h3 data-number="2.12.1" class="anchored" data-anchor-id="all-about-tmap-package"><span class="header-section-number">2.12.1</span> All about tmap package</h3>
 </section>
-<section id="geospatial-data-wrangling" class="level3" data-number="12.2">
-<h3 data-number="12.2" class="anchored" data-anchor-id="geospatial-data-wrangling"><span class="header-section-number">12.2</span> Geospatial data wrangling</h3>
+<section id="geospatial-data-wrangling" class="level3" data-number="2.12.2">
+<h3 data-number="2.12.2" class="anchored" data-anchor-id="geospatial-data-wrangling"><span class="header-section-number">2.12.2</span> Geospatial data wrangling</h3>
 </section>
-<section id="data-wrangling-1" class="level3" data-number="12.3">
-<h3 data-number="12.3" class="anchored" data-anchor-id="data-wrangling-1"><span class="header-section-number">12.3</span> Data wrangling</h3>
+<section id="data-wrangling-1" class="level3" data-number="2.12.3">
+<h3 data-number="2.12.3" class="anchored" data-anchor-id="data-wrangling-1"><span class="header-section-number">2.12.3</span> Data wrangling</h3>
 <ul>
 <li>R for Geospatial Data Science and Analytics, Chapter 2: <a href="https://r4gdsa.netlify.app/chap02.html">Thematic Mapping and GeoVisualisation with R</a></li>
 <li>data.gov.sg: <a href="https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view">Master Plan 2019 Subzone Boundary No Sea</a></li>
@@ -1424,6 +1429,7 @@ First 10 features:
 </ul>
 
 
+</section>
 </section>
 </section>
 

@@ -8,11 +8,14 @@ format:
     toc: true
     toc-depth: 4
     code-fold: false
+    number-offset: 4
 execute:
   echo: true
   warning: false
   message: false
 ---
+
+# 2nd Order Spatial Point Patterns Analysis Methods {.course-chapter-title}
 
 ```{r}
 #| label: setup

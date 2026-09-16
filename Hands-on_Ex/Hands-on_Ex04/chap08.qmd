@@ -8,11 +8,14 @@ format:
     toc: true
     toc-depth: 4
     code-fold: false
+    number-offset: 7
 execute:
   echo: true
   warning: false
   message: false
 ---
+
+# Spatial Weights and Applications {.course-chapter-title}
 
 ```{r}
 #| label: setup

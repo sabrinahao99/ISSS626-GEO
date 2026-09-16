@@ -10,7 +10,10 @@ execute:
 format:
   html:
     code-fold: false
+    number-offset: 1
 ---
+
+# Thematic Mapping and GeoVisualisation with R {.course-chapter-title}
 
 ```{r}
 #| label: setup
