@@ -46,6 +46,15 @@ My main questions are:
 - Which months show stronger clustering?
 - Does the day-of-year view add anything beyond the monthly view?
 
+## Learning Outcome
+
+The workflow is designed to answer two questions about the fire events:
+
+- Are the fire locations spatially and spatio-temporally independent?
+- If they are not independent, where and when do the events tend to cluster?
+
+I use the monthly and day-of-year views as complementary checks. The first gives a broad seasonal pattern, while the second keeps the time mark more precise.
+
 ::: {.callout-note}
 ### Local implementation note
 
@@ -135,6 +144,16 @@ kbb_sf <- st_read(dsn="data/rawdata",
   st_transform(crs = 32748)
 ```
 
+```{r}
+#| label: course-prepared-kbb
+#| eval: false
+kbb_sf <- st_read(dsn="chap06/data/rawdata",
+                  layer = "Kepulauan_Bangka_Belitung") %>%
+  st_union() %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 32748)
+```
+
 ### Converting OWIN
 
 ```{r}
@@ -160,6 +179,15 @@ I transformed the boundary to EPSG:32748 before creating the `owin` object becau
 #| label: read-fire
 fire_sf <- read_csv("data/rawdata/forestfires.csv",
                     show_col_types = FALSE) %>%
+  st_as_sf(coords = c("longitude", "latitude"),
+           crs = 4326) %>%
+  st_transform(crs = 32748)
+```
+
+```{r}
+#| label: course-fire-import
+#| eval: false
+fire_sf <- read_csv("chap06/data/rawdata/forestfires.csv") %>%
   st_as_sf(coords = c("longitude", "latitude"),
            crs = 4326) %>%
   st_transform(crs = 32748)
@@ -194,6 +222,15 @@ The monthly table shows a strong dry-season pattern. In my local extract, August
 ### Overall plot
 
 ```{r}
+#| label: course-fire-overall-map
+#| eval: false
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots()
+```
+
+```{r}
 #| label: fire-overall-map
 #| fig-cap: "Overall distribution of MODIS fire detections in Bangka-Belitung."
 tm_shape(kbb_sf) +
@@ -210,6 +247,18 @@ The points are not spread like a regular grid. Several clusters sit inland, and 
 :::
 
 ### Visualising geographic distribution of forest fires by month
+
+```{r}
+#| label: course-fire-month-map
+#| eval: false
+tm_shape(kbb_sf)+
+  tm_polygons() +
+tm_shape(fire_sf) +
+  tm_dots(size = 0.1) +
+tm_facets(by="Month_fac",
+         free.coords=FALSE,
+         drop.units = TRUE)
+```
 
 ```{r}
 #| label: fire-month-map
@@ -240,6 +289,13 @@ The monthly facets make the seasonal shift much easier to see. The dense months 
 #| label: fire-month-select
 fire_month <- fire_sf %>% 
   dplyr::select(Month_num)
+```
+
+```{r}
+#| label: course-fire-month-select
+#| eval: false
+fire_month <- fire_sf %>%
+  select(Month_num)
 ```
 
 ### Creating ppp
@@ -365,6 +421,14 @@ July starts to show visible clustering, but September and October are much stron
 #| label: fire-yday-ppp
 fire_yday_ppp <- fire_sf %>% 
   dplyr::select(DayofYear) %>%
+  as.ppp()
+```
+
+```{r}
+#| label: course-fire-yday-ppp
+#| eval: false
+fire_yday_ppp <- fire_sf %>%
+  select(DayofYear) %>%
   as.ppp()
 ```
 
@@ -506,6 +570,21 @@ fire_df <- data.frame(
   t = fire_sf$`DayofYear`)
 ```
 
+The `stpp` workflow also needs the study-area boundary as a two-column coordinate matrix.
+
+```{r}
+#| label: stpp-study-region
+#| eval: false
+coords <- st_coordinates(kbb_sf)
+s_region_matrix <- coords[, 1:2]
+```
+
+```{r}
+#| label: stpp-study-region-local
+s_region_matrix <- st_coordinates(kbb_sf)[, 1:2]
+dim(s_region_matrix)
+```
+
 ```{r}
 #| label: stpp-object-course
 #| eval: false
@@ -521,7 +600,14 @@ class(fire_stpp)
 ```{r}
 #| label: stpp-plot-course
 #| eval: false
-plot(fire_stpp)
+plot(fire_stpp, s_region_matrix)
+```
+
+```{r}
+#| label: stpp-plot-marked-course
+#| eval: false
+plot(fire_stpp, s_region_matrix,
+     pch = 19, mark = TRUE)
 ```
 
 The 3D point view can be approximated with a rendered space-time scatter plot.
@@ -551,14 +637,22 @@ Colouring the points by day of year shows that later-year detections occupy many
 ```{r}
 #| label: stik-course
 #| eval: false
-kbb_stik <- STIKhat(fire_stpp)
+kbb_stik <- STIKhat(fire_stpp,
+                    s.region = s_region_matrix,
+                    t.region = c(150,250),
+                    infectious = TRUE)
 ```
 
 ```{r}
 #| label: plotk-course
 #| eval: false
-plotK(kbb_stik)
+plotK(kbb_stik, n = 20,
+      L = TRUE, type = "contour")
 ```
+
+### Reading the space-time K-function
+
+High contour values at small spatial and temporal distances suggest that events occur close together in both space and time. Flat or low contours suggest a weaker signal at those distances. The rate at which contours change along the two axes helps identify the spatial and temporal extent of the concentration.
 
 As a lightweight diagnostic, I count event pairs that are close in both space and time. This is not a replacement for `STIKhat()`, but it helps me read the same idea: whether many events occur near each other within short temporal lags.
 
@@ -626,5 +720,6 @@ The `lambda` value is therefore similar to bandwidth in space: it decides how mu
 ## References
 
 - Course source: [Spatio-Temporal Point Patterns Analysis](https://r4gdsa.netlify.app/chap06.html)
+- Hall, P. (1990). [Using the Bootstrap to Estimate Mean Squared Error and Select Smoothing Parameter in Nonparametric Problems](https://core.ac.uk/works/48942826).
 - NASA FIRMS: [Archive Download](https://firms.modaps.eosdis.nasa.gov/download/) and public country yearly summary files.
 - geoBoundaries: [Indonesia ADM1 boundary](https://www.geoboundaries.org/)
