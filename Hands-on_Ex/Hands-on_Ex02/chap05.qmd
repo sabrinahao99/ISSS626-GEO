@@ -8,14 +8,12 @@ format:
     toc: true
     toc-depth: 4
     code-fold: false
-    number-offset: 4
+    number-sections: false
 execute:
   echo: true
   warning: false
   message: false
 ---
-
-# 2nd Order Spatial Point Patterns Analysis Methods {.course-chapter-title}
 
 ```{r}
 #| label: setup
@@ -29,11 +27,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview
+## 5.1 Overview {#overview}
 
 This page continues from the Chapter 4 preparation and focuses on Choa Chu Kang and Tampines. I use G-, F-, K-, and L-functions to compare how childcare centre locations behave across distance.
 
-## The data
+## 5.2 The data {#the-data}
 
 The same two local GeoJSON datasets are used:
 
@@ -42,25 +40,14 @@ The same two local GeoJSON datasets are used:
 
 The Chapter 5 analysis focuses on the Choa Chu Kang and Tampines planning areas, using the point pattern objects prepared in the same way as Chapter 4.
 
-## Installing and Loading the R packages
+## 5.3 Installing and Loading the R packages {#installing-and-loading-the-r-packages}
 
 ```{r}
-#| label: ch05-packages
+#| label: ch05-01
 pacman::p_load(sf, spatstat, tmap, tidyverse)
 ```
 
-```{r}
-#| label: ch05-seed
-set.seed(1234)
-```
-
-## Data Import and Preparation
-
-::: {.callout-note}
-### Local implementation note
-
-To keep this page reproducible on its own, I recreate the required `sf`, `owin`, and `ppp` objects from the local GeoJSON files.
-:::
+## 5.4 Data Import and Preparation {#data-import-and-preparation}
 
 ```{r}
 #| label: ch05-read-data
@@ -102,329 +89,325 @@ plot(unmark(childcare_ck_ppp), main = "Choa Chu Kang")
 plot(unmark(childcare_tm_ppp), main = "Tampines")
 ```
 
-## Second-order Spatial Point Patterns Analysis
+::: {.callout-note}
+### Local implementation note {.unnumbered}
+
+To keep this page reproducible on its own, I recreate the required `sf`, `owin`, and `ppp` objects from the local GeoJSON files.
+:::
+
+## 5.5 Second-order Spatial Point Patterns Analysis {#second-order-spatial-point-patterns-analysis}
 
 The observed curve is compared with what complete spatial randomness would look like. When an observed line moves outside the simulation envelope, I read that as evidence that the pattern is behaving differently from CSR for that distance range.
 
-## Analysing Spatial Point Process Using G-Function
+## 5.6 Analysing Spatial Point Process Using G-Function {#analysing-spatial-point-process-using-g-function}
 
 ::: {.callout-tip}
-### How I read this plot
+### How I read this plot {.unnumbered}
 
 The G-function is event-to-event. I read it as a nearest-neighbour view: if the observed curve rises faster than the CSR expectation, many events have close neighbours.
 :::
 
-### Choa Chu Kang planning area
+### 5.6.1 Choa Chu Kang planning area {#choa-chu-kang-planning-area}
 
-#### Computing G-function estimation
+#### 5.6.1.1 Computing G-function estimation {#computing-g-function-estimation}
 
 ```{r}
-#| label: ch05-g-ck
+#| label: ch05-02
+set.seed(1234)
+```
+
+```{r}
+#| label: ch05-03
 G_CK = Gest(childcare_ck_ppp, correction = "border")
 plot(G_CK, xlim=c(0,500))
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.6.1.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test}
 
 ```{r}
-#| label: ch05-g-ck-envelope
+#| label: ch05-04
 G_CK.csr <- envelope(childcare_ck_ppp, Gest, nsim = 999)
 ```
 
 ```{r}
-#| label: ch05-plot-g-ck-envelope
+#| label: ch05-05
 plot(G_CK.csr)
 ```
 
-### Tampines planning area
+### 5.6.2 Tampines planning area {#tampines-planning-area}
 
-#### Computing G-function estimation
+#### 5.6.2.1 Computing G-function estimation {#computing-g-function-estimation-1}
 
 ```{r}
-#| label: ch05-g-tm
+#| label: ch05-06
 G_tm = Gest(childcare_tm_ppp, correction = "best")
 plot(G_tm)
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.6.2.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-1}
 
 ```{r}
-#| label: ch05-g-tm-envelope
+#| label: ch05-07
 G_tm.csr <- envelope(childcare_tm_ppp, Gest, correction = "all", nsim = 999)
 ```
 
 ```{r}
-#| label: ch05-plot-g-tm-envelope
+#| label: ch05-08
 plot(G_tm.csr)
 ```
 
 ::: {.callout-tip}
-### My finding from the G-function
+### My finding from the G-function {.unnumbered}
 
 The G-function is the easiest one for me to connect to nearest-neighbour clustering. In these two planning areas, I read the early part of the curve most carefully because short-distance behaviour tells me whether childcare centres tend to have nearby neighbours more often than expected under CSR.
 :::
 
-## Analysing Spatial Point Process Using F-Function
+## 5.7 Analysing Spatial Point Process Using F-Function {#analysing-spatial-point-process-using-f-function}
 
 ::: {.callout-tip}
-### How I read this plot
+### How I read this plot {.unnumbered}
 
 The F-function is location-to-event. Instead of starting from an existing childcare centre, it starts from arbitrary locations in the study area and asks how far those locations are from the nearest centre.
 :::
 
-### Choa Chu Kang planning area
+### 5.7.1 Choa Chu Kang planning area {#choa-chu-kang-planning-area-1}
 
-#### Computing F-function estimation
+#### 5.7.1.1 Computing F-function estimation {#computing-f-function-estimation}
 
 ```{r}
-#| label: ch05-f-ck
+#| label: ch05-09
 F_CK = Fest(childcare_ck_ppp)
 plot(F_CK)
 ```
 
-### Performing Complete Spatial Randomness Test
+### 5.7.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-2}
 
 ```{r}
-#| label: ch05-f-ck-envelope
-F_CK.csr <- envelope(childcare_ck_ppp, Fest, nsim = 999)
+#| label: ch05-10
+F_CK.csr <- envelope(childcare_ck_ppp, Fest, 
+                     nsim = 999)
 ```
 
 ```{r}
-#| label: ch05-plot-f-ck-envelope
+#| label: ch05-11
 plot(F_CK.csr)
 ```
 
-### Tampines planning area
+### 5.7.3 Tampines planning area {#tampines-planning-area-1}
 
-#### Computing F-function estimation
+#### 5.7.3.1 Computing F-function estimation {#computing-f-function-estimation-1}
 
 ```{r}
-#| label: ch05-f-tm
+#| label: ch05-12
 F_tm = Fest(childcare_tm_ppp, correction = "best")
 plot(F_tm)
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.7.3.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-3}
 
 ```{r}
-#| label: ch05-f-tm-envelope
-F_tm.csr <- envelope(childcare_tm_ppp, Fest, correction = "all", nsim = 999)
+#| label: ch05-13
+F_tm.csr <- envelope(childcare_tm_ppp, Fest,
+                     correction = "all", 
+                     nsim = 999)
 ```
 
 ```{r}
-#| label: ch05-plot-f-tm-envelope
+#| label: ch05-14
 plot(F_tm.csr)
 ```
 
 ::: {.callout-note}
-### My finding from the F-function
+### My finding from the F-function {.unnumbered}
 
 The F-function adds a different perspective because it starts from empty locations rather than existing centres. If the observed curve rises quickly, it means many locations in the planning area are close to a childcare centre. I find this useful because it connects the point pattern to accessibility-like thinking, even though it is still a geometric summary rather than a service-demand model.
 :::
 
-## Analysing Spatial Point Process Using K-Function
+## 5.8 Analysing Spatial Point Process Using K-Function {#analysing-spatial-point-process-using-k-function}
 
 ::: {.callout-tip}
-### How I read this plot
+### How I read this plot {.unnumbered}
 
 The K-function is more multi-scale. It counts neighbours within increasing distance bands, so it is useful when clustering may happen at some distances but not others.
 :::
 
-### Choa Chu Kang planning area
+### 5.8.1 Choa Chu Kang planning area {#choa-chu-kang-planning-area-2}
 
-#### Computing K-fucntion estimate
+#### 5.8.1.1 Computing K-fucntion estimate {#computing-k-fucntion-estimate}
 
 ```{r}
-#| label: ch05-k-ck
+#| label: ch05-15
 K_ck = Kest(childcare_ck_ppp, correction = "Ripley")
 plot(K_ck, . -r ~ r, ylab= "K(d)-r", xlab = "d(m)")
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.8.1.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-4}
 
 ```{r}
-#| label: ch05-k-ck-envelope
-K_ck.csr <- envelope(childcare_ck_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
-```
-
-```{r}
-#| label: course-chap05-k-ck-envelope
-#| eval: false
-K_ck.csr <- envelope(childcare_ck_ppp, Kest,
+#| label: ch05-16
+K_ck.csr <- envelope(childcare_ck_ppp, Kest, 
                      nsim = 99, rank = 1,
                      global=FALSE)
 ```
 
 ```{r}
-#| label: ch05-plot-k-ck-envelope
+#| label: ch05-17
 plot(K_ck.csr, . - r ~ r, xlab="d", ylab="K(d)-r")
 ```
 
-### Tampines planning area
+### 5.8.2 Tampines planning area {#tampines-planning-area-2}
 
-#### Computing K-function estimation
+#### 5.8.2.1 Computing K-function estimation {#computing-k-function-estimation}
 
 ```{r}
-#| label: ch05-k-tm
-K_tm = Kest(childcare_tm_ppp, correction = "Ripley")
+#| label: ch05-18
+K_tm = Kest(childcare_tm_ppp, 
+            correction = "Ripley")
 plot(K_tm, . -r ~ r, 
      ylab= "K(d)-r", xlab = "d(m)", 
      xlim=c(0,1000))
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.8.2.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-5}
 
 ```{r}
-#| label: ch05-k-tm-envelope
-K_tm.csr <- envelope(childcare_tm_ppp, Kest, nsim = 99, rank = 1, glocal=TRUE)
-```
-
-```{r}
-#| label: course-chap05-k-tm-envelope
-#| eval: false
-K_tm.csr <- envelope(childcare_tm_ppp, Kest,
+#| label: ch05-19
+K_tm.csr <- envelope(childcare_tm_ppp, Kest, 
                      nsim = 99, rank = 1,
                      global=FALSE)
 ```
 
 ```{r}
-#| label: ch05-plot-k-tm-envelope
+#| label: ch05-20
 plot(K_tm.csr, . - r ~ r, 
-     xlab="d", ylab="K(d)-r", xlim=c(0,500))
+     xlab="d", ylab="K(d)-r", 
+     xlim=c(0,500))
 ```
 
 ::: {.callout-tip}
-### My finding from the K-function
+### My finding from the K-function {.unnumbered}
 
 The K-function helps me avoid making only a nearest-neighbour statement. I read it as a multi-distance check: clustering can be visible at short distances but become weaker at larger distances, so the distance range matters as much as whether the curve is above or below the CSR reference.
 :::
 
-## Analysing Spatial Point Process Using L-Function
+## 5.9 Analysing Spatial Point Process Using L-Function {#analysing-spatial-point-process-using-l-function}
 
 ::: {.callout-tip}
-### How I read this plot
+### How I read this plot {.unnumbered}
 
 The L-function is a transformed version of K. I find it easier to read because the CSR reference is closer to a flat zero line after plotting `L(d)-r`.
 :::
 
-### Choa Chu Kang planning area
+### 5.9.1 Choa Chu Kang planning area {#choa-chu-kang-planning-area-3}
 
-#### Computing L Fucntion estimation
+#### 5.9.1.1 Computing L Fucntion estimation {#computing-l-fucntion-estimation}
 
 ```{r}
-#| label: ch05-l-ck
+#| label: ch05-21
 L_ck = Lest(childcare_ck_ppp, correction = "Ripley")
 plot(L_ck, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)")
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.9.1.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-6}
 
 ```{r}
-#| label: ch05-l-ck-envelope
-L_ck.csr <- envelope(childcare_ck_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
-```
-
-```{r}
-#| label: course-chap05-l-ck-envelope
-#| eval: false
-L_ck.csr <- envelope(childcare_ck_ppp, Lest,
+#| label: ch05-22
+L_ck.csr <- envelope(childcare_ck_ppp, Lest, 
                      nsim = 99, rank = 1,
                      global=FALSE)
 ```
 
 ```{r}
-#| label: ch05-plot-l-ck-envelope
-plot(L_ck.csr, . - r ~ r, xlab="d", ylab="L(d)-r")
+#| label: ch05-23
+plot(L_ck.csr, . - r ~ r, 
+     xlab="d", ylab="L(d)-r")
 ```
 
-### Tampines planning area
+### 5.9.2 Tampines planning area {#tampines-planning-area-3}
 
-#### Computing L-fucntion estimate
+#### 5.9.2.1 Computing L-fucntion estimate {#computing-l-fucntion-estimate}
 
 ```{r}
-#| label: ch05-l-tm
+#| label: ch05-24
 L_tm = Lest(childcare_tm_ppp, correction = "Ripley")
 plot(L_tm, . -r ~ r, 
      ylab= "L(d)-r", xlab = "d(m)", 
      xlim=c(0,1000))
 ```
 
-#### Performing Complete Spatial Randomness Test
+#### 5.9.2.2 Performing Complete Spatial Randomness Test {#performing-complete-spatial-randomness-test-7}
 
 ```{r}
-#| label: ch05-l-tm-envelope
-L_tm.csr <- envelope(childcare_tm_ppp, Lest, nsim = 99, rank = 1, glocal=TRUE)
-```
-
-```{r}
-#| label: course-chap05-l-tm-envelope
-#| eval: false
-L_tm.csr <- envelope(childcare_tm_ppp, Lest,
+#| label: ch05-25
+L_tm.csr <- envelope(childcare_tm_ppp, Lest, 
                      nsim = 99, rank = 1,
                      global=FALSE)
 ```
 
 ```{r}
-#| label: ch05-plot-l-tm-envelope
+#| label: ch05-26
 plot(L_tm.csr, . - r ~ r, 
-     xlab="d", ylab="L(d)-r", xlim=c(0,500))
+     xlab="d", ylab="L(d)-r", 
+     xlim=c(0,500))
 ```
 
 ::: {.callout-note}
-### My finding from the L-function
+### My finding from the L-function {.unnumbered}
 
 The L-function is helpful as a final check because it makes the K-function easier to read visually. When the transformed curve moves away from the zero reference and outside the simulation envelope, I treat that distance range as stronger evidence of departure from CSR.
 :::
 
 ::: {.callout-important}
-### What the four plots show together
+### What the four plots show together {.unnumbered}
 
 The rendered envelopes make Tampines the clearest case of departure from CSR. Its K- and L-function curves remain well above the simulated range across much of the plotted distance. Its F-function drops below the lower envelope at larger distances. Choa Chu Kang is more distance-dependent. The early G-function departure is noticeable. Its K- and L-function curves stay closer to the envelope for longer. I describe Tampines as having the stronger multi-scale interaction signal.
 :::
 
-## G, F, K and L: How I Distinguish Them
+## Further Exploration and Reflections {.unnumbered}
+
+## G, F, K and L: How I Distinguish Them {.unnumbered}
 
 | Function | What it focuses on | Question I ask when reading it | What would suggest clustering |
 |---|---|---|---|
 | G | event-to-event | Are existing childcare centres close to other centres? | The observed curve rises faster than CSR at short distances |
-| F | arbitrary location-to-event | Are random locations in the planning area close to a centre? | Empty-space distances are shorter than expected under CSR |
+| F | arbitrary location-to-event | Are random locations in the planning area close to a centre? | Larger empty spaces: the observed F curve lies below CSR at relevant distances |
 | K | neighbours across distance | Does clustering appear across wider distance bands? | The observed neighbour count is above the CSR envelope |
 | L | transformed K | Is the K-function departure easier to read visually? | `L(d)-r` stays above the reference/envelope over a distance range |
 
 ::: {.callout-note}
-### My learning point
+### My learning point {.unnumbered}
 
 I find the G- and F-functions more intuitive, but K and L are more useful for checking whether the conclusion holds beyond the nearest neighbour. That is why I would not rely on only one curve when making a statement about interaction.
 :::
 
-## My Interpretation
+## My Interpretation {.unnumbered}
 
 Across these plots, I read the observed curves relative to the CSR line and simulation envelope rather than from the curve alone. When a curve sits outside the envelope, it suggests that the childcare centre pattern in that planning area is not behaving like CSR at that distance range. The G and F functions help me think about nearest events and empty space, while K and L give a broader distance-based view.
 
-## What I Learned
+## What I Learned {.unnumbered}
 
 - First-order and second-order methods answer different questions: intensity versus interaction.
 - Simulation envelopes make the plots more useful because they give a practical CSR comparison.
 - The same planning area can look different depending on whether I use G, F, K, or L.
 - The interpretation should be tied to distance ranges, not just one overall statement.
 
-## Limitations
+## Limitations {.unnumbered}
 
 CSR is a simple benchmark, and it does not account for population distribution, residential land use, transport access, or planning policy. The result is useful for describing spatial pattern, but not enough by itself to explain the causes of that pattern.
 
-## Reflection
+## Reflection {.unnumbered}
 
 Compared with first-order KDE, second-order analysis made me think more carefully about distance ranges. A single statement like "the centres are clustered" is too broad unless I say at what distance and under which study window. The envelopes also helped me read the plots more cautiously because I could compare the observed curve with simulated CSR patterns rather than relying only on visual impression.
 
 ::: {.callout-tip}
-## Beyond the Code: `global = FALSE` and `global = TRUE`
+## Beyond the Code: `global = FALSE` and `global = TRUE` {.unnumbered}
 
-The `global` choice in simulation envelopes is a good example of a small parameter that changes the meaning of the evidence. With pointwise envelopes, I can look at particular distances and ask where the observed curve moves outside the simulated range. That is helpful for exploration because the distance scale is visible.
+The `global` choice changes which family of comparisons the envelope covers. With pointwise envelopes, I can look at particular distances and ask where the observed curve moves outside the simulated range. That is helpful for exploration because the distance scale is visible.
 
-With simultaneous envelopes, the comparison is stricter because it controls the whole curve at once. I would use it when I want a more formal statement about whether the pattern departs from CSR overall. For this coursework page, I read pointwise-style results as a guide to interesting distance ranges, and simultaneous-style results as stronger support when making a final claim.
+A simultaneous envelope tests the entire pre-specified distance interval. A pointwise envelope covers each fixed distance separately; searching across many distances changes the overall error rate. I use `global = FALSE` for the course plots and compare it with `global = TRUE` below, keeping the simulated patterns and distance interval identical.
 :::
 
-## Reference
+## Reference {.unnumbered}
 
 - R for Geospatial Data Science and Analytics. Chapter 5: 2nd Order Spatial Point Patterns Analysis Methods. <https://r4gdsa.netlify.app/chap05>

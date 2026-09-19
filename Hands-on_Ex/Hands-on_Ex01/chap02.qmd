@@ -10,10 +10,8 @@ execute:
 format:
   html:
     code-fold: false
-    number-offset: 1
+    number-sections: false
 ---
-
-# Thematic Mapping and GeoVisualisation with R {.course-chapter-title}
 
 ```{r}
 #| label: setup
@@ -27,9 +25,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview
+## 2.1 Overview {#overview}
 
-### Survival Tip
+### 2.1.1 Survival Tip {#survival-tip}
 
 I read the function description before changing the map settings, especially for classification and legend arguments.
 
@@ -38,40 +36,41 @@ This page presents my thematic mapping workflow for Singapore's 2024 subzone pop
 ::: {.callout-note}
 **Local implementation note.**
 
-The local boundary data is stored as GeoJSON, so the useful planning-area fields are already separate columns. The helper function below is kept for reproducibility when a boundary file contains a `Description` field.
+The boundary is stored as GeoJSON with planning-area fields in separate columns. The KML parsing function shows how to obtain those fields from an HTML description; this dataset uses direct column selection.
 :::
 
-## Getting Started
+## 2.2 Getting Started {#getting-started}
 
 ```{r}
+#| label: ch02-01
 pacman::p_load(sf, tmap, tidyverse, rvest)
 ```
 
-## Importing Data into R
+## 2.3 Importing Data into R {#importing-data-into-r}
 
-### The Data
+### 2.3.1 The Data {#the-data}
 
 The boundary layer and the 2024 population table are the two datasets used for the choropleth maps.
 
-### Importing Geospatial Data into R
+### 2.3.2 Importing Geospatial Data into R {#importing-geospatial-data-into-r}
+
+```r
+mpsz <- st_read("chap02/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>%
+  st_transform(crs = 3414)
+```
 
 ```{r}
+#| label: ch02-02
 mpsz <- st_read("data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson",
                 quiet = TRUE) %>%
   st_zm(drop = TRUE, what = "ZM") %>%
   st_transform(crs = 3414)
 ```
 
-```{r}
-#| label: course-chap02-read-mpsz
-#| eval: false
-mpsz <- st_read("chap02/data/geospatial/MasterPlan2019SubzoneBoundaryNoSeaKML.kml") %>%
-  st_transform(crs = 3414)
-```
-
-#### Tidying data
+#### 2.3.2.1 Tidying data {#tidying-data}
 
 ```{r}
+#| label: ch02-03
 extract_kml_field <- function(html_text, field_name) {
   if (is.na(html_text) || html_text == "") return(NA_character_)
   
@@ -87,158 +86,128 @@ extract_kml_field <- function(html_text, field_name) {
 }
 ```
 
-```{r}
-if ("Description" %in% names(mpsz)) {
-  mpsz <- mpsz %>%
-    mutate(
-      REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
-      PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
-      SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
-      SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
-    ) %>%
-    select(-Name, -Description) %>%
-    relocate(geometry, .after = last_col())
-} else {
-  mpsz <- mpsz %>%
-    select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry)
-}
+The GeoJSON already contains the four attributes. The KML extraction step and the direct selection used here are shown together.
+
+```r
+mpsz <- mpsz %>%
+  mutate(
+    REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
+    PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
+    SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
+    SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
+  ) %>%
+  select(-Name, -Description) %>%
+  relocate(geometry, .after = last_col())
 ```
 
 ```{r}
-#| label: course-chap02-tidy-mpsz
-#| eval: false
-mpsz <- mpsz %>% mutate(
-  REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
-  PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
-  SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
-  SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
-) %>% select(-Name, -Description) %>% relocate(geometry, .after = last_col())
+#| label: ch02-04
+mpsz <- mpsz %>%
+  select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry)
 ```
 
 ```{r}
+#| label: ch02-05
 mpsz
 ```
 
-### Importing Attribute Data into R
+### 2.3.3 Importing Attribute Data into R {#importing-attribute-data-into-r}
 
-The SingStat population table is aspatial. It needs to be summarised by planning area, subzone, and age group before joining to the subzone boundary.
-
-```{r}
-popdata <- read_csv("data/aspatial/respopagesextod2024.csv")
-```
-
-```{r}
-#| label: course-chap02-read-popdata
-#| eval: false
+```r
 popdata <- read_csv("chap02/data/aspatial/respopagesextod2024.csv")
 ```
 
-### Data Preparation
-
-#### Data wrangling
-
 ```{r}
-young_age <- c("0_to_4", "5_to_9", "10_to_14", "15_to_19")
-active_age <- c("20_to_24", "25_to_29", "30_to_34", "35_to_39",
-                "40_to_44", "45_to_49", "50_to_54", "55_to_59",
-                "60_to_64")
-aged_age <- c("65_to_69", "70_to_74", "75_to_79", "80_to_84",
-              "85_to_89", "90_and_over")
-
-popdata2024 <- popdata %>%
-  group_by(PA, SZ, AG) %>%
-  summarise(POP = sum(Pop), .groups = "drop") %>%
-  pivot_wider(names_from = AG,
-              values_from = POP,
-              values_fill = 0) %>%
-  mutate(
-    YOUNG = rowSums(across(any_of(young_age))),
-    `ECONOMY ACTIVE` = rowSums(across(any_of(active_age))),
-    AGED = rowSums(across(any_of(aged_age))),
-    TOTAL = YOUNG + `ECONOMY ACTIVE` + AGED,
-    DEPENDENCY = (YOUNG + AGED) / `ECONOMY ACTIVE`
-  ) %>%
-  select(PA, SZ, YOUNG, `ECONOMY ACTIVE`, AGED, TOTAL, DEPENDENCY)
+#| label: ch02-06
+popdata <- read_csv("data/aspatial/respopagesextod2024.csv")
 ```
 
+The SingStat population table is aspatial. It needs to be summarised by planning area, subzone, and age group before joining to the subzone boundary.
+
+### 2.3.4 Data Preparation {#data-preparation}
+
+#### 2.3.4.1 Data wrangling {#data-wrangling}
+
 ```{r}
-#| label: course-chap02-popdata-summary
-#| eval: false
+#| label: ch02-07
 popdata2024 <- popdata %>%
   group_by(PA, SZ, AG) %>%
   summarise(`POP` = sum(`Pop`)) %>%
   ungroup()%>%
-  pivot_wider(names_from=AG,
+  pivot_wider(names_from=AG, 
               values_from=POP) %>%
   mutate(YOUNG = rowSums(.[3:6])
          +rowSums(.[12])) %>%
 mutate(`ECONOMY ACTIVE` = rowSums(.[7:11])+
 rowSums(.[13:15]))%>%
 mutate(`AGED`=rowSums(.[16:21])) %>%
-mutate(`TOTAL`=rowSums(.[3:21])) %>%
+mutate(`TOTAL`=rowSums(.[3:21])) %>%  
 mutate(`DEPENDENCY` = (`YOUNG` + `AGED`)
- /`ECONOMY ACTIVE`) %>%
-  select(`PA`, `SZ`, `YOUNG`,
-       `ECONOMY ACTIVE`, `AGED`,
+/`ECONOMY ACTIVE`) %>%
+  select(`PA`, `SZ`, `YOUNG`, 
+       `ECONOMY ACTIVE`, `AGED`, 
        `TOTAL`, `DEPENDENCY`)
 ```
 
 ```{r}
-popdata2024 <- popdata2024 %>%
-  mutate(PA = toupper(PA),
-         SZ = toupper(SZ)) %>%
-  filter(`ECONOMY ACTIVE` > 0)
+#| label: age-group-check
+age_columns <- popdata %>%
+  group_by(PA, SZ, AG) %>%
+  summarise(POP = sum(Pop), .groups = "drop") %>%
+  pivot_wider(names_from = AG, values_from = POP) %>%
+  names()
+tibble(group = c("YOUNG", "ECONOMY ACTIVE", "AGED"),
+       age_columns = c(paste(age_columns[c(3:6, 12)], collapse = ", "),
+                       paste(age_columns[c(7:11, 13:15)], collapse = ", "),
+                       paste(age_columns[16:21], collapse = ", ")))
 ```
 
+#### 2.3.4.2 Joining the attribute data and geospatial data {#joining-the-attribute-data-and-geospatial-data}
+
 ```{r}
-#| label: course-chap02-popdata-filter
-#| eval: false
+#| label: ch02-08
 popdata2024 <- popdata2024 %>%
-  mutate_at(.vars = vars(PA, SZ),
+  mutate_at(.vars = vars(PA, SZ), 
           .funs = list(toupper)) %>%
   filter(`ECONOMY ACTIVE` > 0)
 ```
 
-#### Joining the attribute data and geospatial data
-
 ```{r}
-mpsz_pop2024 <- left_join(mpsz, 
-                          popdata2024, 
+#| label: ch02-09
+mpsz_pop2024 <- left_join(mpsz, popdata2024,
                           by = c("SUBZONE_N" = "SZ"))
 ```
 
-```{r}
-dir.create("data/rds", recursive = TRUE, showWarnings = FALSE)
-write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
-```
-
-```{r}
-#| label: course-chap02-write-rds
-#| eval: false
+```r
 write_rds(mpsz_pop2024, "chap02/data/rds/mpsz_pop2024.rds")
 ```
 
-## Choropleth Mapping Geospatial Data Using tmap
+```{r}
+#| label: ch02-10
+write_rds(mpsz_pop2024, "data/rds/mpsz_pop2024.rds")
+```
 
-### Plotting a choropleth map quickly by using qtm()
+## 2.4 Choropleth Mapping Geospatial Data Using tmap {#choropleth-mapping-geospatial-data-using-tmap}
+
+### 2.4.1 Plotting a choropleth map quickly by using qtm() {#plotting-a-choropleth-map-quickly-by-using-qtm}
 
 ```{r}
+#| label: ch02-11
 tmap_mode("plot")
 qtm(shp = mpsz_pop2024, 
     fill = "DEPENDENCY")
 ```
 
 ::: {.callout-note}
-## First Impression
+## First Impression {.unnumbered}
 
 The quick map is useful as a first check because it confirms that the joined attribute can be mapped immediately. At the same time, it feels too plain for communication: the legend, classification, borders, and layout still need design work before the map can support a clear interpretation.
 :::
 
-### Creating a choropleth map by using tmap’s elements
-
-The next map uses a fuller `tmap` composition: filled polygons, title, border, compass, scale bar, grid, and data credits.
+### 2.4.2 Creating a choropleth map by using tmap’s elements {#creating-a-choropleth-map-by-using-tmaps-elements}
 
 ```{r}
+#| label: ch02-12
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -253,69 +222,53 @@ tm_shape(mpsz_pop2024) +
   tm_compass(type="8star", size = 2) +
   tm_scalebar() +
   tm_grid(alpha =0.2) +
-  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authority (URA)\n and Population data from Department of Statistics DOS", 
+  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS", 
              position = c("left", "bottom"))
 ```
 
-```{r}
-#| label: course-chap02-dependency-map
-#| eval: false
-tm_shape(mpsz_pop2024) +
-  tm_polygons(fill = "DEPENDENCY",
-              fill.scale = tm_scale_intervals(
-                style = "quantile",
-                n = 5,
-                values = "brewer.blues"),
-              fill.legend = tm_legend(
-                title = "Dependency ratio")) +
-  tm_title("Distribution of Dependency Ratio by planning subzone") +
-  tm_layout(frame = TRUE) +
-  tm_borders(fill_alpha = 0.5) +
-  tm_compass(type="8star", size = 2) +
-  tm_scalebar() +
-  tm_grid(alpha =0.2) +
-  tm_credits("Source: Planning Sub-zone boundary from Urban Redevelopment Authorithy (URA)\n and Population data from Department of Statistics DOS",
-             position = c("left", "bottom"))
-```
+The next map uses a fuller `tmap` composition: filled polygons, title, border, compass, scale bar, grid, and data credits.
 
 ::: {.callout-tip}
-## What I Noticed
+## What I Noticed {.unnumbered}
 
 The dependency ratio map is sensitive to classification. I find the quantile map useful for comparison because each class has a similar number of subzones, but it can also make small numeric differences look more dramatic.
 :::
 
-### Creating a choropleth map by using tmap’s elements
-
 The following blocks show how small `tmap` design choices change the same spatial pattern.
 
-#### Drawing a base map
+#### 2.4.2.1 Drawing a base map {#drawing-a-base-map}
 
 ```{r}
+#| label: ch02-13
 tm_shape(mpsz_pop2024) +
   tm_polygons()
 ```
 
-#### Drawing a choropleth map using tm_polygons()
+#### 2.4.2.2 Drawing a choropleth map using tm_polygons() {#drawing-a-choropleth-map-using-tm_polygons}
 
 ```{r}
+#| label: ch02-14
 tm_shape(mpsz_pop2024)+
   tm_polygons(fill = "DEPENDENCY")
 ```
 
-#### Drawing a choropleth map using tm_fill() and *tm_border()**
+#### 2.4.2.3 Drawing a choropleth map using tm_fill() and \*tm_border()\*\* {#drawing-a-choropleth-map-using-tm_fill-and-tm_border}
 
 ```{r}
+#| label: ch02-15
 tm_shape(mpsz_pop2024)+
   tm_fill("DEPENDENCY")
 ```
 
 ```{r}
+#| label: ch02-16
 tm_shape(mpsz_pop2024)+
   tm_fill("DEPENDENCY") +
   tm_borders()
 ```
 
 ```{r}
+#| label: ch02-17
 tm_shape(mpsz_pop2024)+
   tm_fill("DEPENDENCY") +
   tm_borders(col = "grey60",
@@ -323,11 +276,12 @@ tm_shape(mpsz_pop2024)+
              lty = "dashed")
 ```
 
-### Data classification methods of tmap
+### 2.4.3 Data classification methods of tmap {#data-classification-methods-of-tmap}
 
-#### Plotting choropleth maps with built-in classification methods
+#### 2.4.3.1 Plotting choropleth maps with built-in classification methods {#plotting-choropleth-maps-with-built-in-classification-methods}
 
 ```{r}
+#| label: ch02-18
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -337,6 +291,7 @@ tm_shape(mpsz_pop2024) +
 ```
 
 ```{r}
+#| label: ch02-19
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -345,13 +300,15 @@ tm_shape(mpsz_pop2024) +
   tm_borders(fill_alpha = 0.5)
 ```
 
+#### 2.4.3.2 Plotting choropleth map with custome break {#plotting-choropleth-map-with-custome-break}
+
 ```{r}
+#| label: ch02-20
 summary(mpsz_pop2024$DEPENDENCY)
 ```
 
-#### Plotting choropleth map with custome break
-
 ```{r}
+#| label: ch02-21
 tm_shape(mpsz_pop2024)+
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -359,11 +316,12 @@ tm_shape(mpsz_pop2024)+
   tm_borders(fill_alpha = 0.5)
 ```
 
-### Colour Scheme
+### 2.4.4 Colour Scheme {#colour-scheme}
 
-#### Using ColourBrewer palette
+#### 2.4.4.1 Using ColourBrewer palette {#using-colourbrewer-palette}
 
 ```{r}
+#| label: ch02-22
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -374,6 +332,7 @@ tm_shape(mpsz_pop2024) +
 ```
 
 ```{r}
+#| label: ch02-23
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -383,11 +342,10 @@ tm_shape(mpsz_pop2024) +
   tm_borders(fill_alpha = 0.5)
 ```
 
-### Map Layout
-
-#### Cartographic Furniture
+#### 2.4.4.2 Cartographic Furniture {#cartographic-furniture}
 
 ```{r}
+#| label: ch02-24
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -401,9 +359,12 @@ tm_shape(mpsz_pop2024) +
              position = c("left", "bottom"))
 ```
 
-#### Map Legend
+### 2.4.5 Map Layout {#map-layout}
+
+#### 2.4.5.1 Map Legend {#map-legend}
 
 ```{r}
+#| label: ch02-25
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -420,9 +381,10 @@ tm_shape(mpsz_pop2024) +
              position = c("left", "bottom"))
 ```
 
-#### Map style
+#### 2.4.5.2 Map style {#map-style}
 
 ```{r}
+#| label: ch02-26
 tm_shape(mpsz_pop2024) +
   tm_polygons(fill = "DEPENDENCY",
               fill.scale = tm_scale_intervals(
@@ -434,17 +396,33 @@ tm_shape(mpsz_pop2024) +
 ```
 
 ```{r}
+#| label: ch02-27
 tmap_style("white")
 ```
 
 ::: {.callout-tip}
-## What I Noticed
+## What I Noticed {.unnumbered}
 
 The summary shows that most subzones sit around the middle of the dependency-ratio range, but a few areas are much higher. That is why the fixed break map and the quantile map do not feel the same: one emphasises numeric thresholds, while the other forces spatial comparison by rank.
 :::
 
+::: {.callout-tip}
+## What I Noticed {.unnumbered}
+
+Mapping young and aged population side by side makes the dependency ratio more understandable. Instead of treating dependency as one abstract number, I can see that it is produced by two different age structures, and those two patterns do not always peak in the same places.
+:::
+
+## 2.5 Drawing Small Multiple Choropleth Maps {#drawing-small-multiple-choropleth-maps}
+
+Small multiples make it easier to compare young and aged population patterns without changing datasets between plots.
+
+### 2.5.1 By assigning multiple values to at least one of the aesthetic arguments {#by-assigning-multiple-values-to-at-least-one-of-the-aesthetic-arguments}
+
 ```{r}
-tm_shape(mpsz_pop2024) +
+#| label: ch02-28
+#| fig-width: 12
+#| fig-height: 8
+tm_shape(mpsz_pop2024) + 
   tm_polygons(
     fill = c("YOUNG", "AGED"),
     fill.legend = 
@@ -458,19 +436,12 @@ tm_shape(mpsz_pop2024) +
   tmap_style("natural")
 ```
 
-::: {.callout-tip}
-## What I Noticed
-
-Mapping young and aged population side by side makes the dependency ratio more understandable. Instead of treating dependency as one abstract number, I can see that it is produced by two different age structures, and those two patterns do not always peak in the same places.
-:::
-
-## Drawing Small Multiple Choropleth Maps
-
-Small multiples make it easier to compare young and aged population patterns without changing datasets between plots.
-
-### By assigning multiple values to at least one of the aesthetic arguments
+### 2.5.2 By arrange multiples choropleth maps in a grid layout {#by-arrange-multiples-choropleth-maps-in-a-grid-layout}
 
 ```{r}
+#| label: ch02-29
+#| fig-width: 12
+#| fig-height: 8
 youngmap <- tm_shape(mpsz_pop2024)+ 
   tm_polygons(fill = "YOUNG",
               fill.legend = tm_legend(
@@ -498,9 +469,31 @@ agedmap <- tm_shape(mpsz_pop2024)+
 tmap_arrange(youngmap, agedmap, asp=1, ncol=2)
 ```
 
-### By arrange multiples choropleth maps in a grid layout
+### 2.5.3 By defining a group-by variable in tm_facets() {#by-defining-a-group-by-variable-in-tm_facets}
+
+In tmap 4, `title.size` is a relative text size. I use 1.1 for the regional facet titles so each title fits its panel.
+
+```r
+tm_shape(mpsz_pop2024) +
+  tm_fill(fill = "DEPENDENCY",
+          fill.scale = tm_scale_intervals(
+            style = "quantile",
+            values = "brewer.blues")) + 
+  tm_facets(by = "REGION_N",
+            nrow = 2, 
+            ncols = 3,
+            free.coords=TRUE, 
+            drop.units=TRUE) +
+  tm_layout(legend.show = TRUE,
+            title.position = c("center", "center"), 
+            title.size = 20) +
+  tm_borders(fill_alpha = 0.5)
+```
 
 ```{r}
+#| label: ch02-30
+#| fig-width: 12
+#| fig-height: 8
 tm_shape(mpsz_pop2024) +
   tm_fill(fill = "DEPENDENCY",
           fill.scale = tm_scale_intervals(
@@ -517,36 +510,16 @@ tm_shape(mpsz_pop2024) +
   tm_borders(fill_alpha = 0.5)
 ```
 
-### By defining a group-by variable in tm_facets()
-
-```{r}
-#| label: course-chap02-facet-map
-#| eval: false
-tm_shape(mpsz_pop2024) +
-  tm_fill(fill = "DEPENDENCY",
-          fill.scale = tm_scale_intervals(
-            style = "quantile",
-            values = "brewer.blues")) +
-  tm_facets(by = "REGION_N",
-            nrow = 2,
-            ncols = 3,
-            free.coords=TRUE,
-            drop.units=TRUE) +
-  tm_layout(legend.show = TRUE,
-            title.position = c("center", "center"),
-            title.size = 20) +
-  tm_borders(fill_alpha = 0.5)
-```
-
 ::: {.callout-tip}
-## My Reading of the Facets
+## My Reading of the Facets {.unnumbered}
 
 The regional facets are helpful because Singapore-wide maps can make smaller regions hard to compare. With `free.coords = TRUE`, each region gets more visual space, so I can inspect internal variation within regions rather than only noticing the largest polygons on the full island map.
 :::
 
-## Mappping Spatial Object Meeting a Selection Criterion
+## 2.6 Mappping Spatial Object Meeting a Selection Criterion {#mappping-spatial-object-meeting-a-selection-criterion}
 
 ```{r}
+#| label: ch02-31
 mpsz_pop2024 %>%
   filter(REGION_N == "CENTRAL REGION") %>%
   tm_shape() +
@@ -558,7 +531,10 @@ mpsz_pop2024 %>%
   tm_borders(fill_alpha = 0.5)
 ```
 
+## 2.7 Complementing Thematic Map with Statistical Chart {#complementing-thematic-map-with-statistical-chart}
+
 ```{r}
+#| label: ch02-32
 mpsz_pop2024 %>%
   filter(REGION_N == "CENTRAL REGION") %>%
   tm_shape() +
@@ -573,6 +549,7 @@ mpsz_pop2024 %>%
 ```
 
 ```{r}
+#| label: ch02-33
 mpsz_selected <- mpsz_pop2024 %>%
   filter(REGION_N == "CENTRAL REGION")
 
@@ -596,33 +573,40 @@ tm_shape(outlier_sf) +
   tm_layout(asp = 0.8)
 ```
 
+## 2.8 Creating Interactive Map {#creating-interactive-map}
+
 ```{r}
-#| label: course-chap02-central-outliers-view
-#| eval: false
+#| label: ch02-34
+#| fig-height: 6
 region_selected <- mpsz_pop2024 %>%
   filter(REGION_N == "CENTRAL REGION")
 region_bbox <- st_bbox(region_selected)
+
 stats <- boxplot.stats(region_selected$DEPENDENCY)
 outlier_vals <- stats$out
 outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
+
 tmap_mode("view")
-tm_shape(region_selected,
+tm_shape(region_selected, 
          bbox = region_bbox) +
   tm_fill("DEPENDENCY",
           id = "SUBZONE_N",
           popup.vars = c(
-            "Name" = "SUBZONE_N",
+            "Name" = "SUBZONE_N", 
             "Dependency" = "DEPENDENCY")) +
   tm_borders() +
   tm_shape(outlier_sf) +
   tm_borders(col = "red", lwd = 2)
 ```
 
-## Creating Interactive Map
-
-For the website version, I render this inspection step in plot mode. The important part here is selecting the central region, setting the bounding box, and highlighting outlier subzones.
+```{r}
+#| label: ch02-35
+tmap_mode("plot")
+```
 
 ```{r}
+#| label: ch02-36
+#| fig-height: 6
 region_selected <- mpsz_pop2024 %>%
   filter(REGION_N == "CENTRAL REGION")
 region_bbox <- st_bbox(region_selected)
@@ -631,7 +615,7 @@ stats <- boxplot.stats(region_selected$DEPENDENCY)
 outlier_vals <- stats$out
 outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
 
-tmap_mode("plot")
+tmap_mode("view")
 
 tm_shape(region_selected, 
          bbox = region_bbox) +
@@ -643,93 +627,35 @@ tm_shape(region_selected,
   tm_borders() +
   tm_shape(outlier_sf) +
   tm_borders(col = "red", lwd = 2) +
-tm_layout(frame = FALSE)
+  tm_view(set_zoom_limits = c(12,14))
 ```
 
 ```{r}
-#| label: course-chap02-plot-mode-after-view
-#| eval: false
+#| label: ch02-37
 tmap_mode("plot")
 ```
 
+The interactive maps support zooming and inspection of the central-region subzones. Red borders mark the dependency-ratio outliers identified by the boxplot rule.
+
 ::: {.callout-note}
-## My Finding
+## My Finding {.unnumbered}
 
 The central region subset changes the reading scale. On the full-island map, central subzones compete visually with the rest of Singapore; after filtering, the same dependency values become easier to compare locally, and the red outlier borders feel more purposeful.
 :::
 
-```{r}
-tmap_mode("plot")
-```
-
-```{r}
-region_selected <- mpsz_pop2024 %>%
-  filter(REGION_N == "CENTRAL REGION")
-region_bbox <- st_bbox(region_selected)
-
-stats <- boxplot.stats(region_selected$DEPENDENCY)
-outlier_vals <- stats$out
-outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
-
-tmap_mode("plot")
-
-tm_shape(region_selected, 
-         bbox = region_bbox) +
-  tm_fill("DEPENDENCY",
-          id = "SUBZONE_N",
-          popup.vars = c(
-            "Name" = "SUBZONE_N", 
-            "Dependency" = "DEPENDENCY")) +
-  tm_borders() +
-  tm_shape(outlier_sf) +
-  tm_borders(col = "red", lwd = 2) +
-  tm_view(set_zoom_limits = c(12,14))
-```
-
-```{r}
-#| label: course-chap02-central-outliers-zoom
-#| eval: false
-region_selected <- mpsz_pop2024 %>%
-  filter(REGION_N == "CENTRAL REGION")
-region_bbox <- st_bbox(region_selected)
-stats <- boxplot.stats(region_selected$DEPENDENCY)
-outlier_vals <- stats$out
-outlier_sf <- region_selected[region_selected$DEPENDENCY %in% outlier_vals, ]
-tmap_mode("view")
-tm_shape(region_selected,
-         bbox = region_bbox) +
-  tm_fill("DEPENDENCY",
-          id = "SUBZONE_N",
-          popup.vars = c(
-            "Name" = "SUBZONE_N",
-            "Dependency" = "DEPENDENCY")) +
-  tm_borders() +
-  tm_shape(outlier_sf) +
-  tm_borders(col = "red", lwd = 2) +
-  tm_view(set_zoom_limits = c(12,14))
-```
-
-```{r}
-#| label: course-chap02-plot-mode-final
-#| eval: false
-tmap_mode("plot")
-```
-
-```{r}
-tmap_mode("plot")
-```
-
 ::: {.callout-tip}
-## What I Noticed
+## What I Noticed {.unnumbered}
 
 The central region view makes the outliers easier to inspect than the whole-island map. In my rendered result, places such as Pearl's Hill and Kampong Glam stand out because the dependency ratio is high relative to nearby central subzones.
 :::
 
-## Beyond the Basic Choropleth
+## Further Exploration and Reflections {.unnumbered}
+
+## Beyond the Basic Choropleth {.unnumbered}
 
 The maps above describe where dependency ratio is high or low. I also wanted to check how much of the story comes from the spatial arrangement itself, not just the distribution of the numbers.
 
-### Same Values, Shuffled Locations
+### Same Values, Shuffled Locations {.unnumbered}
 
 ```{r}
 #| label: ch02-shuffled-dependency-map
@@ -762,12 +688,12 @@ tmap_arrange(observed_dependency_map, shuffled_dependency_map, ncol = 2)
 ```
 
 ::: {.callout-important}
-## My Finding
+## My Finding {.unnumbered}
 
 The shuffled map uses the same dependency-ratio values, but it breaks the connection between value and location. The observed map looks more geographically coherent, while the shuffled map looks noisier. This is a useful reminder that a choropleth is not only about the variable distribution; the spatial arrangement also carries information.
 :::
 
-### Visual Area Bias
+### Visual Area Bias {.unnumbered}
 
 ```{r}
 #| label: ch02-area-bias-summary
@@ -794,14 +720,12 @@ area_bias_summary
 ```
 
 ::: {.callout-note}
-## What This Changes for My Map Reading
+## What This Changes for My Map Reading {.unnumbered}
 
 In my output, the least-populated half of subzones takes up `r area_bias_summary$value[1]`% of the mapped land area but contains only `r area_bias_summary$value[2]`% of the population. That means the eye can easily overweight large, sparsely populated subzones. For population mapping, I should be careful not to read visual area as population importance.
 :::
 
-## Complementing Thematic Map with Statistical Chart
-
-### Does Preschool Provision Broadly Follow Young Population?
+### Does Preschool Provision Broadly Follow Young Population? {.unnumbered}
 
 ```{r}
 #| label: ch02-preschool-provision-summary
@@ -849,40 +773,40 @@ ggplot(provision,
                       labels = c("No preschool", "Has preschool"),
                       name = NULL) +
   labs(title = "Preschool count and young population by subzone",
-       x = "Residents aged 0-19",
+       x = "Residents in the course YOUNG age group",
        y = "Preschools in subzone") +
   theme_minimal()
 ```
 
 ::: {.callout-tip}
-## My Finding
+## My Finding {.unnumbered}
 
 The correlation between young population and preschool count is `r provision_summary$correlation`, so the broad relationship is positive. However, `r provision_summary$subzones_without_preschool` subzones with young residents have no preschool point in this dataset, and the largest of these still has `r provision_summary$max_young_no_preschool` young residents. I would treat this as an exploratory signal rather than a final provision assessment, because demand also depends on age bands, school capacity, and nearby centres across subzone boundaries.
 :::
 
-## Takeaway
+## Takeaway {.unnumbered}
 
-Different classification and layout choices can change how strongly a choropleth map communicates spatial contrast. For this dependency-ratio example, the same joined dataset supports overview mapping, regional comparison, and focused outlier inspection. I would use the Jenks or quantile versions for exploration, then refine the legend and annotations depending on the final story.
+Different classification and layout choices can change how strongly a choropleth map communicates spatial contrast. For this dependency-ratio example, the same joined dataset supports overview mapping, regional comparison, and focused outlier inspection. I compare the quantile and equal-interval results, then choose a legend and annotations that communicate the same numeric pattern clearly.
 
-## Reflection
+## Reflection {.unnumbered}
 
 The extra checks changed how I read the choropleth maps. A map can look persuasive even when the classification, area size, or spatial unit is shaping the visual message. The shuffled map, area-bias table, and preschool-population comparison help me slow down and ask whether the pattern is genuinely spatial, visually exaggerated, or only a first descriptive clue.
 
 ::: {.callout-tip}
-## Beyond the Code: Classification Is an Argument
+## Beyond the Code: Classification Is an Argument {.unnumbered}
 
 The part I kept thinking about is that `style = "quantile"`, `style = "jenks"`, and equal intervals can all use the same data but tell slightly different visual stories. Quantile is useful when I want every class to contain a similar number of subzones, but it can exaggerate small numeric differences. Jenks is better at following natural breaks, but the class boundaries are less intuitive to explain without the data beside the map.
 
 So I should not treat the classification argument inside `tm_fill()` as only a design choice. It is part of the analysis. If I were presenting one final map, I would show why that classification was chosen and check whether the main finding still holds when the style changes.
 :::
 
-## Reference
+## 2.9 Reference {#reference}
 
-### All about tmap package
+### 2.9.1 All about tmap package {#all-about-tmap-package}
 
-### Geospatial data wrangling
+### 2.9.2 Geospatial data wrangling {#geospatial-data-wrangling}
 
-### Data wrangling
+### 2.9.3 Data wrangling {#data-wrangling-1}
 
 - R for Geospatial Data Science and Analytics, Chapter 2: [Thematic Mapping and GeoVisualisation with R](https://r4gdsa.netlify.app/chap02.html)
 - data.gov.sg: [Master Plan 2019 Subzone Boundary No Sea](https://data.gov.sg/datasets/d_8594ae9ff96d0c708bc2af633048edfb/view)

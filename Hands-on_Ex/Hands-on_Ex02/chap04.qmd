@@ -8,14 +8,12 @@ format:
     toc: true
     toc-depth: 4
     code-fold: false
-    number-offset: 3
+    number-sections: false
 execute:
   echo: true
   warning: false
   message: false
 ---
-
-# First-order Spatial Point Patterns Analysis Methods {.course-chapter-title}
 
 ```{r}
 #| label: setup
@@ -29,13 +27,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Overview
+## 4.1 Overview {#overview}
 
 I use this page to follow the Chapter 4 point pattern workflow with the local childcare centre and subzone datasets. The main thing I am checking is how the intensity of childcare centres changes across Singapore.
 
 The two practical questions I keep in mind are simple: are childcare centres randomly distributed across Singapore, and where do higher concentrations appear?
 
-## The data
+## 4.2 The data {#the-data}
 
 Two geospatial datasets are used:
 
@@ -44,257 +42,170 @@ Two geospatial datasets are used:
 
 The local project uses GeoJSON copies of both datasets in `Hands-on_Ex/Hands-on_Ex02/data`. I keep all paths relative to this chapter folder so the project can still render after being cloned.
 
-## How I Think About the Method Choices
-
-| Choice | Why it matters in this exercise | What I watch for |
-|---|---|---|
-| Study window | It defines where points are allowed to occur | Singapore-wide and planning-area results should not be treated as the same question |
-| Projected CRS | Distance calculations need metre-based coordinates | EPSG:3414 keeps nearest-neighbour and KDE distances meaningful |
-| Bandwidth | It controls how smooth the KDE surface becomes | A very smooth surface can hide local peaks; a very sharp one can over-emphasise noise |
-| Kernel | It changes how density is spread around each point | I compare kernels as a sensitivity check, not as the main conclusion |
-
-::: {.callout-note}
-### My learning point
-
-For first-order point pattern analysis, the study window and bandwidth feel just as important as the points themselves. The same childcare centres can look more clustered or more evenly spread depending on the scale at which I summarise them.
-:::
-
-## Installing and Loading the R packages
+## 4.3 Installing and Loading the R packages {#installing-and-loading-the-r-packages}
 
 ```{r}
-#| label: ch04-packages
+#| label: ch04-01
 pacman::p_load(sf, terra, spatstat, 
-               tmap, rvest, tidyverse)
-```
-
-```{r}
-#| label: course-chap04-packages
-#| eval: false
-pacman::p_load(sf, terra, spatstat,
                tmap, tidyverse)
 ```
 
-## Importing and Wrangling Geospatial Data Sets
+## 4.4 Importing and Wrangling Geospatial Data Sets {#importing-and-wrangling-geospatial-data-sets}
 
-::: callout-note
-### Local implementation note
-
-The local working datasets are stored as GeoJSON, with the useful boundary attributes already extracted. The import code therefore uses local `st_read()` paths and only uses the KML extraction helper when a `Description` field is present.
-:::
-
-```{r}
-#| label: ch04-read-mpsz
-mpsz_sf <- st_read("data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson",
-                   quiet = TRUE) %>% 
-  st_zm(drop = TRUE, what = "ZM") %>% 
+```r
+mpsz_sf <- st_read("chap04/data/MasterPlan2019SubzoneBoundaryNoSea.geojson") %>% 
   st_transform(crs = 3414)
 ```
 
 ```{r}
-#| label: course-chap04-read-mpsz
-#| eval: false
-mpsz_sf <- st_read("chap04/data/MasterPlan2019SubzoneBoundaryNoSea.geojson") %>%
-  st_transform(crs = 3414)
-```
-
-```{r}
-#| label: ch04-kml-helper
-extract_kml_field <- function(html_text, field_name) {
-  if (is.na(html_text) || html_text == "") return(NA_character_)
-  
-  page <- read_html(html_text)
-  rows <- page %>% html_elements("tr")
-  
-  value <- rows %>%
-    keep(~ html_text2(html_element(.x, "th")) == field_name) %>%
-    html_element("td") %>%
-    html_text2()
-  
-  if (length(value) == 0) NA_character_ else value
-}
-```
-
-```{r}
-#| label: ch04-mpsz-fields
-if ("Description" %in% names(mpsz_sf)) {
-  mpsz_sf <- mpsz_sf %>%
-    mutate(
-      REGION_N = map_chr(Description, extract_kml_field, "REGION_N"),
-      PLN_AREA_N = map_chr(Description, extract_kml_field, "PLN_AREA_N"),
-      SUBZONE_N = map_chr(Description, extract_kml_field, "SUBZONE_N"),
-      SUBZONE_C = map_chr(Description, extract_kml_field, "SUBZONE_C")
-    ) %>%
-    select(-Name, -Description) %>%
-    relocate(geometry, .after = last_col())
-} else {
-  mpsz_sf <- mpsz_sf %>%
-    select(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry)
-}
-```
-
-```{r}
-#| label: ch04-clean-mpsz
-mpsz_cl <- mpsz_sf %>%
-  filter(SUBZONE_N != "SOUTHERN GROUP",
-         PLN_AREA_N != "WESTERN ISLANDS",
-         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
-```
-
-```{r}
-#| label: course-chap04-clean-mpsz
-#| eval: false
-mpsz_cl <- mpsz_sf %>%
-  filter(SUBZONE_N != "SOUTHERN GROUP",
-         PLN_AREA_N != "WESTERN ISLANDS",
-         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
-```
-
-```{r}
-#| label: ch04-save-mpsz
-write_rds(mpsz_cl, 
-          "data/mpsz_cl.rds")
-```
-
-```{r}
-#| label: course-chap04-save-mpsz
-#| eval: false
-write_rds(mpsz_cl,
-          "chap04/data/mpsz_cl.rds")
-```
-
-```{r}
-#| label: ch04-read-childcare
-childcare_sf <- st_read("data/ChildCareServices.geojson",
-                        quiet = TRUE) %>% 
+#| label: ch04-02
+mpsz_sf <- st_read("data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson", quiet = TRUE) %>% 
   st_zm(drop = TRUE, what = "ZM") %>%
   st_transform(crs = 3414)
 ```
 
 ```{r}
-#| label: course-chap04-read-childcare
-#| eval: false
+#| label: ch04-03
+mpsz_cl <- mpsz_sf %>%
+  filter(SUBZONE_N != "SOUTHERN GROUP",
+         PLN_AREA_N != "WESTERN ISLANDS",
+         PLN_AREA_N != "NORTH-EASTERN ISLANDS")
+```
+
+```r
+write_rds(mpsz_cl, 
+          "chap04/data/mpsz_cl.rds")
+```
+
+```{r}
+#| label: ch04-04
+write_rds(mpsz_cl, 
+          "data/mpsz_cl.rds")
+```
+
+```r
 childcare_sf <- st_read("chap04/data/ChildCareServices.geojson") %>%
   st_transform(crs = 3414)
 ```
 
-The projected CRS is important here because the point pattern methods below use distance. Longitude and latitude are good for storing global positions, but metres are more appropriate for measuring nearest neighbours and KDE bandwidths.
-
-### Mapping the geospatial data sets
-
 ```{r}
-#| label: ch04-map-childcare-view
-# The website version renders this as a static map so the Netlify page
-# remains lightweight and reliable.
-tmap_mode('plot')
-tm_shape(childcare_sf)+
-  tm_dots(size = 0.015)
+#| label: ch04-05
+childcare_sf <- st_read("data/ChildCareServices.geojson", quiet = TRUE) %>%
+  st_zm(drop = TRUE, what = "ZM") %>%
+  st_transform(crs = 3414)
 ```
 
+::: callout-note
+### Local implementation note {.unnumbered}
+
+The local working datasets are stored as GeoJSON, with the useful boundary attributes already extracted. The import code therefore uses local `st_read()` paths and only uses the KML extraction helper when a `Description` field is present.
+:::
+
+The projected CRS is important here because the point pattern methods below use distance. Longitude and latitude are good for storing global positions, but metres are more appropriate for measuring nearest neighbours and KDE bandwidths.
+
+### 4.4.1 Mapping the geospatial data sets {#mapping-the-geospatial-data-sets}
+
 ```{r}
-#| label: course-chap04-map-childcare-view
-#| eval: false
+#| label: ch04-06
 tmap_mode('view')
 tm_shape(childcare_sf)+
   tm_dots()
 ```
 
 ```{r}
-#| label: ch04-tmap-plot-mode
+#| label: ch04-07
 tmap_mode('plot')
 ```
 
-## Geospatial Data wrangling
+## 4.5 Geospatial Data wrangling {#geospatial-data-wrangling}
 
 For this exercise, `sf` stores the raw geospatial layers with their attributes, `ppp` stores the point pattern for `spatstat`, and `owin` stores the observation window. I think of them as three different shapes of the same problem: data layer, point process, and study area.
 
-### Converting sf data frames to ppp class
+### 4.5.1 Converting sf data frames to ppp class {#converting-sf-data-frames-to-ppp-class}
 
 ```{r}
-#| label: ch04-as-ppp
+#| label: ch04-08
 childcare_ppp <- as.ppp(childcare_sf)
 ```
 
 ```{r}
-#| label: ch04-class-ppp
+#| label: ch04-09
 class(childcare_ppp)
 ```
 
 ```{r}
-#| label: ch04-summary-ppp
+#| label: ch04-10
 summary(childcare_ppp)
 ```
 
-### Creating owin object
+### 4.5.2 Creating owin object {#creating-owin-object}
 
 ```{r}
-#| label: ch04-as-owin
+#| label: ch04-11
 sg_owin <- as.owin(mpsz_cl)
 ```
 
 ```{r}
-#| label: ch04-class-owin
+#| label: ch04-12
 class(sg_owin)
 ```
 
 ```{r}
-#| label: ch04-plot-owin
+#| label: ch04-13
 plot(sg_owin)
 ```
 
-### Combining point events object and owin object
+### 4.5.3 Combining point events object and owin object {#combining-point-events-object-and-owin-object}
 
 ```{r}
-#| label: ch04-combine-window
+#| label: ch04-14
 childcareSG_ppp = childcare_ppp[sg_owin]
 ```
 
 ```{r}
-#| label: ch04-print-sg-ppp
+#| label: ch04-15
 childcareSG_ppp
 ```
 
-## Clark-Evan Test for Nearest Neighbour Analysis
+## 4.6 Clark-Evan Test for Nearest Neighbour Analysis {#clark-evan-test-for-nearest-neighbour-analysis}
 
 The Clark-Evans test compares the observed nearest-neighbour distances with what would be expected under complete spatial randomness. An index below 1 suggests clustering, while an index above 1 suggests a more regular pattern.
 
-### Perform the Clark-Evans test without CSR
+### 4.6.1 Perform the Clark-Evans test without CSR {#perform-the-clark-evans-test-without-csr}
 
 ```{r}
-#| label: ch04-ce-sg-no-csr
-ce_sg <- clarkevans.test(childcareSG_ppp,
-                correction="none",
-                clipregion=sg_owin,
-                alternative=c("clustered"))
-ce_sg
-```
-
-```{r}
-#| label: course-chap04-ce-clustered
-#| eval: false
+#| label: ch04-16
 clarkevans.test(childcareSG_ppp,
                 correction="none",
                 clipregion= sg_owin,
                 alternative=c("clustered"))
 ```
 
-### Perform the Clark-Evans test with CSR
+```{r}
+#| label: save-ce_sg
+#| include: false
+ce_sg <- clarkevans.test(childcareSG_ppp,
+                correction="none",
+                clipregion= sg_owin,
+                alternative=c("clustered"))
+```
+
+### 4.6.2 Perform the Clark-Evans test with CSR {#perform-the-clark-evans-test-with-csr}
 
 ```{r}
-#| label: ch04-ce-sg-csr
-set.seed(1234)
-ce_sg_mc <- clarkevans.test(childcareSG_ppp,
+#| label: ch04-17
+clarkevans.test(childcareSG_ppp,
                 correction="none",
-                clipregion=sg_owin,
+                clipregion= sg_owin,
                 alternative=c("clustered"),
                 method="MonteCarlo",
                 nsim=99)
-ce_sg_mc
 ```
 
 ```{r}
-#| label: course-chap04-ce-montecarlo
-#| eval: false
-clarkevans.test(childcareSG_ppp,
+#| label: save-ce_sg_mc
+#| include: false
+ce_sg_mc <- clarkevans.test(childcareSG_ppp,
                 correction="none",
                 clipregion= sg_owin,
                 alternative=c("clustered"),
@@ -303,19 +214,19 @@ clarkevans.test(childcareSG_ppp,
 ```
 
 ::: callout-tip
-### My interpretation
+### My interpretation {.unnumbered}
 
 The rendered Singapore-wide Clark-Evans index is `r round(unname(ce_sg$statistic[["R"]]), 3)`. Since it is below 1, the nearest-neighbour pattern supports clustering rather than a regular spacing. The Monte Carlo p-value is `r signif(ce_sg_mc$p.value, 3)`, so the result is statistical evidence against CSR. This does not explain why childcare centres cluster, but it does show that the observed spacing is unlikely to be purely random under this simple null model.
 :::
 
-## Kernel Density Estimation Method
+## 4.7 Kernel Density Estimation Method {#kernel-density-estimation-method}
 
 KDE turns the point pattern into a continuous intensity surface. I use it after the Clark-Evans test because it answers a slightly different question: not whether the pattern is random, but where concentrations appear more clearly on the map.
 
-### Working with automatic bandwidth selection method
+### 4.7.1 Working with automatic bandwidth selection method {#working-with-automatic-bandwidth-selection-method}
 
 ```{r}
-#| label: ch04-kde-diggle
+#| label: ch04-18
 kde_SG_diggle <- density(
   childcareSG_ppp,
   sigma=bw.diggle,
@@ -324,31 +235,31 @@ kde_SG_diggle <- density(
 ```
 
 ```{r}
-#| label: ch04-plot-kde-diggle
+#| label: ch04-19
 plot(kde_SG_diggle)
 ```
 
 ```{r}
-#| label: ch04-summary-kde-diggle
+#| label: ch04-20
 summary(kde_SG_diggle)
 ```
 
-### Rescalling KDE values
-
 ```{r}
-#| label: ch04-bw-diggle
+#| label: ch04-21
 bw <- bw.diggle(childcareSG_ppp)
 bw
 ```
 
+### 4.7.2 Rescalling KDE values {#rescalling-kde-values}
+
 ```{r}
-#| label: ch04-rescale-ppp
+#| label: ch04-22
 childcareSG_ppp_km <- rescale.ppp(
   childcareSG_ppp, 1000, "km")
 ```
 
 ```{r}
-#| label: ch04-kde-km
+#| label: ch04-23
 kde_childcareSG_km <- density(childcareSG_ppp_km,
                               sigma=bw.diggle,
                               edge=TRUE,
@@ -356,34 +267,36 @@ kde_childcareSG_km <- density(childcareSG_ppp_km,
 ```
 
 ```{r}
-#| label: ch04-plot-kde-km
+#| label: ch04-24
 plot(kde_childcareSG_km)
 ```
 
-### Working with different automatic badwidth methods
+### 4.7.3 Working with different automatic badwidth methods {#working-with-different-automatic-badwidth-methods}
 
 ```{r}
-#| label: ch04-bw-cvl
+#| label: ch04-25
 bw.CvL(childcareSG_ppp_km)
 ```
 
 ```{r}
-#| label: ch04-bw-scott
+#| label: ch04-26
 bw.scott(childcareSG_ppp_km)
 ```
 
 ```{r}
-#| label: ch04-bw-ppl
+#| label: ch04-27
 bw.ppl(childcareSG_ppp_km)
 ```
 
 ```{r}
-#| label: ch04-bw-diggle-km
+#| label: ch04-28
 bw.diggle(childcareSG_ppp_km)
 ```
 
 ```{r}
-#| label: ch04-compare-diggle-ppl
+#| label: ch04-29
+#| fig-width: 10
+#| fig-height: 8
 kde_childcareSG.ppl <- density(childcareSG_ppp_km, 
                                sigma=bw.ppl, 
                                edge=TRUE,
@@ -394,15 +307,17 @@ plot(kde_childcareSG.ppl, main = "bw.ppl")
 ```
 
 ::: callout-tip
-### My finding from the bandwidth comparison
+### My finding from the bandwidth comparison {.unnumbered}
 
 The two bandwidth choices tell slightly different stories. `bw.diggle` keeps the surface more locally responsive, while `bw.ppl` gives a smoother island-wide impression. For this childcare dataset, I would use the sharper surface for exploration and the smoother surface when explaining the broad pattern to a non-technical reader.
 :::
 
-### Working with different kernel methods
+### 4.7.4 Working with different kernel methods {#working-with-different-kernel-methods}
 
 ```{r}
-#| label: ch04-kernel-methods
+#| label: ch04-30
+#| fig-width: 10
+#| fig-height: 8
 par(mfrow=c(2,2))
 plot(density(childcareSG_ppp_km, 
              sigma=0.2959712, 
@@ -427,17 +342,17 @@ plot(density(childcareSG_ppp_km,
 ```
 
 ::: callout-note
-### My reading of the kernel plots
+### My reading of the kernel plots {.unnumbered}
 
 The kernel choice changes the texture of the density surface less dramatically than the bandwidth choice. I read the four panels mainly as a sensitivity check: the strongest concentration zones remain visible, so the broad interpretation does not depend on only one kernel shape.
 :::
 
-## Fixed and Adaptive KDE
+## 4.8 Fixed and Adaptive KDE {#fixed-and-adaptive-kde}
 
-### Computing KDE by using fixed bandwidth
+### 4.8.1 Computing KDE by using fixed bandwidth {#computing-kde-by-using-fixed-bandwidth}
 
 ```{r}
-#| label: ch04-fixed-kde
+#| label: ch04-31
 kde_childcareSG_fb <- density(childcareSG_ppp_km,
                               sigma=0.6, 
                               edge=TRUE,
@@ -445,10 +360,10 @@ kde_childcareSG_fb <- density(childcareSG_ppp_km,
 plot(kde_childcareSG_fb)
 ```
 
-### Computing KDE by using adaptive bandwidth
+### 4.8.2 Computing KDE by using adaptive bandwidth {#computing-kde-by-using-adaptive-bandwidth}
 
 ```{r}
-#| label: ch04-adaptive-kde
+#| label: ch04-32
 kde_childcareSG_ab <- adaptive.density(
   childcareSG_ppp_km, 
   method="kernel")
@@ -456,70 +371,68 @@ plot(kde_childcareSG_ab)
 ```
 
 ```{r}
-#| label: ch04-fixed-adaptive-compare
+#| label: ch04-33
+#| fig-width: 10
+#| fig-height: 8
 par(mfrow=c(1,2))
 plot(kde_childcareSG_fb, main = "Fixed bandwidth")
 plot(kde_childcareSG_ab, main = "Adaptive bandwidth")
 ```
 
 ::: callout-tip
-### Why bandwidth matters
+### Why bandwidth matters {.unnumbered}
 
 The bandwidth changes how strongly the surface is smoothed. A smaller bandwidth keeps local peaks sharper, while a larger fixed bandwidth makes the pattern easier to read at a broad scale but can blur nearby concentrations. The adaptive KDE is useful here because childcare centres are not evenly spread across Singapore; it keeps more local detail where points are dense and smooths more where points are sparse.
 :::
 
-## Plotting cartographic quality KDE map
+## 4.9 Plotting cartographic quality KDE map {#plotting-cartographic-quality-kde-map}
 
-### Converting gridded output into raster
+### 4.9.1 Converting gridded output into raster {#converting-gridded-output-into-raster}
 
 ```{r}
-#| label: ch04-kde-to-terra
+#| label: ch04-34
 kde_childcareSG_bw_terra <- rast(kde_childcareSG_km)
 ```
 
-::: callout-note
-### Local cartographic note
-
-The KDE object above was calculated from a point pattern rescaled to kilometres. Before assigning EPSG:3414 for mapping, I convert the raster extent back to metres so the cartographic coordinates match Singapore SVY21.
-:::
-
 ```{r}
-#| label: ch04-kde-extent-metres
-kde_ext <- ext(kde_childcareSG_bw_terra)
-ext(kde_childcareSG_bw_terra) <- ext(
-  kde_ext[1] * 1000,
-  kde_ext[2] * 1000,
-  kde_ext[3] * 1000,
-  kde_ext[4] * 1000
-)
-```
-
-```{r}
-#| label: ch04-kde-terra-class
+#| label: ch04-35
 class(kde_childcareSG_bw_terra)
 ```
 
 ```{r}
-#| label: ch04-print-terra-no-crs
+#| label: ch04-36
 kde_childcareSG_bw_terra
 ```
 
-### Assigning projection systems
+The raster grid uses kilometres. I multiply its extent by 1,000 before assigning the metre-based EPSG:3414 CRS; the density values stay in centres per square kilometre.
 
 ```{r}
-#| label: ch04-assign-crs
+#| label: raster-extent-metres
+ext(kde_childcareSG_bw_terra) <- as.vector(ext(kde_childcareSG_bw_terra)) * 1000
+```
+
+::: callout-note
+### Local cartographic note {.unnumbered}
+
+The KDE object above was calculated from a point pattern rescaled to kilometres. Before assigning EPSG:3414 for mapping, I convert the raster extent back to metres so the cartographic coordinates match Singapore SVY21.
+:::
+
+### 4.9.2 Assigning projection systems {#assigning-projection-systems}
+
+```{r}
+#| label: ch04-37
 crs(kde_childcareSG_bw_terra) <- "EPSG:3414"
 ```
 
 ```{r}
-#| label: ch04-print-terra-crs
+#| label: ch04-38
 kde_childcareSG_bw_terra
 ```
 
-### Plotting KDE map with tmap
+### 4.9.3 Plotting KDE map with tmap {#plotting-kde-map-with-tmap}
 
 ```{r}
-#| label: ch04-tmap-kde
+#| label: ch04-39
 tm_shape(kde_childcareSG_bw_terra) + 
   tm_raster(col.scale = 
               tm_scale_continuous(
@@ -539,17 +452,19 @@ tm_shape(kde_childcareSG_bw_terra) +
 ```
 
 ::: callout-tip
-### What I noticed on the KDE map
+### What I noticed on the KDE map {.unnumbered}
 
 The cartographic KDE map makes the density result easier to discuss because it places the intensity surface back into Singapore coordinates. The higher density areas appear as a spatial surface rather than isolated points, which is more useful for describing service concentration.
 :::
 
-## First Order SPPA at the Planning Subzone Level
+## 4.10 First Order SPPA at the Planning Subzone Level {#first-order-sppa-at-the-planning-subzone-level}
 
-### Geospatial data wrangling
+### 4.10.1 Geospatial data wrangling {#geospatial-data-wrangling-1}
+
+#### 4.10.1.1 Extracting study area {#extracting-study-area}
 
 ```{r}
-#| label: ch04-planning-areas
+#| label: ch04-40
 pg <- mpsz_cl %>%
   filter(PLN_AREA_N == "PUNGGOL")
 tm <- mpsz_cl %>%
@@ -560,10 +475,10 @@ jw <- mpsz_cl %>%
   filter(PLN_AREA_N == "JURONG WEST")
 ```
 
-#### Extracting study area
-
 ```{r}
-#| label: ch04-plot-planning-areas
+#| label: ch04-41
+#| fig-width: 10
+#| fig-height: 8
 par(mfrow=c(2,2))
 plot(st_geometry(pg), main = "Ponggol")
 plot(st_geometry(tm), main = "Tampines")
@@ -571,20 +486,20 @@ plot(st_geometry(ck), main = "Choa Chu Kang")
 plot(st_geometry(jw), main = "Jurong West")
 ```
 
-#### Creating owin Object
+#### 4.10.1.2 Creating owin object {#creating-owin-object-1}
 
 ```{r}
-#| label: ch04-planning-owin
+#| label: ch04-42
 pg_owin = as.owin(pg)
 tm_owin = as.owin(tm)
 ck_owin = as.owin(ck)
 jw_owin = as.owin(jw)
 ```
 
-#### Combining point events object and owin object
+#### 4.10.1.3 Combining point events object and owin object {#combining-point-events-object-and-owin-object-1}
 
 ```{r}
-#| label: ch04-planning-ppp
+#| label: ch04-43
 childcare_pg_ppp = childcare_ppp[pg_owin]
 childcare_tm_ppp = childcare_ppp[tm_owin]
 childcare_ck_ppp = childcare_ppp[ck_owin]
@@ -592,7 +507,7 @@ childcare_jw_ppp = childcare_ppp[jw_owin]
 ```
 
 ```{r}
-#| label: ch04-planning-ppp-km
+#| label: ch04-44
 childcare_pg_ppp.km = rescale.ppp(childcare_pg_ppp, 1000, "km")
 childcare_tm_ppp.km = rescale.ppp(childcare_tm_ppp, 1000, "km")
 childcare_ck_ppp.km = rescale.ppp(childcare_ck_ppp, 1000, "km")
@@ -600,7 +515,9 @@ childcare_jw_ppp.km = rescale.ppp(childcare_jw_ppp, 1000, "km")
 ```
 
 ```{r}
-#| label: ch04-plot-planning-ppp
+#| label: ch04-45
+#| fig-width: 10
+#| fig-height: 8
 par(mfrow=c(2,2))
 plot(unmark(childcare_pg_ppp.km), 
   main="Punggol")
@@ -613,61 +530,67 @@ plot(unmark(childcare_jw_ppp.km),
 ```
 
 ::: callout-note
-### Comparing local point patterns
+### Comparing local point patterns {.unnumbered}
 
 The four planning areas do not look equally dense or equally spread out. This is why I think the local windows are important: a national pattern can hide the fact that each planning area has its own geometry, number of centres, and internal spacing.
 :::
 
-### Clark and Evans Test
+### 4.10.2 Clark and Evans Test {#clark-and-evans-test}
 
-#### Choa Chu Kang planning area
+#### 4.10.2.1 Choa Chu Kang planning area {#choa-chu-kang-planning-area}
 
 ```{r}
-#| label: ch04-ce-ck
-set.seed(1234)
+#| label: ch04-46
+clarkevans.test(childcare_ck_ppp,
+                correction="none",
+                clipregion=NULL,
+                alternative=c("two.sided"),
+                nsim=999)
+```
+
+```{r}
+#| label: save-ce_ck
+#| include: false
 ce_ck <- clarkevans.test(childcare_ck_ppp,
                 correction="none",
                 clipregion=NULL,
                 alternative=c("two.sided"),
                 nsim=999)
-ce_ck
+```
+
+#### 4.10.2.2 Tampines planning area {#tampines-planning-area}
+
+```{r}
+#| label: ch04-47
+clarkevans.test(childcare_tm_ppp,
+                correction="none",
+                clipregion=NULL,
+                alternative=c("two.sided"),
+                nsim=999)
 ```
 
 ```{r}
-#| label: course-chap04-ce-ck
-#| eval: false
-clarkevans.test(childcare_ck_ppp, correction="none", clipregion=NULL, alternative=c("two.sided"), nsim=999)
-```
-
-#### Tampines planning area
-
-```{r}
-#| label: ch04-ce-tm
-set.seed(1234)
+#| label: save-ce_tm
+#| include: false
 ce_tm <- clarkevans.test(childcare_tm_ppp,
                 correction="none",
                 clipregion=NULL,
                 alternative=c("two.sided"),
                 nsim=999)
-ce_tm
-```
-
-```{r}
-#| label: course-chap04-ce-tm
-#| eval: false
-clarkevans.test(childcare_tm_ppp, correction="none", clipregion=NULL, alternative=c("two.sided"), nsim=999)
 ```
 
 ::: callout-tip
-### Singapore-wide vs planning-area view
+### Singapore-wide vs planning-area view {.unnumbered}
 
 The planning-area tests show why the analysis window matters. The Singapore-wide result summarises one point pattern over the whole country, while the Choa Chu Kang and Tampines windows focus on local spacing inside each planning area. In this render, Choa Chu Kang has a Clark-Evans index of `r round(unname(ce_ck$statistic[["R"]]), 3)` and Tampines has an index of `r round(unname(ce_tm$statistic[["R"]]), 3)`, so the local interpretation should not be read as a simple copy of the national pattern.
 :::
 
-### Computing KDE surfaces by planning area
+### 4.10.3 Computing KDE surfaces by planning area {#computing-kde-surfaces-by-planning-area}
 
 ```{r}
-#| label: ch04-planning-kde
+#| label: ch04-48
+#| fig-width: 10
+#| fig-height: 8
 par(mfrow=c(2,2))
 plot(density(childcare_pg_ppp.km, 
              sigma=bw.diggle, 
@@ -691,7 +614,24 @@ plot(density(childcare_jw_ppp.km,
      main="Jurong West")
 ```
 
-### My Enhanced View
+## Further Exploration and Reflections {.unnumbered}
+
+## How I Think About the Method Choices {.unnumbered}
+
+| Choice | Why it matters in this exercise | What I watch for |
+|---|---|---|
+| Study window | It defines where points are allowed to occur | Singapore-wide and planning-area results should not be treated as the same question |
+| Projected CRS | Distance calculations need metre-based coordinates | EPSG:3414 keeps nearest-neighbour and KDE distances meaningful |
+| Bandwidth | It controls how smooth the KDE surface becomes | A very smooth surface can hide local peaks; a very sharp one can over-emphasise noise |
+| Kernel | It changes how density is spread around each point | I compare kernels as a sensitivity check, not as the main conclusion |
+
+::: {.callout-note}
+### My learning point {.unnumbered}
+
+For first-order point pattern analysis, the study window and bandwidth feel just as important as the points themselves. The same childcare centres can look more clustered or more evenly spread depending on the scale at which I summarise them.
+:::
+
+### My Enhanced View {.unnumbered}
 
 ```{r}
 #| label: ch04-enhanced-focus-map
@@ -714,44 +654,44 @@ tm_shape(focus_areas) +
 ```
 
 ::: callout-tip
-### My finding from the focus map
+### My finding from the focus map {.unnumbered}
 
 The focus map is useful because Choa Chu Kang and Tampines are easier to compare when they are shown together with the same symbol style. Tampines appears to have a more visibly distributed set of childcare centres, while Choa Chu Kang looks more constrained by its planning-area shape.
 :::
 
-## Beyond the Basic Density Surface
+## Beyond the Basic Density Surface {.unnumbered}
 
 The KDE map is visually strong, but I should not over-read it as a demand or accessibility map. It shows where childcare centres are concentrated, not whether the number of centres is enough for nearby children or whether families can reach them easily.
 
 ::: {.callout-important}
-### What I would check next
+### What I would check next {.unnumbered}
 
 The next step would be to bring in child population, residential land use, or walking-network distance. That would move the analysis from "where are centres dense?" to "where might service provision be relatively high or low compared with potential demand?"
 :::
 
-## Clark-Evans vs KDE
+## Clark-Evans vs KDE {.unnumbered}
 
 Clark-Evans gives a statistical check of nearest-neighbour spacing, while KDE gives a visual intensity surface. I would not treat them as substitutes. The test helps me ask whether the pattern departs from CSR, while KDE helps me inspect where concentrations are stronger.
 
-## What I Learned
+## What I Learned {.unnumbered}
 
 - CRS matters because the main calculations use distance.
 - `ppp` and `owin` are the key objects that let `spatstat` understand the point events and the analysis window.
 - KDE is useful for visualising intensity, but the hotspot appearance depends on bandwidth.
 - Changing the study window can change the interpretation, especially when comparing Singapore-wide and planning-area views.
 
-## Limitations
+## Limitations {.unnumbered}
 
 The point pattern shows where childcare centres are located, but it does not directly explain the causes of clustering. CSR is also a simple null model, so the result should be read as a starting point rather than a full explanation of childcare service provision.
 
 ::: {.callout-tip}
-## Beyond the Code: Bandwidth Changes the Story
+## Beyond the Code: Bandwidth Changes the Story {.unnumbered}
 
 For KDE, I realised the bandwidth is not just a technical input. A smaller bandwidth makes local hotspots appear sharper, while a larger bandwidth smooths the same points into broader regional patterns. Both can be useful, but they answer different reading questions.
 
 I would use a sharper surface when I want to inspect very local concentration, such as whether centres bunch around a few neighbourhood nodes. I would use a smoother surface when the question is more about planning-area level intensity. This is why comparing `bw.diggle`, `bw.ppl`, and the fixed/adaptive KDE outputs matters: it helps me avoid presenting one attractive heatmap as if it were the only possible truth.
 :::
 
-## References
+## References {.unnumbered}
 
 - R for Geospatial Data Science and Analytics. Chapter 4: First-order Spatial Point Patterns Analysis Methods. <https://r4gdsa.netlify.app/chap04>

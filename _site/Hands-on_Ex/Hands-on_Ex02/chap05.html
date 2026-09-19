@@ -161,6 +161,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex04/chap08.html">
  <span class="dropdown-text">Exercise 4: Spatial Weights</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="../../Hands-on_Ex/Hands-on_Ex05/chap09.html">
+ <span class="dropdown-text">Exercise 5: Global Autocorrelation</span></a>
+  </li>  
     </ul>
   </li>
   <li class="nav-item">
@@ -198,72 +202,70 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#nd-order-spatial-point-patterns-analysis-methods" id="toc-nd-order-spatial-point-patterns-analysis-methods" class="nav-link active" data-scroll-target="#nd-order-spatial-point-patterns-analysis-methods"><span class="header-section-number">5</span> 2nd Order Spatial Point Patterns Analysis Methods</a>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">5.1 Overview</a></li>
+  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data">5.2 The data</a></li>
+  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages">5.3 Installing and Loading the R packages</a></li>
+  <li><a href="#data-import-and-preparation" id="toc-data-import-and-preparation" class="nav-link" data-scroll-target="#data-import-and-preparation">5.4 Data Import and Preparation</a></li>
+  <li><a href="#second-order-spatial-point-patterns-analysis" id="toc-second-order-spatial-point-patterns-analysis" class="nav-link" data-scroll-target="#second-order-spatial-point-patterns-analysis">5.5 Second-order Spatial Point Patterns Analysis</a></li>
+  <li><a href="#analysing-spatial-point-process-using-g-function" id="toc-analysing-spatial-point-process-using-g-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-g-function">5.6 Analysing Spatial Point Process Using G-Function</a>
   <ul>
-  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">5.1</span> Overview</a></li>
-  <li><a href="#the-data" id="toc-the-data" class="nav-link" data-scroll-target="#the-data"><span class="header-section-number">5.2</span> The data</a></li>
-  <li><a href="#installing-and-loading-the-r-packages" id="toc-installing-and-loading-the-r-packages" class="nav-link" data-scroll-target="#installing-and-loading-the-r-packages"><span class="header-section-number">5.3</span> Installing and Loading the R packages</a></li>
-  <li><a href="#data-import-and-preparation" id="toc-data-import-and-preparation" class="nav-link" data-scroll-target="#data-import-and-preparation"><span class="header-section-number">5.4</span> Data Import and Preparation</a></li>
-  <li><a href="#second-order-spatial-point-patterns-analysis" id="toc-second-order-spatial-point-patterns-analysis" class="nav-link" data-scroll-target="#second-order-spatial-point-patterns-analysis"><span class="header-section-number">5.5</span> Second-order Spatial Point Patterns Analysis</a></li>
-  <li><a href="#analysing-spatial-point-process-using-g-function" id="toc-analysing-spatial-point-process-using-g-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-g-function"><span class="header-section-number">5.6</span> Analysing Spatial Point Process Using G-Function</a>
+  <li><a href="#choa-chu-kang-planning-area" id="toc-choa-chu-kang-planning-area" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area">5.6.1 Choa Chu Kang planning area</a>
   <ul class="collapse">
-  <li><a href="#choa-chu-kang-planning-area" id="toc-choa-chu-kang-planning-area" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area"><span class="header-section-number">5.6.1</span> Choa Chu Kang planning area</a>
+  <li><a href="#computing-g-function-estimation" id="toc-computing-g-function-estimation" class="nav-link" data-scroll-target="#computing-g-function-estimation">5.6.1.1 Computing G-function estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test" id="toc-performing-complete-spatial-randomness-test" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test">5.6.1.2 Performing Complete Spatial Randomness Test</a></li>
+  </ul></li>
+  <li><a href="#tampines-planning-area" id="toc-tampines-planning-area" class="nav-link" data-scroll-target="#tampines-planning-area">5.6.2 Tampines planning area</a>
   <ul class="collapse">
-  <li><a href="#computing-g-function-estimation" id="toc-computing-g-function-estimation" class="nav-link" data-scroll-target="#computing-g-function-estimation"><span class="header-section-number">5.6.1.1</span> Computing G-function estimation</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test" id="toc-performing-complete-spatial-randomness-test" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test"><span class="header-section-number">5.6.1.2</span> Performing Complete Spatial Randomness Test</a></li>
+  <li><a href="#computing-g-function-estimation-1" id="toc-computing-g-function-estimation-1" class="nav-link" data-scroll-target="#computing-g-function-estimation-1">5.6.2.1 Computing G-function estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-1" id="toc-performing-complete-spatial-randomness-test-1" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-1">5.6.2.2 Performing Complete Spatial Randomness Test</a></li>
   </ul></li>
-  <li><a href="#tampines-planning-area" id="toc-tampines-planning-area" class="nav-link" data-scroll-target="#tampines-planning-area"><span class="header-section-number">5.6.2</span> Tampines planning area</a>
+  </ul></li>
+  <li><a href="#analysing-spatial-point-process-using-f-function" id="toc-analysing-spatial-point-process-using-f-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-f-function">5.7 Analysing Spatial Point Process Using F-Function</a>
+  <ul>
+  <li><a href="#choa-chu-kang-planning-area-1" id="toc-choa-chu-kang-planning-area-1" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area-1">5.7.1 Choa Chu Kang planning area</a>
   <ul class="collapse">
-  <li><a href="#computing-g-function-estimation-1" id="toc-computing-g-function-estimation-1" class="nav-link" data-scroll-target="#computing-g-function-estimation-1"><span class="header-section-number">5.6.2.1</span> Computing G-function estimation</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test-1" id="toc-performing-complete-spatial-randomness-test-1" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-1"><span class="header-section-number">5.6.2.2</span> Performing Complete Spatial Randomness Test</a></li>
+  <li><a href="#computing-f-function-estimation" id="toc-computing-f-function-estimation" class="nav-link" data-scroll-target="#computing-f-function-estimation">5.7.1.1 Computing F-function estimation</a></li>
   </ul></li>
-  </ul></li>
-  <li><a href="#analysing-spatial-point-process-using-f-function" id="toc-analysing-spatial-point-process-using-f-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-f-function"><span class="header-section-number">5.7</span> Analysing Spatial Point Process Using F-Function</a>
+  <li><a href="#performing-complete-spatial-randomness-test-2" id="toc-performing-complete-spatial-randomness-test-2" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-2">5.7.2 Performing Complete Spatial Randomness Test</a></li>
+  <li><a href="#tampines-planning-area-1" id="toc-tampines-planning-area-1" class="nav-link" data-scroll-target="#tampines-planning-area-1">5.7.3 Tampines planning area</a>
   <ul class="collapse">
-  <li><a href="#choa-chu-kang-planning-area-1" id="toc-choa-chu-kang-planning-area-1" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area-1"><span class="header-section-number">5.7.1</span> Choa Chu Kang planning area</a>
+  <li><a href="#computing-f-function-estimation-1" id="toc-computing-f-function-estimation-1" class="nav-link" data-scroll-target="#computing-f-function-estimation-1">5.7.3.1 Computing F-function estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-3" id="toc-performing-complete-spatial-randomness-test-3" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-3">5.7.3.2 Performing Complete Spatial Randomness Test</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#analysing-spatial-point-process-using-k-function" id="toc-analysing-spatial-point-process-using-k-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-k-function">5.8 Analysing Spatial Point Process Using K-Function</a>
+  <ul>
+  <li><a href="#choa-chu-kang-planning-area-2" id="toc-choa-chu-kang-planning-area-2" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area-2">5.8.1 Choa Chu Kang planning area</a>
   <ul class="collapse">
-  <li><a href="#computing-f-function-estimation" id="toc-computing-f-function-estimation" class="nav-link" data-scroll-target="#computing-f-function-estimation"><span class="header-section-number">5.7.1.1</span> Computing F-function estimation</a></li>
+  <li><a href="#computing-k-fucntion-estimate" id="toc-computing-k-fucntion-estimate" class="nav-link" data-scroll-target="#computing-k-fucntion-estimate">5.8.1.1 Computing K-fucntion estimate</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-4" id="toc-performing-complete-spatial-randomness-test-4" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-4">5.8.1.2 Performing Complete Spatial Randomness Test</a></li>
   </ul></li>
-  <li><a href="#performing-complete-spatial-randomness-test-2" id="toc-performing-complete-spatial-randomness-test-2" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-2"><span class="header-section-number">5.7.2</span> Performing Complete Spatial Randomness Test</a></li>
-  <li><a href="#tampines-planning-area-1" id="toc-tampines-planning-area-1" class="nav-link" data-scroll-target="#tampines-planning-area-1"><span class="header-section-number">5.7.3</span> Tampines planning area</a>
+  <li><a href="#tampines-planning-area-2" id="toc-tampines-planning-area-2" class="nav-link" data-scroll-target="#tampines-planning-area-2">5.8.2 Tampines planning area</a>
   <ul class="collapse">
-  <li><a href="#computing-f-function-estimation-1" id="toc-computing-f-function-estimation-1" class="nav-link" data-scroll-target="#computing-f-function-estimation-1"><span class="header-section-number">5.7.3.1</span> Computing F-function estimation</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test-3" id="toc-performing-complete-spatial-randomness-test-3" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-3"><span class="header-section-number">5.7.3.2</span> Performing Complete Spatial Randomness Test</a></li>
+  <li><a href="#computing-k-function-estimation" id="toc-computing-k-function-estimation" class="nav-link" data-scroll-target="#computing-k-function-estimation">5.8.2.1 Computing K-function estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-5" id="toc-performing-complete-spatial-randomness-test-5" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-5">5.8.2.2 Performing Complete Spatial Randomness Test</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#analysing-spatial-point-process-using-k-function" id="toc-analysing-spatial-point-process-using-k-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-k-function"><span class="header-section-number">5.8</span> Analysing Spatial Point Process Using K-Function</a>
+  <li><a href="#analysing-spatial-point-process-using-l-function" id="toc-analysing-spatial-point-process-using-l-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-l-function">5.9 Analysing Spatial Point Process Using L-Function</a>
+  <ul>
+  <li><a href="#choa-chu-kang-planning-area-3" id="toc-choa-chu-kang-planning-area-3" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area-3">5.9.1 Choa Chu Kang planning area</a>
   <ul class="collapse">
-  <li><a href="#choa-chu-kang-planning-area-2" id="toc-choa-chu-kang-planning-area-2" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area-2"><span class="header-section-number">5.8.1</span> Choa Chu Kang planning area</a>
+  <li><a href="#computing-l-fucntion-estimation" id="toc-computing-l-fucntion-estimation" class="nav-link" data-scroll-target="#computing-l-fucntion-estimation">5.9.1.1 Computing L Fucntion estimation</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-6" id="toc-performing-complete-spatial-randomness-test-6" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-6">5.9.1.2 Performing Complete Spatial Randomness Test</a></li>
+  </ul></li>
+  <li><a href="#tampines-planning-area-3" id="toc-tampines-planning-area-3" class="nav-link" data-scroll-target="#tampines-planning-area-3">5.9.2 Tampines planning area</a>
   <ul class="collapse">
-  <li><a href="#computing-k-fucntion-estimate" id="toc-computing-k-fucntion-estimate" class="nav-link" data-scroll-target="#computing-k-fucntion-estimate"><span class="header-section-number">5.8.1.1</span> Computing K-fucntion estimate</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test-4" id="toc-performing-complete-spatial-randomness-test-4" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-4"><span class="header-section-number">5.8.1.2</span> Performing Complete Spatial Randomness Test</a></li>
-  </ul></li>
-  <li><a href="#tampines-planning-area-2" id="toc-tampines-planning-area-2" class="nav-link" data-scroll-target="#tampines-planning-area-2"><span class="header-section-number">5.8.2</span> Tampines planning area</a>
-  <ul class="collapse">
-  <li><a href="#computing-k-function-estimation" id="toc-computing-k-function-estimation" class="nav-link" data-scroll-target="#computing-k-function-estimation"><span class="header-section-number">5.8.2.1</span> Computing K-function estimation</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test-5" id="toc-performing-complete-spatial-randomness-test-5" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-5"><span class="header-section-number">5.8.2.2</span> Performing Complete Spatial Randomness Test</a></li>
+  <li><a href="#computing-l-fucntion-estimate" id="toc-computing-l-fucntion-estimate" class="nav-link" data-scroll-target="#computing-l-fucntion-estimate">5.9.2.1 Computing L-fucntion estimate</a></li>
+  <li><a href="#performing-complete-spatial-randomness-test-7" id="toc-performing-complete-spatial-randomness-test-7" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-7">5.9.2.2 Performing Complete Spatial Randomness Test</a></li>
   </ul></li>
   </ul></li>
-  <li><a href="#analysing-spatial-point-process-using-l-function" id="toc-analysing-spatial-point-process-using-l-function" class="nav-link" data-scroll-target="#analysing-spatial-point-process-using-l-function"><span class="header-section-number">5.9</span> Analysing Spatial Point Process Using L-Function</a>
-  <ul class="collapse">
-  <li><a href="#choa-chu-kang-planning-area-3" id="toc-choa-chu-kang-planning-area-3" class="nav-link" data-scroll-target="#choa-chu-kang-planning-area-3"><span class="header-section-number">5.9.1</span> Choa Chu Kang planning area</a>
-  <ul class="collapse">
-  <li><a href="#computing-l-fucntion-estimation" id="toc-computing-l-fucntion-estimation" class="nav-link" data-scroll-target="#computing-l-fucntion-estimation"><span class="header-section-number">5.9.1.1</span> Computing L Fucntion estimation</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test-6" id="toc-performing-complete-spatial-randomness-test-6" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-6"><span class="header-section-number">5.9.1.2</span> Performing Complete Spatial Randomness Test</a></li>
-  </ul></li>
-  <li><a href="#tampines-planning-area-3" id="toc-tampines-planning-area-3" class="nav-link" data-scroll-target="#tampines-planning-area-3"><span class="header-section-number">5.9.2</span> Tampines planning area</a>
-  <ul class="collapse">
-  <li><a href="#computing-l-fucntion-estimate" id="toc-computing-l-fucntion-estimate" class="nav-link" data-scroll-target="#computing-l-fucntion-estimate"><span class="header-section-number">5.9.2.1</span> Computing L-fucntion estimate</a></li>
-  <li><a href="#performing-complete-spatial-randomness-test-7" id="toc-performing-complete-spatial-randomness-test-7" class="nav-link" data-scroll-target="#performing-complete-spatial-randomness-test-7"><span class="header-section-number">5.9.2.2</span> Performing Complete Spatial Randomness Test</a></li>
-  </ul></li>
-  </ul></li>
-  <li><a href="#g-f-k-and-l-how-i-distinguish-them" id="toc-g-f-k-and-l-how-i-distinguish-them" class="nav-link" data-scroll-target="#g-f-k-and-l-how-i-distinguish-them"><span class="header-section-number">5.10</span> G, F, K and L: How I Distinguish Them</a></li>
-  <li><a href="#my-interpretation" id="toc-my-interpretation" class="nav-link" data-scroll-target="#my-interpretation"><span class="header-section-number">5.11</span> My Interpretation</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned"><span class="header-section-number">5.12</span> What I Learned</a></li>
-  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations"><span class="header-section-number">5.13</span> Limitations</a></li>
-  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection"><span class="header-section-number">5.14</span> Reflection</a></li>
-  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference"><span class="header-section-number">5.15</span> Reference</a></li>
-  </ul></li>
+  <li><a href="#further-exploration-and-reflections" id="toc-further-exploration-and-reflections" class="nav-link" data-scroll-target="#further-exploration-and-reflections">Further Exploration and Reflections</a></li>
+  <li><a href="#g-f-k-and-l-how-i-distinguish-them" id="toc-g-f-k-and-l-how-i-distinguish-them" class="nav-link" data-scroll-target="#g-f-k-and-l-how-i-distinguish-them">G, F, K and L: How I Distinguish Them</a></li>
+  <li><a href="#my-interpretation" id="toc-my-interpretation" class="nav-link" data-scroll-target="#my-interpretation">My Interpretation</a></li>
+  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I Learned</a></li>
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  <li><a href="#reference" id="toc-reference" class="nav-link" data-scroll-target="#reference">Reference</a></li>
   </ul>
 </nav>
     </div>
@@ -302,14 +304,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="nd-order-spatial-point-patterns-analysis-methods" class="level1 course-chapter-title" data-number="5">
-<h1 class="course-chapter-title" data-number="5"><span class="header-section-number">5</span> 2nd Order Spatial Point Patterns Analysis Methods</h1>
-<section id="overview" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="overview"><span class="header-section-number">5.1</span> Overview</h2>
+<section id="overview" class="level2">
+<h2 class="anchored" data-anchor-id="overview">5.1 Overview</h2>
 <p>This page continues from the Chapter 4 preparation and focuses on Choa Chu Kang and Tampines. I use G-, F-, K-, and L-functions to compare how childcare centre locations behave across distance.</p>
 </section>
-<section id="the-data" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="the-data"><span class="header-section-number">5.2</span> The data</h2>
+<section id="the-data" class="level2">
+<h2 class="anchored" data-anchor-id="the-data">5.2 The data</h2>
 <p>The same two local GeoJSON datasets are used:</p>
 <ul>
 <li>Child Care Services as point features.</li>
@@ -317,17 +317,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>The Chapter 5 analysis focuses on the Choa Chu Kang and Tampines planning areas, using the point pattern objects prepared in the same way as Chapter 4.</p>
 </section>
-<section id="installing-and-loading-the-r-packages" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="installing-and-loading-the-r-packages"><span class="header-section-number">5.3</span> Installing and Loading the R packages</h2>
+<section id="installing-and-loading-the-r-packages" class="level2">
+<h2 class="anchored" data-anchor-id="installing-and-loading-the-r-packages">5.3 Installing and Loading the R packages</h2>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(sf, spatstat, tmap, tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 </section>
-<section id="data-import-and-preparation" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="data-import-and-preparation"><span class="header-section-number">5.4</span> Data Import and Preparation</h2>
+<section id="data-import-and-preparation" class="level2">
+<h2 class="anchored" data-anchor-id="data-import-and-preparation">5.4 Data Import and Preparation</h2>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mpsz_cl <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson"</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry) <span class="sc">%&gt;%</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(SUBZONE_N <span class="sc">!=</span> <span class="st">"SOUTHERN GROUP"</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>         PLN_AREA_N <span class="sc">!=</span> <span class="st">"WESTERN ISLANDS"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>         PLN_AREA_N <span class="sc">!=</span> <span class="st">"NORTH-EASTERN ISLANDS"</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>childcare_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/ChildCareServices.geojson"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>childcare_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(childcare_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>tm <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"TAMPINES"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ck <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"CHOA CHU KANG"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>tm_owin <span class="ot">=</span> <span class="fu">as.owin</span>(tm)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ck_owin <span class="ot">=</span> <span class="fu">as.owin</span>(ck)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>childcare_tm_ppp <span class="ot">=</span> childcare_ppp[tm_owin]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>childcare_ck_ppp <span class="ot">=</span> childcare_ppp[ck_owin]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_ck_ppp), <span class="at">main =</span> <span class="st">"Choa Chu Kang"</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_tm_ppp), <span class="at">main =</span> <span class="st">"Tampines"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="chap05_files/figure-html/ch05-plot-study-areas-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -341,54 +379,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>To keep this page reproducible on its own, I recreate the required <code>sf</code>, <code>owin</code>, and <code>ppp</code> objects from the local GeoJSON files.</p>
 </div>
 </div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mpsz_cl <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/MasterPlan2019SubzoneBoundaryNoSeaGEOJSON.geojson"</span>,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(REGION_N, PLN_AREA_N, SUBZONE_N, SUBZONE_C, geometry) <span class="sc">%&gt;%</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(SUBZONE_N <span class="sc">!=</span> <span class="st">"SOUTHERN GROUP"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>         PLN_AREA_N <span class="sc">!=</span> <span class="st">"WESTERN ISLANDS"</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>         PLN_AREA_N <span class="sc">!=</span> <span class="st">"NORTH-EASTERN ISLANDS"</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>childcare_sf <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"data/ChildCareServices.geojson"</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                        <span class="at">quiet =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_zm</span>(<span class="at">drop =</span> <span class="cn">TRUE</span>, <span class="at">what =</span> <span class="st">"ZM"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_transform</span>(<span class="at">crs =</span> <span class="dv">3414</span>)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>childcare_ppp <span class="ot">&lt;-</span> <span class="fu">as.ppp</span>(childcare_sf)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tm <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"TAMPINES"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>ck <span class="ot">&lt;-</span> mpsz_cl <span class="sc">%&gt;%</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(PLN_AREA_N <span class="sc">==</span> <span class="st">"CHOA CHU KANG"</span>)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>tm_owin <span class="ot">=</span> <span class="fu">as.owin</span>(tm)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ck_owin <span class="ot">=</span> <span class="fu">as.owin</span>(ck)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>childcare_tm_ppp <span class="ot">=</span> childcare_ppp[tm_owin]</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>childcare_ck_ppp <span class="ot">=</span> childcare_ppp[ck_owin]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow=</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">2</span>))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_ck_ppp), <span class="at">main =</span> <span class="st">"Choa Chu Kang"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">unmark</span>(childcare_tm_ppp), <span class="at">main =</span> <span class="st">"Tampines"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-study-areas-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
 </section>
-<section id="second-order-spatial-point-patterns-analysis" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="second-order-spatial-point-patterns-analysis"><span class="header-section-number">5.5</span> Second-order Spatial Point Patterns Analysis</h2>
+<section id="second-order-spatial-point-patterns-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="second-order-spatial-point-patterns-analysis">5.5 Second-order Spatial Point Patterns Analysis</h2>
 <p>The observed curve is compared with what complete spatial randomness would look like. When an observed line moves outside the simulation envelope, I read that as evidence that the pattern is behaving differently from CSR for that distance range.</p>
 </section>
-<section id="analysing-spatial-point-process-using-g-function" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="analysing-spatial-point-process-using-g-function"><span class="header-section-number">5.6</span> Analysing Spatial Point Process Using G-Function</h2>
+<section id="analysing-spatial-point-process-using-g-function" class="level2">
+<h2 class="anchored" data-anchor-id="analysing-spatial-point-process-using-g-function">5.6 Analysing Spatial Point Process Using G-Function</h2>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -402,24 +399,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The G-function is event-to-event. I read it as a nearest-neighbour view: if the observed curve rises faster than the CSR expectation, many events have close neighbours.</p>
 </div>
 </div>
-<section id="choa-chu-kang-planning-area" class="level3" data-number="5.6.1">
-<h3 data-number="5.6.1" class="anchored" data-anchor-id="choa-chu-kang-planning-area"><span class="header-section-number">5.6.1</span> Choa Chu Kang planning area</h3>
-<section id="computing-g-function-estimation" class="level4" data-number="5.6.1.1">
-<h4 data-number="5.6.1.1" class="anchored" data-anchor-id="computing-g-function-estimation"><span class="header-section-number">5.6.1.1</span> Computing G-function estimation</h4>
+<section id="choa-chu-kang-planning-area" class="level3">
+<h3 class="anchored" data-anchor-id="choa-chu-kang-planning-area">5.6.1 Choa Chu Kang planning area</h3>
+<section id="computing-g-function-estimation" class="level4">
+<h4 class="anchored" data-anchor-id="computing-g-function-estimation">5.6.1.1 Computing G-function estimation</h4>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>G_CK <span class="ot">=</span> <span class="fu">Gest</span>(childcare_ck_ppp, <span class="at">correction =</span> <span class="st">"border"</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_CK, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">500</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-g-ck-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-03-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="performing-complete-spatial-randomness-test" class="level4" data-number="5.6.1.2">
-<h4 data-number="5.6.1.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test"><span class="header-section-number">5.6.1.2</span> Performing Complete Spatial Randomness Test</h4>
+<section id="performing-complete-spatial-randomness-test" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test">5.6.1.2 Performing Complete Spatial Randomness Test</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>G_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Gest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -449,31 +449,31 @@ Done.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-g-ck-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-05-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="tampines-planning-area" class="level3" data-number="5.6.2">
-<h3 data-number="5.6.2" class="anchored" data-anchor-id="tampines-planning-area"><span class="header-section-number">5.6.2</span> Tampines planning area</h3>
-<section id="computing-g-function-estimation-1" class="level4" data-number="5.6.2.1">
-<h4 data-number="5.6.2.1" class="anchored" data-anchor-id="computing-g-function-estimation-1"><span class="header-section-number">5.6.2.1</span> Computing G-function estimation</h4>
+<section id="tampines-planning-area" class="level3">
+<h3 class="anchored" data-anchor-id="tampines-planning-area">5.6.2 Tampines planning area</h3>
+<section id="computing-g-function-estimation-1" class="level4">
+<h4 class="anchored" data-anchor-id="computing-g-function-estimation-1">5.6.2.1 Computing G-function estimation</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>G_tm <span class="ot">=</span> <span class="fu">Gest</span>(childcare_tm_ppp, <span class="at">correction =</span> <span class="st">"best"</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(G_tm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-g-tm-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-06-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="performing-complete-spatial-randomness-test-1" class="level4" data-number="5.6.2.2">
-<h4 data-number="5.6.2.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-1"><span class="header-section-number">5.6.2.2</span> Performing Complete Spatial Randomness Test</h4>
+<section id="performing-complete-spatial-randomness-test-1" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-1">5.6.2.2 Performing Complete Spatial Randomness Test</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>G_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Gest, <span class="at">correction =</span> <span class="st">"all"</span>, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -503,7 +503,7 @@ Done.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-g-tm-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-08-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
@@ -524,8 +524,8 @@ Done.</code></pre>
 </section>
 </section>
 </section>
-<section id="analysing-spatial-point-process-using-f-function" class="level2" data-number="5.7">
-<h2 data-number="5.7" class="anchored" data-anchor-id="analysing-spatial-point-process-using-f-function"><span class="header-section-number">5.7</span> Analysing Spatial Point Process Using F-Function</h2>
+<section id="analysing-spatial-point-process-using-f-function" class="level2">
+<h2 class="anchored" data-anchor-id="analysing-spatial-point-process-using-f-function">5.7 Analysing Spatial Point Process Using F-Function</h2>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -539,27 +539,28 @@ Done.</code></pre>
 <p>The F-function is location-to-event. Instead of starting from an existing childcare centre, it starts from arbitrary locations in the study area and asks how far those locations are from the nearest centre.</p>
 </div>
 </div>
-<section id="choa-chu-kang-planning-area-1" class="level3" data-number="5.7.1">
-<h3 data-number="5.7.1" class="anchored" data-anchor-id="choa-chu-kang-planning-area-1"><span class="header-section-number">5.7.1</span> Choa Chu Kang planning area</h3>
-<section id="computing-f-function-estimation" class="level4" data-number="5.7.1.1">
-<h4 data-number="5.7.1.1" class="anchored" data-anchor-id="computing-f-function-estimation"><span class="header-section-number">5.7.1.1</span> Computing F-function estimation</h4>
+<section id="choa-chu-kang-planning-area-1" class="level3">
+<h3 class="anchored" data-anchor-id="choa-chu-kang-planning-area-1">5.7.1 Choa Chu Kang planning area</h3>
+<section id="computing-f-function-estimation" class="level4">
+<h4 class="anchored" data-anchor-id="computing-f-function-estimation">5.7.1.1 Computing F-function estimation</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>F_CK <span class="ot">=</span> <span class="fu">Fest</span>(childcare_ck_ppp)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(F_CK)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-f-ck-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-09-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="performing-complete-spatial-randomness-test-2" class="level3" data-number="5.7.2">
-<h3 data-number="5.7.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-2"><span class="header-section-number">5.7.2</span> Performing Complete Spatial Randomness Test</h3>
+<section id="performing-complete-spatial-randomness-test-2" class="level3">
+<h3 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-2">5.7.2 Performing Complete Spatial Randomness Test</h3>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>F_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Fest, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>F_CK.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Fest, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 999 simulated realisations of CSR  ...
 1, 2, 3, ......10.........20.........30.........40.........50.........60..
@@ -587,32 +588,34 @@ Done.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-f-ck-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-11-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="tampines-planning-area-1" class="level3" data-number="5.7.3">
-<h3 data-number="5.7.3" class="anchored" data-anchor-id="tampines-planning-area-1"><span class="header-section-number">5.7.3</span> Tampines planning area</h3>
-<section id="computing-f-function-estimation-1" class="level4" data-number="5.7.3.1">
-<h4 data-number="5.7.3.1" class="anchored" data-anchor-id="computing-f-function-estimation-1"><span class="header-section-number">5.7.3.1</span> Computing F-function estimation</h4>
+<section id="tampines-planning-area-1" class="level3">
+<h3 class="anchored" data-anchor-id="tampines-planning-area-1">5.7.3 Tampines planning area</h3>
+<section id="computing-f-function-estimation-1" class="level4">
+<h4 class="anchored" data-anchor-id="computing-f-function-estimation-1">5.7.3.1 Computing F-function estimation</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>F_tm <span class="ot">=</span> <span class="fu">Fest</span>(childcare_tm_ppp, <span class="at">correction =</span> <span class="st">"best"</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(F_tm)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-f-tm-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-12-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="performing-complete-spatial-randomness-test-3" class="level4" data-number="5.7.3.2">
-<h4 data-number="5.7.3.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-3"><span class="header-section-number">5.7.3.2</span> Performing Complete Spatial Randomness Test</h4>
+<section id="performing-complete-spatial-randomness-test-3" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-3">5.7.3.2 Performing Complete Spatial Randomness Test</h4>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>F_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Fest, <span class="at">correction =</span> <span class="st">"all"</span>, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>F_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Fest,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">correction =</span> <span class="st">"all"</span>, </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 999 simulated realisations of CSR  ...
 1, 2, 3, ......10.........20.........30.........40.........50.........60..
@@ -640,7 +643,7 @@ Done.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-f-tm-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-14-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
@@ -661,8 +664,8 @@ Done.</code></pre>
 </section>
 </section>
 </section>
-<section id="analysing-spatial-point-process-using-k-function" class="level2" data-number="5.8">
-<h2 data-number="5.8" class="anchored" data-anchor-id="analysing-spatial-point-process-using-k-function"><span class="header-section-number">5.8</span> Analysing Spatial Point Process Using K-Function</h2>
+<section id="analysing-spatial-point-process-using-k-function" class="level2">
+<h2 class="anchored" data-anchor-id="analysing-spatial-point-process-using-k-function">5.8 Analysing Spatial Point Process Using K-Function</h2>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -676,26 +679,28 @@ Done.</code></pre>
 <p>The K-function is more multi-scale. It counts neighbours within increasing distance bands, so it is useful when clustering may happen at some distances but not others.</p>
 </div>
 </div>
-<section id="choa-chu-kang-planning-area-2" class="level3" data-number="5.8.1">
-<h3 data-number="5.8.1" class="anchored" data-anchor-id="choa-chu-kang-planning-area-2"><span class="header-section-number">5.8.1</span> Choa Chu Kang planning area</h3>
-<section id="computing-k-fucntion-estimate" class="level4" data-number="5.8.1.1">
-<h4 data-number="5.8.1.1" class="anchored" data-anchor-id="computing-k-fucntion-estimate"><span class="header-section-number">5.8.1.1</span> Computing K-fucntion estimate</h4>
+<section id="choa-chu-kang-planning-area-2" class="level3">
+<h3 class="anchored" data-anchor-id="choa-chu-kang-planning-area-2">5.8.1 Choa Chu Kang planning area</h3>
+<section id="computing-k-fucntion-estimate" class="level4">
+<h4 class="anchored" data-anchor-id="computing-k-fucntion-estimate">5.8.1.1 Computing K-fucntion estimate</h4>
 <div class="cell" data-layout-align="center">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>K_ck <span class="ot">=</span> <span class="fu">Kest</span>(childcare_ck_ppp, <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_ck, . <span class="sc">-</span>r <span class="sc">~</span> r, <span class="at">ylab=</span> <span class="st">"K(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-k-ck-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-15-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="performing-complete-spatial-randomness-test-4" class="level4" data-number="5.8.1.2">
-<h4 data-number="5.8.1.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-4"><span class="header-section-number">5.8.1.2</span> Performing Complete Spatial Randomness Test</h4>
+<section id="performing-complete-spatial-randomness-test-4" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-4">5.8.1.2 Performing Complete Spatial Randomness Test</h4>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>K_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Kest, <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal=</span><span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>K_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Kest, </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 99 simulated realisations of CSR  ...
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -709,44 +714,42 @@ Done.</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>K_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Kest,</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_ck.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"K(d)-r"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_ck.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"K(d)-r"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-k-ck-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-17-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="tampines-planning-area-2" class="level3" data-number="5.8.2">
-<h3 data-number="5.8.2" class="anchored" data-anchor-id="tampines-planning-area-2"><span class="header-section-number">5.8.2</span> Tampines planning area</h3>
-<section id="computing-k-function-estimation" class="level4" data-number="5.8.2.1">
-<h4 data-number="5.8.2.1" class="anchored" data-anchor-id="computing-k-function-estimation"><span class="header-section-number">5.8.2.1</span> Computing K-function estimation</h4>
+<section id="tampines-planning-area-2" class="level3">
+<h3 class="anchored" data-anchor-id="tampines-planning-area-2">5.8.2 Tampines planning area</h3>
+<section id="computing-k-function-estimation" class="level4">
+<h4 class="anchored" data-anchor-id="computing-k-function-estimation">5.8.2.1 Computing K-function estimation</h4>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>K_tm <span class="ot">=</span> <span class="fu">Kest</span>(childcare_tm_ppp, <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_tm, . <span class="sc">-</span>r <span class="sc">~</span> r, </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab=</span> <span class="st">"K(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>, </span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>K_tm <span class="ot">=</span> <span class="fu">Kest</span>(childcare_tm_ppp, </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_tm, . <span class="sc">-</span>r <span class="sc">~</span> r, </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab=</span> <span class="st">"K(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>, </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-k-tm-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-18-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="performing-complete-spatial-randomness-test-5" class="level4" data-number="5.8.2.2">
-<h4 data-number="5.8.2.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-5"><span class="header-section-number">5.8.2.2</span> Performing Complete Spatial Randomness Test</h4>
+<section id="performing-complete-spatial-randomness-test-5" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-5">5.8.2.2 Performing Complete Spatial Randomness Test</h4>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>K_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Kest, <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal=</span><span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>K_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Kest, </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 99 simulated realisations of CSR  ...
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -760,17 +763,13 @@ Done.</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>K_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Kest,</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_tm.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, </span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"K(d)-r"</span>, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">500</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(K_tm.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"K(d)-r"</span>, </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">500</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-k-tm-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-20-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
@@ -791,8 +790,8 @@ Done.</code></pre>
 </section>
 </section>
 </section>
-<section id="analysing-spatial-point-process-using-l-function" class="level2" data-number="5.9">
-<h2 data-number="5.9" class="anchored" data-anchor-id="analysing-spatial-point-process-using-l-function"><span class="header-section-number">5.9</span> Analysing Spatial Point Process Using L-Function</h2>
+<section id="analysing-spatial-point-process-using-l-function" class="level2">
+<h2 class="anchored" data-anchor-id="analysing-spatial-point-process-using-l-function">5.9 Analysing Spatial Point Process Using L-Function</h2>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -806,27 +805,29 @@ Done.</code></pre>
 <p>The L-function is a transformed version of K. I find it easier to read because the CSR reference is closer to a flat zero line after plotting <code>L(d)-r</code>.</p>
 </div>
 </div>
-<section id="choa-chu-kang-planning-area-3" class="level3" data-number="5.9.1">
-<h3 data-number="5.9.1" class="anchored" data-anchor-id="choa-chu-kang-planning-area-3"><span class="header-section-number">5.9.1</span> Choa Chu Kang planning area</h3>
-<section id="computing-l-fucntion-estimation" class="level4" data-number="5.9.1.1">
-<h4 data-number="5.9.1.1" class="anchored" data-anchor-id="computing-l-fucntion-estimation"><span class="header-section-number">5.9.1.1</span> Computing L Fucntion estimation</h4>
+<section id="choa-chu-kang-planning-area-3" class="level3">
+<h3 class="anchored" data-anchor-id="choa-chu-kang-planning-area-3">5.9.1 Choa Chu Kang planning area</h3>
+<section id="computing-l-fucntion-estimation" class="level4">
+<h4 class="anchored" data-anchor-id="computing-l-fucntion-estimation">5.9.1.1 Computing L Fucntion estimation</h4>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>L_ck <span class="ot">=</span> <span class="fu">Lest</span>(childcare_ck_ppp, <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_ck, . <span class="sc">-</span>r <span class="sc">~</span> r, </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab=</span> <span class="st">"L(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>L_ck <span class="ot">=</span> <span class="fu">Lest</span>(childcare_ck_ppp, <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_ck, . <span class="sc">-</span>r <span class="sc">~</span> r, </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab=</span> <span class="st">"L(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-l-ck-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-21-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
 </div>
 </section>
-<section id="performing-complete-spatial-randomness-test-6" class="level4" data-number="5.9.1.2">
-<h4 data-number="5.9.1.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-6"><span class="header-section-number">5.9.1.2</span> Performing Complete Spatial Randomness Test</h4>
+<section id="performing-complete-spatial-randomness-test-6" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-6">5.9.1.2 Performing Complete Spatial Randomness Test</h4>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>L_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Lest, <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal=</span><span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>L_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Lest, </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 99 simulated realisations of CSR  ...
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -840,44 +841,42 @@ Done.</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>L_ck.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_ck_ppp, Lest,</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_ck.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"L(d)-r"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="chap05_files/figure-html/ch05-23-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="tampines-planning-area-3" class="level3">
+<h3 class="anchored" data-anchor-id="tampines-planning-area-3">5.9.2 Tampines planning area</h3>
+<section id="computing-l-fucntion-estimate" class="level4">
+<h4 class="anchored" data-anchor-id="computing-l-fucntion-estimate">5.9.2.1 Computing L-fucntion estimate</h4>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>L_tm <span class="ot">=</span> <span class="fu">Lest</span>(childcare_tm_ppp, <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_tm, . <span class="sc">-</span>r <span class="sc">~</span> r, </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab=</span> <span class="st">"L(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>, </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="chap05_files/figure-html/ch05-24-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="performing-complete-spatial-randomness-test-7" class="level4">
+<h4 class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-7">5.9.2.2 Performing Complete Spatial Randomness Test</h4>
+<div class="cell" data-layout-align="center">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>L_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Lest, </span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
 <span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_ck.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"L(d)-r"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-l-ck-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="tampines-planning-area-3" class="level3" data-number="5.9.2">
-<h3 data-number="5.9.2" class="anchored" data-anchor-id="tampines-planning-area-3"><span class="header-section-number">5.9.2</span> Tampines planning area</h3>
-<section id="computing-l-fucntion-estimate" class="level4" data-number="5.9.2.1">
-<h4 data-number="5.9.2.1" class="anchored" data-anchor-id="computing-l-fucntion-estimate"><span class="header-section-number">5.9.2.1</span> Computing L-fucntion estimate</h4>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>L_tm <span class="ot">=</span> <span class="fu">Lest</span>(childcare_tm_ppp, <span class="at">correction =</span> <span class="st">"Ripley"</span>)</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_tm, . <span class="sc">-</span>r <span class="sc">~</span> r, </span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab=</span> <span class="st">"L(d)-r"</span>, <span class="at">xlab =</span> <span class="st">"d(m)"</span>, </span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1000</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-l-tm-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="performing-complete-spatial-randomness-test-7" class="level4" data-number="5.9.2.2">
-<h4 data-number="5.9.2.2" class="anchored" data-anchor-id="performing-complete-spatial-randomness-test-7"><span class="header-section-number">5.9.2.2</span> Performing Complete Spatial Randomness Test</h4>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>L_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Lest, <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>, <span class="at">glocal=</span><span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Generating 99 simulated realisations of CSR  ...
 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -891,17 +890,13 @@ Done.</code></pre>
 </div>
 </div>
 <div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>L_tm.csr <span class="ot">&lt;-</span> <span class="fu">envelope</span>(childcare_tm_ppp, Lest,</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">nsim =</span> <span class="dv">99</span>, <span class="at">rank =</span> <span class="dv">1</span>,</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">global=</span><span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell" data-layout-align="center">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_tm.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, </span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"L(d)-r"</span>, <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">500</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(L_tm.csr, . <span class="sc">-</span> r <span class="sc">~</span> r, </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab=</span><span class="st">"d"</span>, <span class="at">ylab=</span><span class="st">"L(d)-r"</span>, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlim=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">500</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="chap05_files/figure-html/ch05-plot-l-tm-envelope-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
+<p><img src="chap05_files/figure-html/ch05-26-1.png" class="img-fluid quarto-figure quarto-figure-center figure-img" width="768"></p>
 </figure>
 </div>
 </div>
@@ -935,8 +930,11 @@ Done.</code></pre>
 </section>
 </section>
 </section>
-<section id="g-f-k-and-l-how-i-distinguish-them" class="level2" data-number="5.10">
-<h2 data-number="5.10" class="anchored" data-anchor-id="g-f-k-and-l-how-i-distinguish-them"><span class="header-section-number">5.10</span> G, F, K and L: How I Distinguish Them</h2>
+<section id="further-exploration-and-reflections" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="further-exploration-and-reflections">Further Exploration and Reflections</h2>
+</section>
+<section id="g-f-k-and-l-how-i-distinguish-them" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="g-f-k-and-l-how-i-distinguish-them">G, F, K and L: How I Distinguish Them</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -963,7 +961,7 @@ Done.</code></pre>
 <td>F</td>
 <td>arbitrary location-to-event</td>
 <td>Are random locations in the planning area close to a centre?</td>
-<td>Empty-space distances are shorter than expected under CSR</td>
+<td>Larger empty spaces: the observed F curve lies below CSR at relevant distances</td>
 </tr>
 <tr class="odd">
 <td>K</td>
@@ -993,12 +991,12 @@ Done.</code></pre>
 </div>
 </div>
 </section>
-<section id="my-interpretation" class="level2" data-number="5.11">
-<h2 data-number="5.11" class="anchored" data-anchor-id="my-interpretation"><span class="header-section-number">5.11</span> My Interpretation</h2>
+<section id="my-interpretation" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="my-interpretation">My Interpretation</h2>
 <p>Across these plots, I read the observed curves relative to the CSR line and simulation envelope rather than from the curve alone. When a curve sits outside the envelope, it suggests that the childcare centre pattern in that planning area is not behaving like CSR at that distance range. The G and F functions help me think about nearest events and empty space, while K and L give a broader distance-based view.</p>
 </section>
-<section id="what-i-learned" class="level2" data-number="5.12">
-<h2 data-number="5.12" class="anchored" data-anchor-id="what-i-learned"><span class="header-section-number">5.12</span> What I Learned</h2>
+<section id="what-i-learned" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="what-i-learned">What I Learned</h2>
 <ul>
 <li>First-order and second-order methods answer different questions: intensity versus interaction.</li>
 <li>Simulation envelopes make the plots more useful because they give a practical CSR comparison.</li>
@@ -1006,12 +1004,12 @@ Done.</code></pre>
 <li>The interpretation should be tied to distance ranges, not just one overall statement.</li>
 </ul>
 </section>
-<section id="limitations" class="level2" data-number="5.13">
-<h2 data-number="5.13" class="anchored" data-anchor-id="limitations"><span class="header-section-number">5.13</span> Limitations</h2>
+<section id="limitations" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="limitations">Limitations</h2>
 <p>CSR is a simple benchmark, and it does not account for population distribution, residential land use, transport access, or planning policy. The result is useful for describing spatial pattern, but not enough by itself to explain the causes of that pattern.</p>
 </section>
-<section id="reflection" class="level2" data-number="5.14">
-<h2 data-number="5.14" class="anchored" data-anchor-id="reflection"><span class="header-section-number">5.14</span> Reflection</h2>
+<section id="reflection" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="reflection">Reflection</h2>
 <p>Compared with first-order KDE, second-order analysis made me think more carefully about distance ranges. A single statement like “the centres are clustered” is too broad unless I say at what distance and under which study window. The envelopes also helped me read the plots more cautiously because I could compare the observed curve with simulated CSR patterns rather than relying only on visual impression.</p>
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -1023,19 +1021,18 @@ Done.</code></pre>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>The <code>global</code> choice in simulation envelopes is a good example of a small parameter that changes the meaning of the evidence. With pointwise envelopes, I can look at particular distances and ask where the observed curve moves outside the simulated range. That is helpful for exploration because the distance scale is visible.</p>
-<p>With simultaneous envelopes, the comparison is stricter because it controls the whole curve at once. I would use it when I want a more formal statement about whether the pattern departs from CSR overall. For this coursework page, I read pointwise-style results as a guide to interesting distance ranges, and simultaneous-style results as stronger support when making a final claim.</p>
+<p>The <code>global</code> choice changes which family of comparisons the envelope covers. With pointwise envelopes, I can look at particular distances and ask where the observed curve moves outside the simulated range. That is helpful for exploration because the distance scale is visible.</p>
+<p>A simultaneous envelope tests the entire pre-specified distance interval. A pointwise envelope covers each fixed distance separately; searching across many distances changes the overall error rate. I use <code>global = FALSE</code> for the course plots and compare it with <code>global = TRUE</code> below, keeping the simulated patterns and distance interval identical.</p>
 </div>
 </div>
 </section>
-<section id="reference" class="level2" data-number="5.15">
-<h2 data-number="5.15" class="anchored" data-anchor-id="reference"><span class="header-section-number">5.15</span> Reference</h2>
+<section id="reference" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="reference">Reference</h2>
 <ul>
 <li>R for Geospatial Data Science and Analytics. Chapter 5: 2nd Order Spatial Point Patterns Analysis Methods. <a href="https://r4gdsa.netlify.app/chap05" class="uri">https://r4gdsa.netlify.app/chap05</a></li>
 </ul>
 
 
-</section>
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->

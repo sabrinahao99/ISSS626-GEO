@@ -13,4 +13,4 @@ This index lists the main files in the ISSS626 geospatial analytics coursework w
 | Hands-on Exercise 4 | `Hands-on_Ex/Hands-on_Ex04/chap08.qmd` |
 | Rendered website | `_site/` |
 
-Exercise 3 uses local MODIS fire detections and the Bangka-Belitung study boundary stored in `Hands-on_Ex/Hands-on_Ex03/data/rawdata/`.
+Exercise 3 uses local MODIS fire detections and the Bangka-Belitung study boundary stored in `Hands-on_Ex/Hands-on_Ex03/data/rawdata/`. Exercise 5 uses the local Hunan county data stored in `Hands-on_Ex/Hands-on_Ex05/data/`.

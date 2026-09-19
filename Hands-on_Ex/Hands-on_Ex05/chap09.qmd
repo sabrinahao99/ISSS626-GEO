@@ -1,0 +1,516 @@
+---
+title: "Global Measures of Spatial Autocorrelation"
+subtitle: "Hands-on Exercise 5"
+author: "Zhiyi Hao"
+date: "2026-09-19"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+    number-offset: 8
+    fig-width: 8
+    fig-height: 6
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Global Measures of Spatial Autocorrelation {.course-chapter-title}
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+library(sf)
+library(spdep)
+library(tmap)
+library(tidyverse)
+library(knitr)
+
+tmap_mode("plot")
+```
+
+## Overview
+
+This exercise checks whether GDP per capita in Hunan is geographically patterned. I use the global statistics first, then look at how the relationship changes across neighbour orders in the correlograms.
+
+The main questions I keep in mind are:
+
+- Are neighbouring counties more alike than a random arrangement would suggest?
+- Do Moran's I and Geary's C tell the same story from different perspectives?
+- At which neighbour orders does the relationship weaken or change direction?
+
+## Getting Started
+
+### The analytical question
+
+I treat GDP per capita as a development indicator rather than as a complete measure of development. A significant spatial statistic would show that nearby values are related under the chosen weights; it would not by itself explain why the relationship exists.
+
+### The Study Area and Data
+
+The local folder contains the same 88 county-level Hunan boundary units and `Hunan_2012.csv` used in the course example. The shapefile and the indicator table are copied into this exercise's own `data` folder so the page can render independently.
+
+### Setting the Analytical Toolls
+
+The course package-loading command is kept below. I use the same four packages for importing, wrangling, mapping and spatial autocorrelation.
+
+```r
+pacman::p_load(sf, spdep, tmap, tidyverse)
+```
+
+```{r}
+#| label: ch09-01
+pacman::p_load(sf, spdep, tmap, tidyverse)
+```
+
+## Getting the Data Into R Environment
+
+### Import shapefile into r environment
+
+The course path is shown first, followed by the equivalent local path used for this page.
+
+```r
+hunan <- st_read(dsn = "chap09/data/geospatial", 
+                 layer = "Hunan")
+```
+
+```{r}
+#| label: ch09-02
+hunan <- st_read(
+  dsn = "data/geospatial",
+  layer = "Hunan",
+  quiet = TRUE
+)
+hunan
+```
+
+### Import csv file into r environment
+
+```r
+hunan2012 <- read_csv("chap09/data/aspatial/Hunan_2012.csv")
+```
+
+```{r}
+#| label: ch09-03
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv", show_col_types = FALSE)
+hunan2012 %>% select(County, GDPPC) %>% slice_head(n = 6)
+```
+
+### Performing relational join
+
+```r
+hunan <- left_join(hunan,hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+```{r}
+#| label: ch09-04
+hunan <- left_join(hunan, hunan2012, by = "County") %>%
+  select(1:4, 7, 15)
+
+tibble(
+  county_units = nrow(hunan),
+  missing_gdppc = sum(is.na(hunan$GDPPC)),
+  mean_gdppc = mean(hunan$GDPPC, na.rm = TRUE)
+)
+```
+
+::: {.callout-tip}
+### What I noticed {.unnumbered}
+
+The join keeps 88 spatial units and adds one GDPPC value to each county. The value range is wide, so I expect a classification map to show a few high-value counties clearly. This is only a first visual check: the spatial tests below are needed before I describe the pattern as clustered.
+:::
+
+### Visualising Regional Development Indicator
+
+```r
+#| fig-width: 12
+#| fig-height: 8
+equal <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_borders(fiil_alpha = 0.5) + 
+  tm_layout(legend.position = c("left", "bottom"), 
+            main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fiil_alpha = 0.5) + 
+  tm_layout(legend.position = c("left", "bottom"), 
+            main.title = "Quantile classification")
+
+tmap_arrange(equal, 
+             quantile, 
+             asp=1, 
+             ncol=2)
+```
+
+```{r}
+#| label: ch09-05
+#| fig-width: 12
+#| fig-height: 8
+equal <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "equal",
+                n = 5,
+                values = "brewer.blues")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_layout(legend.position = c("left", "bottom"),
+            main.title = "Equal interval classification")
+
+quantile <- tm_shape(hunan) +
+  tm_polygons(fill = "GDPPC",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5)) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_layout(legend.position = c("left", "bottom"),
+            main.title = "Quantile classification")
+
+tmap_arrange(equal, quantile, asp = 1, ncol = 2)
+```
+
+::: {.callout-tip}
+### My observation {.unnumbered}
+
+The equal-interval map leaves most counties in the lower classes because GDPPC is right-skewed. The quantile map is easier for comparing the number of counties in each class, though it can make small differences look more important. I therefore use the raw GDPPC values for the spatial tests rather than treating either colour classification as evidence.
+:::
+
+## Global Measures of Spatial Autocorrelation
+
+The next step is to define which counties are neighbours. The global statistics depend on this weight matrix, so the neighbour rule is part of the analysis rather than a cosmetic setting.
+
+### Computing Contiguity Spatial Weights
+
+```r
+wm_q <- poly2nb(hunan, 
+                queen=TRUE)
+summary(wm_q)
+```
+
+```{r}
+#| label: ch09-06
+wm_q <- poly2nb(hunan, queen = TRUE)
+summary(wm_q)
+```
+
+::: {.callout-tip}
+### What I noticed {.unnumbered}
+
+The Queen matrix connects polygons that touch at either a boundary or a corner. The summary shows 88 regions and an average of about five links per region. I keep the summary visible because it makes the spatial support of the later test inspectable.
+:::
+
+### Row-standardised weights matrix
+
+```r
+rswm_q <- nb2listw(wm_q, 
+                   style="W", 
+                   zero.policy = TRUE)
+rswm_q
+```
+
+```{r}
+#| label: ch09-07
+rswm_q <- nb2listw(wm_q,
+                   style = "W",
+                   zero.policy = TRUE)
+rswm_q
+```
+
+::: {.callout-note}
+### What can we learn from the code chunk above? {.unnumbered}
+
+With `style = "W"`, each county's neighbouring values are averaged after assigning each link a weight of `1 / number of neighbours`. This lets a county with many neighbours and one with few neighbours contribute on the same row scale. `zero.policy = TRUE` specifies how a region with no neighbours would be handled; it does not create a missing spatial relationship.
+:::
+
+## Global Measures of Spatial Autocorrelation: Moran's I
+
+### Maron's I test
+
+```r
+moran.test(hunan$GDPPC, 
+           listw=rswm_q, 
+           zero.policy = TRUE, 
+           na.action=na.omit)
+```
+
+```{r}
+#| label: ch09-08
+moran_result <- moran.test(hunan$GDPPC,
+                           listw = rswm_q,
+                           zero.policy = TRUE,
+                           na.action = na.omit)
+moran_result
+```
+
+::: {.callout-tip}
+### My interpretation {.unnumbered}
+
+The observed Moran's I is positive and the p-value is very small. Under this Queen and row-standardised specification, neighbouring counties tend to have more similar GDPPC values than a random arrangement would produce. The conclusion is about spatial association, not a causal development mechanism.
+:::
+
+### Computing Monte Carlo Moran's I
+
+```r
+set.seed(1234)
+bperm= moran.mc(hunan$GDPPC, 
+                listw=rswm_q, 
+                nsim=999, 
+                zero.policy = TRUE, 
+                na.action=na.omit)
+bperm
+```
+
+```{r}
+#| label: ch09-09
+set.seed(1234)
+bperm <- moran.mc(hunan$GDPPC,
+                  listw = rswm_q,
+                  nsim = 999,
+                  zero.policy = TRUE,
+                  na.action = na.omit)
+bperm
+```
+
+::: {.callout-tip}
+### What I noticed {.unnumbered}
+
+The permutation test compares the observed statistic with values generated after rearranging GDPPC over the same neighbour structure. The observed value is at the extreme positive end of the simulated distribution, which supports the direction from the analytical test.
+:::
+
+### Visualising Monte Carlo Moran's I
+
+```r
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+hist(bperm$res, 
+     freq=TRUE, 
+     breaks=20, 
+     xlab="Simulated Moran's I")
+abline(v=0, 
+       col="red") 
+```
+
+```{r}
+#| label: ch09-10
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+hist(bperm$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulated Moran's I",
+     main = "Permutation distribution of Moran's I")
+abline(v = 0, col = "red")
+```
+
+::: {.callout-tip}
+### My observation {.unnumbered}
+
+The red line marks the randomisation centre near zero. The observed Moran's I is well to the right of that centre rather than being a small shift inside the main mass of the histogram. This is a useful visual check of the p-value, while the test output remains the formal numerical result.
+:::
+
+> Question: What statistical observation can you draw from the output above?
+
+## Global Measures of Spatial Autocorrelation: Geary's C
+
+### Geary's C test
+
+```r
+geary.test(hunan$GDPPC, listw=rswm_q)
+```
+
+```{r}
+#| label: ch09-11
+geary_result <- geary.test(hunan$GDPPC, listw = rswm_q)
+geary_result
+```
+
+::: {.callout-tip}
+### My interpretation {.unnumbered}
+
+Geary's C is below its randomisation expectation of 1 and the test is significant. This agrees with Moran's I, but the statistic is more sensitive to local pairwise differences. In this dataset, the two measures reinforce the same broad conclusion instead of producing competing signals.
+:::
+
+### Computing Monte Carlo Geary's C
+
+```r
+set.seed(1234)
+bperm=geary.mc(hunan$GDPPC, 
+               listw=rswm_q, 
+               nsim=999)
+bperm
+```
+
+```{r}
+#| label: ch09-12
+set.seed(1234)
+bperm <- geary.mc(hunan$GDPPC,
+                  listw = rswm_q,
+                  nsim = 999)
+bperm
+```
+
+::: {.callout-tip}
+### What I noticed {.unnumbered}
+
+The simulated Geary's C values place the observed value at the low end of the randomisation distribution. Low C means neighbouring values are locally similar, so this result gives the same positive-autocorrelation interpretation as the Moran test from a different calculation.
+:::
+
+### Visualising the Monte Carlo Geary's C
+
+```r
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+hist(bperm$res, freq=TRUE, breaks=20, xlab="Simulated Geary c")
+abline(v=1, col="red") 
+```
+
+```{r}
+#| label: ch09-13
+mean(bperm$res[1:999])
+var(bperm$res[1:999])
+summary(bperm$res[1:999])
+hist(bperm$res,
+     freq = TRUE,
+     breaks = 20,
+     xlab = "Simulated Geary c",
+     main = "Permutation distribution of Geary's C")
+abline(v = 1, col = "red")
+```
+
+::: {.callout-tip}
+### My observation {.unnumbered}
+
+The reference line at 1 represents the randomisation expectation for Geary's C. The observed value lies below this reference, matching the direction in the test output. Moran's I is easier to read as a positive similarity signal; Geary's C is easier to connect to local squared differences.
+:::
+
+> Question: What statistical observation can you draw from the output?
+
+## Spatial Correlogram
+
+### Compute Moran's I correlogram
+
+```r
+MI_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order=6, 
+                          method="I", 
+                          style="W")
+plot(MI_corr)
+```
+
+```{r}
+#| label: ch09-14
+MI_corr <- sp.correlogram(wm_q,
+                          hunan$GDPPC,
+                          order = 6,
+                          method = "I",
+                          style = "W")
+plot(MI_corr)
+```
+
+```r
+print(MI_corr)
+```
+
+```{r}
+#| label: ch09-15
+print(MI_corr)
+```
+
+::: {.callout-tip}
+### My observation {.unnumbered}
+
+Moran's I is positive for the first three neighbour orders, then moves close to zero and becomes negative at higher orders. The global Moran result therefore hides a scale effect: nearby counties are similar, while more distant graph neighbours do not maintain that same relationship.
+:::
+
+> Question: What statistical observation can you draw from the plot above?
+
+### Compute Geary's C correlogram and plot
+
+```r
+GC_corr <- sp.correlogram(wm_q, 
+                          hunan$GDPPC, 
+                          order=6, 
+                          method="C", 
+                          style="W")
+plot(GC_corr)
+```
+
+```{r}
+#| label: ch09-16
+GC_corr <- sp.correlogram(wm_q,
+                          hunan$GDPPC,
+                          order = 6,
+                          method = "C",
+                          style = "W")
+plot(GC_corr)
+```
+
+```r
+print(GC_corr)
+```
+
+```{r}
+#| label: ch09-17
+print(GC_corr)
+```
+
+::: {.callout-tip}
+### My interpretation {.unnumbered}
+
+Geary's C is below 1 at the first two orders, close to 1 around the middle orders, and above 1 at the fifth order. That change is consistent with the Moran correlogram: the strongest local similarity is short range, and the relationship becomes weaker or reverses as the neighbourhood expands.
+:::
+
+## My Additional Check {.unnumbered}
+
+The teacher workflow uses Queen contiguity and row-standardised weights. I repeated the global tests with Rook contiguity to see how sensitive the conclusion is to the shared-corner rule.
+
+```{r}
+#| label: ch09-check
+wm_r <- poly2nb(hunan, queen = FALSE)
+rswm_r <- nb2listw(wm_r, style = "W", zero.policy = TRUE)
+
+comparison <- tibble(
+  statistic = c("Moran's I", "Geary's C"),
+  queen = c(
+    unname(moran_result$estimate[["Moran I statistic"]]),
+    unname(geary_result$estimate[["Geary C statistic"]])
+  ),
+  rook = c(
+    unname(moran.test(hunan$GDPPC, rswm_r, zero.policy = TRUE)$estimate[["Moran I statistic"]]),
+    unname(geary.test(hunan$GDPPC, rswm_r)$estimate[["Geary C statistic"]])
+  )
+)
+comparison
+```
+
+::: {.callout-tip}
+### What I learned from the comparison {.unnumbered}
+
+The Rook check changes the exact statistics because it removes corner-touching links, while the overall direction remains positive Moran's I and sub-one Geary's C. This makes the modelling choice visible: the claim is strongest when it includes the chosen neighbour definition, the weighting style and the statistic together.
+:::
+
+## References
+
+- [Chapter 9: Global Measures of Spatial Autocorrelation](https://r4gdsa.netlify.app/chap09.html)
+- [spdep reference documentation](https://r-spatial.github.io/spdep/)
