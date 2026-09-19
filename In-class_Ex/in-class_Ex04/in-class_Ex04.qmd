@@ -1,0 +1,171 @@
+---
+title: "in-class_Ex04"
+author: "Zhiyi Hao"
+format: html
+date: "2026-09-18"
+date-modified: today
+execute:
+  echo: true
+  eval: true
+  warning: false
+  freeze:  true
+  message: false
+---
+
+```{r}
+pacman::p_load(sf,ggstatsplot,tmap,tidyverse,knitr,GWmodel)
+```
+
+### Import shapefile into r environment
+
+The import paths below point to this exercise's `data` folder. The course paths are shown immediately before each local import.
+
+``` r
+hunan_sf <- st_read(dsn = "chap08/data/geospatial", 
+                 layer = "Hunan")
+```
+
+```{r}
+#| label: ch08-02
+hunan_sf <- st_read(dsn = "data/geospatial", 
+                 layer = "Hunan",
+                 quiet = TRUE)
+```
+
+### Import csv file into r environment
+
+``` r
+hunan2012 <- read_csv("chap08/data/aspatial/Hunan_2012.csv")
+```
+
+```{r}
+#| label: ch08-03
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv")
+```
+
+### Joining hunan and hunan_2012
+
+```{r}
+#| label: ch08-04
+hunan_sf <- left_join(hunan_sf,hunan2012) %>%
+  select(1:3, 7, 15, 16, 31, 32)
+```
+
+### Mapping GDPPC
+
+```{r}
+#| fig-width: 16
+#| fig-height: 6
+#| echo:false
+basemap <- tm_shape(hunan) +
+  tm_polygons() +
+  tm_text("NAME_3", size=0.5)
+
+gdppc <- qtm(hunan_sf, "GDPPC") +
+  tm_layout(
+    legend.position = c("left", "bottom"))
+tmap_arrange(basemap, gdppc, asp=1, ncol=2)
+```
+
+### Converting to SpatialPolygonDataFrame
+
+```{r}
+hunan_sp <- hunan_sf %>%
+  as_Spatial()
+```
+
+### Geographically Weighted Summary Statistics(GSWW) with adaptive bandwidth
+
+#### Determine adaptive bandwidth
+
+Cross-validation
+
+```{r}
+bw_CV <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "CV",
+                adaptive = TRUE,
+                kernel = "bisquare",
+                longlat = T)
+```
+
+::: callout-tip
+##### My observation {.unnumbered}
+For the adaptive bandwidth, the cross-validation (CV) procedure tests different numbers of nearest neighbours and compares their CV scores. The optimal bandwidth is the one that produces the minimum CV score. In our case, the selected adaptive bandwidth is 22. This means that for each location, the model uses its 22 nearest neighbours when calculating the local statistics. Since the bandwidth is adaptive, the actual geographical distance covered can vary from one location to another. In densely populated areas, the 22 neighbours may be relatively close, while in more dispersed areas, the model may need to search over a larger distance.
+:::
+
+#### Determine fixed bandwidth
+```{r}
+bw_CV <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "CV",
+                adaptive = FALSE,
+                kernel = "bisquare",
+                longlat = T)
+```
+
+::: callout-tip
+##### My observation {.unnumbered}
+For the fixed bandwidth, the bandwidth is defined by geographical distance rather than by a fixed number of neighbours. Since longlat = TRUE, the distance is calculated based on longitude and latitude coordinates and is expressed in kilometres. During the cross-validation process, some very small bandwidth values may produce an infinite (Inf) CV score because there are not enough neighbouring observations receiving sufficient weights for a stable local estimation. The algorithm therefore continues testing other bandwidth values and selects the distance that gives the lowest valid CV score. Compared with the adaptive bandwidth, the fixed bandwidth keeps the same geographical search distance for every location, although the number of observations included may vary across space.
+:::
+
+```{r}
+bw_CV
+```
+
+AICc
+
+```{r}
+bw_AIC <- bw.gwr(GDPPC ~ 1,
+                data = hunan_sp,
+                approach = "AICc",
+                adaptive = TRUE,
+                kernel = "bisquare",
+                longlat = T)
+```
+
+```{r}
+bw_AIC
+```
+### Computing geographically weighted summary statistics
+The code chunk below computes geographically weighted summary statistics by using gwss () of GWmodel package. The analysis is performed using adaptive distance weighted. The distance is derived using AlC method and the kernel method used is bisquare.
+```{r}
+gwstat <- gwss(data = hunan_sp,
+               vars = "GDPPC",
+               bw = bw_AIC,
+               kernel = "bisquare",
+               quantile = TRUE,
+               adaptive = TRUE,
+               longlat = T)
+```
+
+Note
+gwss support five kernel methods, namely gaussian, exponential, bisquare, tricube, and boxcar. Repeat the code chunk above with different kernel methods and compare their results visually.
+
+### Preparing the output data
+Code chunk below is used to extract SDF data table from gwss object output from gwss() fro subsequent geovilisation. It will be converted into data.frame by using as.data.frame().
+```{r}
+gwstat_df <- as.data.frame(gwstat$SDF)
+```
+Next,cbind() is used to append the newly derived data.frame onto hunan_sf sf data.frame.
+```{r}
+hunan_gstat <- cbind(hunan_sf, gwstat_df)
+```
+
+### Visualising geographically weighted summary statistics
+
+```{r}
+#| fig-width: 18
+#| fig-height: 8
+tm_shape(hunan_gstat) +
+  tm_polygons(fill = "GDPPC_LM",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 5,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "local Mean")) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("Distribution of geographically wieghted mean") +
+  tm_layout(legend.position = c("left", "bottom"))
+```

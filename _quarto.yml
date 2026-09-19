@@ -11,6 +11,7 @@ project:
     - Hands-on_Ex/Hands-on_Ex03/chap06.qmd
     - Hands-on_Ex/Hands-on_Ex04/chap08.qmd
     - Hands-on_Ex/Hands-on_Ex05/chap09.qmd
+    - In-class_Ex/in-class_Ex04/in-class_Ex04.qmd
 
 website:
   title: "ISSS626"
@@ -36,6 +37,10 @@ website:
             href: "Hands-on_Ex/Hands-on_Ex05/chap09.html"
       - text: "Take-home Exercise"
         href: "Take-home_Ex/index.qmd"
+      - text: "In-class Exercise"
+        menu:
+          - text:"In-class Exercise 4"
+        href: "In-class_Ex/in-class_Ex04/in-class_Ex04.html"
       - about.qmd
     right:
       - icon: github

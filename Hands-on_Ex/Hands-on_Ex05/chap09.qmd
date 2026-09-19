@@ -63,7 +63,7 @@ The local folder contains the same 88 county-level Hunan boundary units and `Hun
 
 The course package-loading command is kept below. I use the same four packages for importing, wrangling, mapping and spatial autocorrelation.
 
-```r
+``` r
 pacman::p_load(sf, spdep, tmap, tidyverse)
 ```
 
@@ -78,7 +78,7 @@ pacman::p_load(sf, spdep, tmap, tidyverse)
 
 The course path is shown first, followed by the equivalent local path used for this page.
 
-```r
+``` r
 hunan <- st_read(dsn = "chap09/data/geospatial", 
                  layer = "Hunan")
 ```
@@ -95,7 +95,7 @@ hunan
 
 ### Import csv file into r environment
 
-```r
+``` r
 hunan2012 <- read_csv("chap09/data/aspatial/Hunan_2012.csv")
 ```
 
@@ -107,7 +107,7 @@ hunan2012 %>% select(County, GDPPC) %>% slice_head(n = 6)
 
 ### Performing relational join
 
-```r
+``` r
 hunan <- left_join(hunan,hunan2012) %>%
   select(1:4, 7, 15)
 ```
@@ -124,7 +124,7 @@ tibble(
 )
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 The join keeps 88 spatial units and adds one GDPPC value to each county. The value range is wide, so I expect a classification map to show a few high-value counties clearly. This is only a first visual check: the spatial tests below are needed before I describe the pattern as clustered.
@@ -132,7 +132,7 @@ The join keeps 88 spatial units and adds one GDPPC value to each county. The val
 
 ### Visualising Regional Development Indicator
 
-```r
+``` r
 #| fig-width: 12
 #| fig-height: 8
 equal <- tm_shape(hunan) +
@@ -186,7 +186,7 @@ quantile <- tm_shape(hunan) +
 tmap_arrange(equal, quantile, asp = 1, ncol = 2)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 The equal-interval map leaves most counties in the lower classes because GDPPC is right-skewed. The quantile map is easier for comparing the number of counties in each class, though it can make small differences look more important. I therefore use the raw GDPPC values for the spatial tests rather than treating either colour classification as evidence.
@@ -198,7 +198,7 @@ The next step is to define which counties are neighbours. The global statistics 
 
 ### Computing Contiguity Spatial Weights
 
-```r
+``` r
 wm_q <- poly2nb(hunan, 
                 queen=TRUE)
 summary(wm_q)
@@ -210,7 +210,7 @@ wm_q <- poly2nb(hunan, queen = TRUE)
 summary(wm_q)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 The Queen matrix connects polygons that touch at either a boundary or a corner. The summary shows 88 regions and an average of about five links per region. I keep the summary visible because it makes the spatial support of the later test inspectable.
@@ -218,7 +218,7 @@ The Queen matrix connects polygons that touch at either a boundary or a corner. 
 
 ### Row-standardised weights matrix
 
-```r
+``` r
 rswm_q <- nb2listw(wm_q, 
                    style="W", 
                    zero.policy = TRUE)
@@ -233,7 +233,7 @@ rswm_q <- nb2listw(wm_q,
 rswm_q
 ```
 
-::: {.callout-note}
+::: callout-note
 ### What can we learn from the code chunk above? {.unnumbered}
 
 With `style = "W"`, each county's neighbouring values are averaged after assigning each link a weight of `1 / number of neighbours`. This lets a county with many neighbours and one with few neighbours contribute on the same row scale. `zero.policy = TRUE` specifies how a region with no neighbours would be handled; it does not create a missing spatial relationship.
@@ -243,7 +243,7 @@ With `style = "W"`, each county's neighbouring values are averaged after assigni
 
 ### Maron's I test
 
-```r
+``` r
 moran.test(hunan$GDPPC, 
            listw=rswm_q, 
            zero.policy = TRUE, 
@@ -259,7 +259,7 @@ moran_result <- moran.test(hunan$GDPPC,
 moran_result
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My interpretation {.unnumbered}
 
 The observed Moran's I is positive and the p-value is very small. Under this Queen and row-standardised specification, neighbouring counties tend to have more similar GDPPC values than a random arrangement would produce. The conclusion is about spatial association, not a causal development mechanism.
@@ -267,7 +267,7 @@ The observed Moran's I is positive and the p-value is very small. Under this Que
 
 ### Computing Monte Carlo Moran's I
 
-```r
+``` r
 set.seed(1234)
 bperm= moran.mc(hunan$GDPPC, 
                 listw=rswm_q, 
@@ -288,7 +288,7 @@ bperm <- moran.mc(hunan$GDPPC,
 bperm
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 The permutation test compares the observed statistic with values generated after rearranging GDPPC over the same neighbour structure. The observed value is at the extreme positive end of the simulated distribution, which supports the direction from the analytical test.
@@ -296,7 +296,7 @@ The permutation test compares the observed statistic with values generated after
 
 ### Visualising Monte Carlo Moran's I
 
-```r
+``` r
 mean(bperm$res[1:999])
 var(bperm$res[1:999])
 summary(bperm$res[1:999])
@@ -321,7 +321,7 @@ hist(bperm$res,
 abline(v = 0, col = "red")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 The red line marks the randomisation centre near zero. The observed Moran's I is well to the right of that centre rather than being a small shift inside the main mass of the histogram. This is a useful visual check of the p-value, while the test output remains the formal numerical result.
@@ -333,7 +333,7 @@ The red line marks the randomisation centre near zero. The observed Moran's I is
 
 ### Geary's C test
 
-```r
+``` r
 geary.test(hunan$GDPPC, listw=rswm_q)
 ```
 
@@ -343,7 +343,7 @@ geary_result <- geary.test(hunan$GDPPC, listw = rswm_q)
 geary_result
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My interpretation {.unnumbered}
 
 Geary's C is below its randomisation expectation of 1 and the test is significant. This agrees with Moran's I, but the statistic is more sensitive to local pairwise differences. In this dataset, the two measures reinforce the same broad conclusion instead of producing competing signals.
@@ -351,7 +351,7 @@ Geary's C is below its randomisation expectation of 1 and the test is significan
 
 ### Computing Monte Carlo Geary's C
 
-```r
+``` r
 set.seed(1234)
 bperm=geary.mc(hunan$GDPPC, 
                listw=rswm_q, 
@@ -368,7 +368,7 @@ bperm <- geary.mc(hunan$GDPPC,
 bperm
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 The simulated Geary's C values place the observed value at the low end of the randomisation distribution. Low C means neighbouring values are locally similar, so this result gives the same positive-autocorrelation interpretation as the Moran test from a different calculation.
@@ -376,7 +376,7 @@ The simulated Geary's C values place the observed value at the low end of the ra
 
 ### Visualising the Monte Carlo Geary's C
 
-```r
+``` r
 mean(bperm$res[1:999])
 var(bperm$res[1:999])
 summary(bperm$res[1:999])
@@ -397,7 +397,7 @@ hist(bperm$res,
 abline(v = 1, col = "red")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 The reference line at 1 represents the randomisation expectation for Geary's C. The observed value lies below this reference, matching the direction in the test output. Moran's I is easier to read as a positive similarity signal; Geary's C is easier to connect to local squared differences.
@@ -409,7 +409,7 @@ The reference line at 1 represents the randomisation expectation for Geary's C. 
 
 ### Compute Moran's I correlogram
 
-```r
+``` r
 MI_corr <- sp.correlogram(wm_q, 
                           hunan$GDPPC, 
                           order=6, 
@@ -428,7 +428,7 @@ MI_corr <- sp.correlogram(wm_q,
 plot(MI_corr)
 ```
 
-```r
+``` r
 print(MI_corr)
 ```
 
@@ -437,7 +437,7 @@ print(MI_corr)
 print(MI_corr)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 Moran's I is positive for the first three neighbour orders, then moves close to zero and becomes negative at higher orders. The global Moran result therefore hides a scale effect: nearby counties are similar, while more distant graph neighbours do not maintain that same relationship.
@@ -447,7 +447,7 @@ Moran's I is positive for the first three neighbour orders, then moves close to 
 
 ### Compute Geary's C correlogram and plot
 
-```r
+``` r
 GC_corr <- sp.correlogram(wm_q, 
                           hunan$GDPPC, 
                           order=6, 
@@ -466,7 +466,7 @@ GC_corr <- sp.correlogram(wm_q,
 plot(GC_corr)
 ```
 
-```r
+``` r
 print(GC_corr)
 ```
 
@@ -475,7 +475,7 @@ print(GC_corr)
 print(GC_corr)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My interpretation {.unnumbered}
 
 Geary's C is below 1 at the first two orders, close to 1 around the middle orders, and above 1 at the fifth order. That change is consistent with the Moran correlogram: the strongest local similarity is short range, and the relationship becomes weaker or reverses as the neighbourhood expands.
@@ -504,7 +504,7 @@ comparison <- tibble(
 comparison
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I learned from the comparison {.unnumbered}
 
 The Rook check changes the exact statistics because it removes corner-touching links, while the overall direction remains positive Moran's I and sub-one Geary's C. This makes the modelling choice visible: the claim is strongest when it includes the chosen neighbour definition, the weighting style and the statistic together.

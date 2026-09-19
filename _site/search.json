@@ -733,5 +733,12 @@
     "title": "Spatial Weights and Applications",
     "section": "",
     "text": "Course source: Spatial Weights and Applications\nspdep documentation: Creating neighbours using sf objects"
+  },
+  {
+    "objectID": "In-class_Ex/in-class_Ex04/in-class_Ex04.html",
+    "href": "In-class_Ex/in-class_Ex04/in-class_Ex04.html",
+    "title": "in-class_Ex04",
+    "section": "",
+    "text": "pacman::p_load(sf,spdep,tidyverse,knitr,GWmodel)\n\n\n\n\n Back to top"
   }
 ]

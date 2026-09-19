@@ -66,7 +66,7 @@ pacman::p_load(sf, spdep, tmap, tidyverse, knitr)
 
 The import paths below point to this exercise's `data` folder. The course paths are shown immediately before each local import.
 
-```r
+``` r
 hunan <- st_read(dsn = "chap08/data/geospatial", 
                  layer = "Hunan")
 ```
@@ -80,7 +80,7 @@ hunan <- st_read(dsn = "data/geospatial",
 
 ### Import csv file into r environment
 
-```r
+``` r
 hunan2012 <- read_csv("chap08/data/aspatial/Hunan_2012.csv")
 ```
 
@@ -97,7 +97,7 @@ hunan <- left_join(hunan,hunan2012) %>%
   select(1:4, 7, 15)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 The join keeps one row for each county and adds `GDPPC` to the spatial layer. The geometry is still in WGS 84, which is suitable for this first map. The distance-based examples use longitude and latitude with `longlat = TRUE`, so the distances are in kilometres. I compare these with projected distances in my additional check.
@@ -107,8 +107,8 @@ The join keeps one row for each county and adds `GDPPC` to the spatial layer. Th
 
 ```{r}
 #| label: ch08-05
-#| fig-width: 12
-#| fig-height: 8
+#| fig-width: 16
+#| fig-height: 6
 basemap <- tm_shape(hunan) +
   tm_polygons() +
   tm_text("NAME_3", size=0.5)
@@ -119,7 +119,7 @@ gdppc <- qtm(hunan, "GDPPC") +
 tmap_arrange(basemap, gdppc, asp=1, ncol=2)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 The highest GDPPC values are concentrated around a small number of counties, while many western and southern counties sit in lower classes. The map gives the variable a spatial shape, yet it does not tell me whether neighbouring counties are similar enough to support a clustering claim. That is the reason for constructing weights before calculating autocorrelation statistics.
@@ -170,7 +170,7 @@ wm_r <- poly2nb(hunan, queen=FALSE)
 summary(wm_r)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 Queen contiguity counts a shared corner as a connection. Rook contiguity requires a shared boundary segment, so it usually produces fewer links. The choice changes the question: Queen captures broader contact, while Rook focuses on direct edge-sharing neighbours.
@@ -313,7 +313,7 @@ plot(hunan$geometry, border="lightgrey")
 plot(knn6, coords, pch = 19, cex = 0.6, add = TRUE, col = "red")
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 The distance rule uses one global radius, so dense and sparse parts of the province can receive very different numbers of neighbours. The six-nearest-neighbour rule keeps the neighbour count stable and gives every county a comparable local sample. It changes the meaning of proximity from a fixed geography to a fixed amount of information.
@@ -361,7 +361,7 @@ rswm_ids$weights[1]
 summary(unlist(rswm_ids$weights))
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed {.unnumbered}
 
 Row-standardisation makes each county's neighbour contributions sum to one. A county with five neighbours gives each one-fifth of the total weight, while a county with two neighbours gives each one-half. This creates an average-like spatial lag and prevents counties with many neighbours from automatically dominating the calculation.
@@ -551,7 +551,7 @@ w_sum_gdppc <- qtm(hunan, "w_sum GDPPC")
 tmap_arrange(lag_sum_gdppc, w_sum_gdppc, asp=1, ncol=2)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My observation {.unnumbered}
 
 The row-standardised lag is comparable across counties because it averages the neighbours. The binary lag sum is larger in places with more neighbours, so it measures a sum of neighbouring per-capita indicators. This sum is not total GDP, which would require population weights. Adding the focal county to the window moves the result closer to a local context measure that includes both the county and its immediate surroundings.
@@ -559,18 +559,15 @@ The row-standardised lag is comparable across counties because it averages the n
 
 ## Final Takeaway {.unnumbered}
 
-
 The weight matrix is part of the analysis question. Queen and Rook describe different forms of contact, fixed-distance and k-nearest-neighbour rules describe different forms of proximity, and row-standardised or binary weights produce different meanings for a spatial lag.
 
 For this Hunan example, GDPPC appears geographically uneven in the map and the neighbouring values are structured enough to justify checking spatial autocorrelation in the next exercise. I would report the selected neighbour rule with the statistic because the result is not independent of that modelling choice.
 
-::: {.callout-tip}
+::: callout-tip
 ## Beyond the Code: The Weight Matrix Is an Assumption {.unnumbered}
 
 I initially treated a neighbour as a simple yes-or-no relationship. The calculations made the assumption more visible: the same GDPPC values can produce different lag surfaces when I change Queen to Rook, use a distance threshold, or standardise each row. A spatial statistic is therefore not only a property of the data. It is also a property of how local context is defined.
 :::
-
-
 
 ## References
 

@@ -1,0 +1,17 @@
+{
+  "hash": "334e403e54b655ba85e26e99cd024eda",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"in-class_Ex04\"\nauthor: \"Zhiyi Hao\"\nformat: html\ndate: \"2026-09-18\"\ndate-modified: today\nexecute:\n  echo: true\n  eval: true\n  warning: false\n  freeze:  true\n  message: false\n---\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(sf,spdep,tidyverse,knitr,GWmodel)\n```\n:::\n\n",
+    "supporting": [
+      "in-class_Ex04_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
