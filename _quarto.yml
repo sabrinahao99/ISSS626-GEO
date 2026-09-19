@@ -40,7 +40,7 @@ website:
       - text: "In-class Exercise"
         menu:
           - text:"In-class Exercise 4"
-        href: "In-class_Ex/in-class_Ex04/in-class_Ex04.html"
+            href: "In-class_Ex/in-class_Ex04/in-class_Ex04.html"
       - about.qmd
     right:
       - icon: github
