@@ -43,6 +43,8 @@ tmap_mode("plot")
 
 This exercise checks whether GDP per capita in Hunan is geographically patterned. I use the global statistics first, then look at how the relationship changes across neighbour orders in the correlograms.
 
+The workflow follows the chapter objectives: import spatial and attribute data, perform a relational join, construct spatial weights, calculate global spatial autocorrelation statistics, visualise the Moran's I simulation, and compute spatial correlograms. The final interpretation keeps the statistical conclusion tied to the selected spatial weights.
+
 The main questions I keep in mind are:
 
 - Are neighbouring counties more alike than a random arrangement would suggest?
@@ -265,6 +267,8 @@ moran_result
 The observed Moran's I is positive and the p-value is very small. Under this Queen and row-standardised specification, neighbouring counties tend to have more similar GDPPC values than a random arrangement would produce. The conclusion is about spatial association, not a causal development mechanism.
 :::
 
+> Question: What statistical conclusion can you draw from the output above?
+
 ### Computing Monte Carlo Moran's I
 
 ``` r
@@ -293,6 +297,8 @@ bperm
 
 The permutation test compares the observed statistic with values generated after rearranging GDPPC over the same neighbour structure. The observed value is at the extreme positive end of the simulated distribution, which supports the direction from the analytical test.
 :::
+
+> Question: What statistical conclusion can you draw from the output above?
 
 ### Visualising Monte Carlo Moran's I
 
@@ -329,6 +335,8 @@ The red line marks the randomisation centre near zero. The observed Moran's I is
 
 > Question: What statistical observation can you draw from the output above?
 
+> Challenge: Instead of using base R graphics to plot the values, recreate the simulation distribution with `ggplot2`.
+
 ## Global Measures of Spatial Autocorrelation: Geary's C
 
 ### Geary's C test
@@ -348,6 +356,8 @@ geary_result
 
 Geary's C is below its randomisation expectation of 1 and the test is significant. This agrees with Moran's I, but the statistic is more sensitive to local pairwise differences. In this dataset, the two measures reinforce the same broad conclusion instead of producing competing signals.
 :::
+
+> Question: What statistical conclusion can you draw from the output above?
 
 ### Computing Monte Carlo Geary's C
 
@@ -373,6 +383,8 @@ bperm
 
 The simulated Geary's C values place the observed value at the low end of the randomisation distribution. Low C means neighbouring values are locally similar, so this result gives the same positive-autocorrelation interpretation as the Moran test from a different calculation.
 :::
+
+> Question: What statistical conclusion can you draw from the output above?
 
 ### Visualising the Monte Carlo Geary's C
 
@@ -480,6 +492,8 @@ print(GC_corr)
 
 Geary's C is below 1 at the first two orders, close to 1 around the middle orders, and above 1 at the fifth order. That change is consistent with the Moran correlogram: the strongest local similarity is short range, and the relationship becomes weaker or reverses as the neighbourhood expands.
 :::
+
+> Question: What statistical observation can you draw from the output above?
 
 ## My Additional Check {.unnumbered}
 

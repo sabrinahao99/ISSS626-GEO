@@ -5,12 +5,16 @@ This index lists the main files in the ISSS626 geospatial analytics coursework w
 | Area | Main files |
 | --- | --- |
 | Site configuration | `_quarto.yml`, `styles.css` |
+| Assignment 1 working instructions | `AGENTS.md`; local skill `/Users/sabrina/.codex/skills/isss626-network-assignment/SKILL.md` |
 | Homepage | `index.qmd` |
 | Profile | `about.qmd` |
 | Hands-on Exercise 1 | `Hands-on_Ex/Hands-on_Ex01/chap01.qmd`, `Hands-on_Ex/Hands-on_Ex01/chap02.qmd` |
 | Hands-on Exercise 2 | `Hands-on_Ex/Hands-on_Ex02/chap04.qmd`, `Hands-on_Ex/Hands-on_Ex02/chap05.qmd` |
 | Hands-on Exercise 3 | `Hands-on_Ex/Hands-on_Ex03/chap06.qmd` |
 | Hands-on Exercise 4 | `Hands-on_Ex/Hands-on_Ex04/chap08.qmd` |
+| Hands-on Exercise 5 | `Hands-on_Ex/Hands-on_Ex05/chap09.qmd`, `Hands-on_Ex/Hands-on_Ex05/chap10.qmd` |
+| In-class Exercise 4 | `In-class_Ex/in-class_Ex04/in-class_Ex04.qmd` |
+| In-class Exercise 5 | `In-class_Ex/in-class_Ex05/in-class_Ex05.qmd` |
 | Rendered website | `_site/` |
 
 Exercise 3 uses local MODIS fire detections and the Bangka-Belitung study boundary stored in `Hands-on_Ex/Hands-on_Ex03/data/rawdata/`. Exercise 5 uses the local Hunan county data stored in `Hands-on_Ex/Hands-on_Ex05/data/`.

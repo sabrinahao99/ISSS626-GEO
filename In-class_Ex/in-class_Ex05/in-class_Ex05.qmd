@@ -1,0 +1,216 @@
+---
+title: "Global Measures of Spatial Association"
+subtitle: "In-class Exercise 5"
+author: "Zhiyi Hao"
+format: html
+date: "2026-09-26"
+date-modified: today
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Getting Started
+
+## Setting the Analytical Tools
+
+```{r}
+#| label: ic05-01
+pacman::p_load(sf, sfdep, tmap, tidyverse)
+```
+
+## Getting the Data Into R Environment
+
+### Import shapefile into R environment
+
+```{r}
+#| label: ic05-02
+hunan <- st_read(dsn = "data/geospatial",
+                 layer = "Hunan",
+                 quiet = TRUE)
+```
+
+### Import csv file into R environment
+
+```{r}
+#| label: ic05-03
+hunan2012 <- read_csv("data/aspatial/Hunan_2012.csv",
+                      show_col_types = FALSE)
+```
+
+### Performing relational join
+
+```{r}
+#| label: ic05-04
+hunan_GDPPC <- left_join(hunan, hunan2012) %>%
+  select(1:4, 7, 15)
+```
+
+## Step 1: Deriving Queen's Contiguity Weights
+
+The code chunk below is used to compute the Queen's contiguity weights.
+By default, `st_contiguity(geometry)` uses Queen contiguity. Two polygons are treated as neighbours when they share a boundary or a corner.
+
+```{r}
+#| label: ic05-05
+wm_q <- hunan_GDPPC %>%
+  mutate(
+    nb = st_contiguity(geometry),
+    wt = st_weights(nb, style = "W"),
+    .before = 1
+  )
+```
+
+::: callout-note
+It is a good practice to review the output datatable after the computation is done.
+`summary(wm_q$nb)` reports the number of regions, number of non-zero links, link distribution, and whether any region has no neighbour.
+:::
+
+```{r}
+#| label: ic05-06
+summary(wm_q$nb)
+glimpse(wm_q)
+```
+
+::: callout-note
+`st_weights()` requires three inputs:
+
+- `nb`: A neighbour list object created by `st_contiguity()`.
+- `style`: Default `"W"` for row-standardised weights. Under `"W"`, each county's neighbour weights sum to 1, making counties with different neighbour counts easier to compare. Other supported coding schemes include `"B"`, `"C"`, `"U"`, `"minmax"`, and `"S"`. `"B"` uses basic binary coding, `"C"` is globally standardised, `"U"` divides `"C"` by the number of neighbours, and `"S"` is a variance-stabilising coding scheme.
+- `allow_zero`: If `TRUE`, assigns zero as the lagged value to a zone without neighbours.
+:::
+
+## Step 2: Computing Global Moran's I
+
+In the code chunk below, `global_moran()` is used to compute Moran's I value.
+The three inputs are the numeric variable `x`, the neighbour list `nb`, and the weight list `wt`.
+
+```{r}
+#| label: ic05-07
+moranI <- global_moran(wm_q$GDPPC,
+                       wm_q$nb,
+                       wm_q$wt)
+
+glimpse(moranI)
+```
+
+::: callout-note
+The printed `I` is about 0.301 for this dataset. A positive Moran's I means neighbouring counties tend to have similar GDPPC values under the selected Queen contiguity and row-standardised weights.
+:::
+
+## Performing Global Moran's I Test
+
+Moran's I test is used to assess the statistical evidence for global spatial autocorrelation. With `sfdep`, the test can be performed by using `global_moran_test()`.
+
+```{r}
+#| label: ic05-08
+moranI_test <- global_moran_test(wm_q$GDPPC,
+                                 wm_q$nb,
+                                 wm_q$wt)
+
+moranI_test
+```
+
+::: callout-note
+The default alternative is `"greater"`, so the test checks for positive spatial autocorrelation under randomisation. The report gives the Moran I statistic, expectation, variance, standard deviate, and p-value.
+:::
+
+## Performing Global Moran's I Permutation Test
+
+Monte Carlo simulation is used to perform the statistical test in practice. With `sfdep`, it is supported by `global_moran_perm()`.
+
+```{r}
+#| label: ic05-09
+set.seed(1234)
+
+moranI_perm <- global_moran_perm(wm_q$GDPPC,
+                                 wm_q$nb,
+                                 wm_q$wt,
+                                 nsim = 99)
+
+moranI_perm
+```
+
+::: callout-tip
+- Use `set.seed()` before simulation to make the computation reproducible.
+- The simulation count is read with the observed arrangement, so `nsim = 99` gives 100 arrangements in the report.
+- `observed rank` shows where the observed Moran's I sits within the simulated reference distribution, and the p-value summarises how extreme the observed statistic is under random permutation.
+:::
+
+## Interpretation
+
+Under Queen contiguity and row-standardised weights, Hunan county GDPPC shows significant positive global spatial autocorrelation. The result should be reported together with the selected neighbour definition, weighting style, and test method.
+
+
+## Computing local Moran's I
+In this section,i learnt how to compute local moran's I of GDPPC at county level by using local_moran() of sfdep package.
+```{r}
+lisa <- wm_q %>%
+  mutate(local_moran = local_moran(
+    GDPPC, nb, wt, nsim = 99),
+         .before = 1) %>%
+  unnest(local_moran)
+view(lisa)
+```
+
+## Plotting LISA map
+We can find three fields contain the LISA categories, they are mean, median and pysal. In general, classification in mean will be used as shown in the code chunk below.
+```{r}
+lisa_sig <- lisa %>%
+  filter(p_ii_sim < 0.05)
+
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(lisa_sig) +
+  tm_polygons(fill = "mean",
+              fill.legend = tm_legend(
+                text.size = 1.15,
+                width = 6)) +
+  tm_borders(fill_alpha = 0.4) +
+  tm_layout(legend.title.size = 1.25)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(lisa) +
+  tm_polygons(fill = "p_ii_sim") +
+  tm_borders(fill_alpha = 0.5) +
+  tm_title("p-value of local Moran's I") +
+  tm_layout(legend.title.size = 1.5)
+```
+
+```{r}
+wm_idw <- hunan_GDPPC %>%
+  mutate(nb = include_self(st_contiguity(geometry)),
+         wts = st_inverse_distance(nb, geometry,
+                                   scale = 1,
+                                   alpha = 1),
+         .before = 1)
+
+HCSA <- wm_idw %>%
+  mutate(local_Gi = local_gstar_perm(
+    GDPPC, nb, wts, nsim = 99),
+         .before = 1) %>%
+  unnest(local_Gi)
+```
+
+```{r}
+tmap_mode("plot")
+tm_shape(HCSA) +
+  tm_polygons(
+    fill = "p_sim",
+    fill.scale = tm_scale_intervals(
+      breaks = c(0, 0.001, 0.01, 0.05, 1.0),
+      labels = c("p < 0.001", "p < 0.01", "p < 0.05", "Not Significant"),
+      values = c("#de2d26", "#fc9272", "#fee0d2", "#e0e0e0")),
+    fill.legend = tm_legend(
+      title = "p-values")
+  ) +
+  tm_title("p-values of G*i for GDP per capita") +
+  tm_borders(fill_alpha = 0.5)
+```
+
+

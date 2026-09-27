@@ -3,7 +3,8 @@ project:
   render:
     - index.qmd
     - about.qmd
-    - Take-home_Ex/index.qmd
+    - Take-home_Ex/assignment1.qmd
+    - Take-home_Ex/executive_summary.qmd
     - Hands-on_Ex/Hands-on_Ex01/chap01.qmd
     - Hands-on_Ex/Hands-on_Ex01/chap02.qmd
     - Hands-on_Ex/Hands-on_Ex02/chap04.qmd
@@ -11,7 +12,9 @@ project:
     - Hands-on_Ex/Hands-on_Ex03/chap06.qmd
     - Hands-on_Ex/Hands-on_Ex04/chap08.qmd
     - Hands-on_Ex/Hands-on_Ex05/chap09.qmd
+    - Hands-on_Ex/Hands-on_Ex05/chap10.qmd
     - In-class_Ex/in-class_Ex04/in-class_Ex04.qmd
+    - In-class_Ex/in-class_Ex05/in-class_Ex05.qmd
 
 website:
   title: "ISSS626"
@@ -35,12 +38,20 @@ website:
             href: "Hands-on_Ex/Hands-on_Ex04/chap08.html"
           - text: "Exercise 5: Global Autocorrelation"
             href: "Hands-on_Ex/Hands-on_Ex05/chap09.html"
+          - text: "Exercise 5: Local Autocorrelation"
+            href: "Hands-on_Ex/Hands-on_Ex05/chap10.html"
       - text: "Take-home Exercise"
-        href: "Take-home_Ex/index.qmd"
+        menu:
+          - text: "Executive Summary"
+            href: "Take-home_Ex/executive_summary.html"
+          - text: "Technical Report"
+            href: "Take-home_Ex/assignment1.html"
       - text: "In-class Exercise"
         menu:
           - text: "In-class Exercise 4"
             href: "In-class_Ex/in-class_Ex04/in-class_Ex04.html"
+          - text: "In-class Exercise 5"
+            href: "In-class_Ex/in-class_Ex05/in-class_Ex05.html"
       - about.qmd
     right:
       - icon: github

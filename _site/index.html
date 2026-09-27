@@ -129,12 +129,27 @@ ul.task-list li input[type="checkbox"] {
     <a class="dropdown-item" href="./Hands-on_Ex/Hands-on_Ex05/chap09.html">
  <span class="dropdown-text">Exercise 5: Global Autocorrelation</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="./Hands-on_Ex/Hands-on_Ex05/chap10.html">
+ <span class="dropdown-text">Exercise 5: Local Autocorrelation</span></a>
+  </li>  
     </ul>
   </li>
-  <li class="nav-item">
-    <a class="nav-link" href="./Take-home_Ex/index.html"> 
-<span class="menu-text">Take-home Exercise</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-take-home-exercise" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Take-home Exercise</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-take-home-exercise">    
+        <li>
+    <a class="dropdown-item" href="./Take-home_Ex/executive_summary.html">
+ <span class="dropdown-text">Executive Summary</span></a>
   </li>  
+        <li>
+    <a class="dropdown-item" href="./Take-home_Ex/assignment1.html">
+ <span class="dropdown-text">Technical Report</span></a>
+  </li>  
+    </ul>
+  </li>
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-in-class-exercise" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">In-class Exercise</span>
@@ -143,6 +158,10 @@ ul.task-list li input[type="checkbox"] {
         <li>
     <a class="dropdown-item" href="./In-class_Ex/in-class_Ex04/in-class_Ex04.html">
  <span class="dropdown-text">In-class Exercise 4</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./In-class_Ex/in-class_Ex05/in-class_Ex05.html">
+ <span class="dropdown-text">In-class Exercise 5</span></a>
   </li>  
     </ul>
   </li>
@@ -174,7 +193,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     
 <!-- main -->
-<main class="content column-page" id="quarto-document-content">
+<main class="content page-columns page-full column-page" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
@@ -201,104 +220,114 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="home-shell">
-<div class="home-banner">
-<div class="hero-links">
-<p><a href="index.html">Home</a> <a href="Hands-on_Ex/Hands-on_Ex01/chap01.html">Geospatial Data</a> <a href="Hands-on_Ex/Hands-on_Ex01/chap02.html">Thematic Mapping</a> <a href="Hands-on_Ex/Hands-on_Ex02/chap04.html">Point Density</a> <a href="Hands-on_Ex/Hands-on_Ex02/chap05.html">Point Interaction</a> <a href="Hands-on_Ex/Hands-on_Ex03/chap06.html">Space-Time Fires</a> <a href="Hands-on_Ex/Hands-on_Ex04/chap08.html">Spatial Weights</a> <a href="Hands-on_Ex/Hands-on_Ex05/chap09.html">Global Autocorrelation</a></p>
-</div>
-<section id="welcome-to-my-geospatial-analytics-portfolio" class="level1">
-<h1>Welcome to My Geospatial Analytics Portfolio</h1>
-<p>ISSS626 Geospatial Analytics and Applications · Zhiyi Hao</p>
-</section>
-</div>
-<div class="home-content">
-<div class="home-side-menu">
-<div class="home-side-item active">
-<p><a href="Hands-on_Ex/Hands-on_Ex01/chap01.html">Geospatial Data Science</a> 26 Aug</p>
-</div>
-<div class="home-side-item">
-<p><a href="Hands-on_Ex/Hands-on_Ex01/chap02.html">Thematic Mapping</a> 28 Aug</p>
-</div>
-<div class="home-side-item">
-<p><a href="Hands-on_Ex/Hands-on_Ex02/chap04.html">Point Density</a> 30 Aug</p>
-</div>
-<div class="home-side-item">
-<p><a href="Hands-on_Ex/Hands-on_Ex02/chap05.html">Point Interaction</a> 2 Sep</p>
-</div>
-<div class="home-side-item">
-<p><a href="Hands-on_Ex/Hands-on_Ex03/chap06.html">Space-Time Fires</a> 5 Sep</p>
-</div>
-<div class="home-side-item">
-<p><a href="Hands-on_Ex/Hands-on_Ex04/chap08.html">Spatial Weights</a></p>
-</div>
-<div class="home-side-item">
-<p><a href="Hands-on_Ex/Hands-on_Ex05/chap09.html">Global Autocorrelation</a> 19 Sep</p>
-</div>
-</div>
-<section id="coursework-overview" class="level2 home-main">
-<h2 class="anchored" data-anchor-id="coursework-overview">Coursework Overview</h2>
-<p>This portfolio presents seven hands-on geospatial analytics chapters completed with R and Quarto. The work starts from spatial data import and coordinate systems, moves into choropleth mapping, develops first-order and second-order spatial point pattern analysis for Singapore childcare centre locations, extends point pattern thinking into a spatio-temporal fire case study, and applies spatial weights and global autocorrelation statistics to county-level development data.</p>
-<p>I designed the site so each chapter can be read as a self-contained workflow: the code is visible, the maps are rendered in the page, and short observations are included after key outputs.</p>
-<div class="exercise-grid">
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 1 · 26 Aug</span></p>
-<section id="geospatial-data-science" class="level3">
-<h3 class="anchored" data-anchor-id="geospatial-data-science">Geospatial Data Science</h3>
-<p>Spatial layers, CRS transformation, point conversion, and basic geoprocessing.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex01/chap01.html">Open Chapter 1</a></p>
-</section>
-</div>
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 1 · 28 Aug</span></p>
-<section id="thematic-mapping" class="level3">
-<h3 class="anchored" data-anchor-id="thematic-mapping">Thematic Mapping</h3>
-<p>Population joins, choropleth classifications, facets, and dependency-ratio outliers.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex01/chap02.html">Open Chapter 2</a></p>
-</section>
-</div>
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 2 · 30 Aug</span></p>
-<section id="point-density" class="level3">
-<h3 class="anchored" data-anchor-id="point-density">Point Density</h3>
-<p>Point pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex02/chap04.html">Open Chapter 4</a></p>
-</section>
-</div>
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 2 · 2 Sep</span></p>
-<section id="point-interaction" class="level3">
-<h3 class="anchored" data-anchor-id="point-interaction">Point Interaction</h3>
-<p>G-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex02/chap05.html">Open Chapter 5</a></p>
-</section>
-</div>
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 3 · 5 Sep</span></p>
-<section id="space-time-fires" class="level3">
-<h3 class="anchored" data-anchor-id="space-time-fires">Space-Time Fires</h3>
-<p>MODIS fire detections, monthly and day-of-year density patterns, and space-time clustering diagnostics.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex03/chap06.html">Open Chapter 6</a></p>
-</section>
-</div>
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 4</span></p>
-<section id="spatial-weights-and-applications" class="level3">
-<h3 class="anchored" data-anchor-id="spatial-weights-and-applications">Spatial Weights and Applications</h3>
-<p>Queen and Rook neighbours, distance-based links, IDW, spatial lag, and window summaries using Hunan county data.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex04/chap08.html">Open Chapter 8</a></p>
-</section>
-</div>
-<div class="exercise-card">
-<p><span class="card-label">Hands-on Exercise 5 · 19 Sep</span></p>
-<section id="global-autocorrelation" class="level3">
-<h3 class="anchored" data-anchor-id="global-autocorrelation">Global Autocorrelation</h3>
-<p>Moran’s I, Geary’s C, Monte Carlo tests, correlograms, and a Queen-versus-Rook sensitivity check.</p>
-<p><a href="Hands-on_Ex/Hands-on_Ex05/chap09.html">Open Chapter 9</a></p>
-</section>
-</div>
-</div>
-</section>
-</div>
+<div class="home-shell page-columns page-full">
+  <section class="home-hero page-columns page-full">
+    <div class="hero-grid page-columns page-full">
+      <div class="hero-copy">
+        <span class="hero-rule" aria-hidden="true"></span>
+        <p class="hero-kicker">ISSS626 · Geospatial Analytics and Applications</p>
+        <h1>Geospatial Analytics Portfolio</h1>
+        <p class="hero-lead">A collection of spatial data workflows, thematic maps, point-pattern analysis, space-time exploration, and spatial autocorrelation studies developed with R and Quarto.</p>
+        <div class="hero-actions">
+          <a class="hero-button hero-button-primary" href="#coursework-overview">Explore Workflows</a>
+          <a class="hero-button hero-button-ghost" href="about.html">About Sabrina</a>
+        </div>
+      </div>
+
+      <aside class="hero-index" aria-label="Hands-on exercises">
+        <p class="hero-index-label">Hands-on exercises</p>
+        <div class="home-side-menu">
+          <a class="home-side-item active" href="Hands-on_Ex/Hands-on_Ex01/chap01.html"><span>Geospatial Data</span><time>26 Aug</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex01/chap02.html"><span>Thematic Mapping</span><time>28 Aug</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex02/chap04.html"><span>Point Density</span><time>30 Aug</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex02/chap05.html"><span>Point Interaction</span><time>2 Sep</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex03/chap06.html"><span>Space-Time Fires</span><time>5 Sep</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex04/chap08.html"><span>Spatial Weights</span><time>Exercise 4</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex05/chap09.html"><span>Global and Local Autocorrelation</span><time>Exercise 5</time></a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="home-content" id="take-home-exercise">
+    <div class="home-main">
+      <h2 class="anchored">Take-home Exercise 1</h2>
+      <p>The current assignment investigates the spatial and spatio-temporal pattern of 2022 road accidents across the Bangkok Greater Metropolitan Area, moving from data preparation through first-order intensity to second-order interaction testing.</p>
+
+      <div class="exercise-grid">
+        <article class="exercise-card exercise-card-wide">
+          <p class="card-label">Take-home Exercise 1 · 2022 BGMA Road Accidents</p>
+          <h3 class="anchored">Spatial and Spatio-temporal Patterns of Road Accidents</h3>
+          <p>Data-quality screening, monthly and space-time KDE, bandwidth sensitivity, G/F/K/L functions with CSR envelopes, inhomogeneous K, hexagon Moran's I, and a fatal/non-fatal cross-K robustness check — read against the road-network constraint on the CSR null model.</p>
+          <div class="method-chips">
+            <span>KDE &amp; STKDE</span>
+            <span>Clark-Evans</span>
+            <span>G / F / K / L</span>
+            <span>Inhomogeneous K</span>
+            <span>Moran's I</span>
+            <span>Cross-K</span>
+          </div>
+          <a href="Take-home_Ex/assignment1.html">Open Technical Report</a>
+          &nbsp;·&nbsp;
+          <a href="Take-home_Ex/executive_summary.html">Open Executive Summary</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-content" id="coursework-overview">
+    <div class="home-main">
+      <h2 class="anchored">Coursework Overview</h2>
+      <p>This portfolio brings together eight hands-on chapters. The workflow moves from spatial data preparation and thematic mapping to point density, point interaction, space-time analysis, spatial weights, and global and local autocorrelation.</p>
+      <p>Each chapter keeps the R workflow visible, uses local data, and places short observations beside the rendered maps and statistical outputs.</p>
+
+      <div class="exercise-grid">
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 1 · 26 Aug</p>
+          <h3 class="anchored">Geospatial Data Science</h3>
+          <p>Spatial layers, CRS transformation, point conversion, and basic geoprocessing.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex01/chap01.html">Open Chapter 1</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 1 · 28 Aug</p>
+          <h3 class="anchored">Thematic Mapping</h3>
+          <p>Population joins, choropleth classifications, facets, and dependency-ratio outliers.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex01/chap02.html">Open Chapter 2</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 2 · 30 Aug</p>
+          <h3 class="anchored">Point Density</h3>
+          <p>Point-pattern preparation, Clark-Evans tests, KDE bandwidths, and density maps.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex02/chap04.html">Open Chapter 4</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 2 · 2 Sep</p>
+          <h3 class="anchored">Point Interaction</h3>
+          <p>G-, F-, K-, and L-functions with CSR simulation envelopes for two planning areas.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex02/chap05.html">Open Chapter 5</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 3 · 5 Sep</p>
+          <h3 class="anchored">Space-Time Fires</h3>
+          <p>MODIS fire detections, monthly density patterns, and space-time clustering diagnostics.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex03/chap06.html">Open Chapter 6</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 4</p>
+          <h3 class="anchored">Spatial Weights and Applications</h3>
+          <p>Queen and Rook neighbours, distance-based links, IDW, spatial lag, and window summaries.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex04/chap08.html">Open Chapter 8</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 5</p>
+          <h3 class="anchored">Global and Local Autocorrelation</h3>
+          <p>Moran's I, Geary's C, correlograms, LISA clusters, and Getis-Ord hot and cold spots.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex05/chap09.html">Open Chapter 9</a>
+          <a href="Hands-on_Ex/Hands-on_Ex05/chap10.html">Open Chapter 10</a>
+        </article>
+      </div>
+    </div>
+  </section>
 </div>
 
 

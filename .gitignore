@@ -7,3 +7,7 @@
 
 /.quarto/
 **/*.quarto_ipynb
+
+AGENTS.md
+Take-home_Ex/assignment1_files/
+*_cache/
