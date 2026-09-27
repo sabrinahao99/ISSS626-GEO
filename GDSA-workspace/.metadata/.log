@@ -1,0 +1,19 @@
+!SESSION 2026-08-29 11:31:13.769 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=21.0.9
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=aarch64, WS=cocoa, NL=en_SG
+Framework arguments:  -keyring /Users/sabrina/.eclipse_keyring -showlocation
+Command-line arguments:  -os macosx -ws cocoa -arch aarch64 -keyring /Users/sabrina/.eclipse_keyring -showlocation -data file:/Users/sabrina/Desktop/ISSS626/GDSA-workspace/
+
+!ENTRY org.knime.conda.envinstall 1 0 2026-08-29 11:31:24.336
+!MESSAGE Checking pixi cache directory for knime-python-versions (knime-python-versions-5.12.0-py313_202606041333) package: /Applications/KNIME 5.12.0.app/Contents/Eclipse/bundling/.pixi-cache
+
+!ENTRY org.knime.conda.envinstall 1 0 2026-08-29 11:31:24.338
+!MESSAGE Could not determine version for knime-python-versions - cleaning cache to be safe.
+
+!ENTRY org.knime.conda.envinstall 1 0 2026-08-29 11:31:56.047
+!MESSAGE Warming up Python environment at: /Applications/KNIME 5.12.0.app/Contents/Eclipse/bundling/sdl_harvard_geospatial
+
+!ENTRY org.knime.conda.envinstall 1 0 2026-08-29 11:32:02.981
+!MESSAGE Environment warmup successful.
