@@ -40,7 +40,7 @@ website:
             href: "Hands-on_Ex/Hands-on_Ex05/chap09.html"
           - text: "Exercise 5: Local Autocorrelation"
             href: "Hands-on_Ex/Hands-on_Ex05/chap10.html"
-      - text: "Take-home Exercise"
+      - text: "Take-home Exercise 1"
         menu:
           - text: "Executive Summary"
             href: "Take-home_Ex/executive_summary.html"
