@@ -33,6 +33,7 @@ format:
           <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex03/chap06.html"><span>Space-Time Fires</span><time>5 Sep</time></a>
           <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex04/chap08.html"><span>Spatial Weights</span><time>Exercise 4</time></a>
           <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex05/chap09.html"><span>Global and Local Autocorrelation</span><time>Exercise 5</time></a>
+          <a class="home-side-item" href="Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.html"><span>Geographical Segmentation</span><time>Exercise 6</time></a>
         </div>
       </aside>
     </div>
@@ -67,7 +68,7 @@ format:
   <section class="home-content" id="coursework-overview">
     <div class="home-main">
       <h2>Coursework Overview</h2>
-      <p>This portfolio brings together eight hands-on chapters. The workflow moves from spatial data preparation and thematic mapping to point density, point interaction, space-time analysis, spatial weights, and global and local autocorrelation.</p>
+      <p>This portfolio brings together nine hands-on chapters. The workflow moves from spatial data preparation and thematic mapping to point density, point interaction, space-time analysis, spatial weights, autocorrelation, and spatially constrained clustering.</p>
       <p>Each chapter keeps the R workflow visible, uses local data, and places short observations beside the rendered maps and statistical outputs.</p>
 
       <div class="exercise-grid">
@@ -113,6 +114,12 @@ format:
           <p>Moran's I, Geary's C, correlograms, LISA clusters, and Getis-Ord hot and cold spots.</p>
           <a href="Hands-on_Ex/Hands-on_Ex05/chap09.html">Open Chapter 9</a>
           <a href="Hands-on_Ex/Hands-on_Ex05/chap10.html">Open Chapter 10</a>
+        </article>
+        <article class="exercise-card">
+          <p class="card-label">Hands-on Exercise 6</p>
+          <h3>Geographical Segmentation</h3>
+          <p>Hierarchical clustering, minimum spanning trees, SKATER, and spatially constrained ClustGeo regions.</p>
+          <a href="Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.html">Open Hands-on Exercise 6</a>
         </article>
       </div>
     </div>

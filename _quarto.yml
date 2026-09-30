@@ -13,6 +13,7 @@ project:
     - Hands-on_Ex/Hands-on_Ex04/chap08.qmd
     - Hands-on_Ex/Hands-on_Ex05/chap09.qmd
     - Hands-on_Ex/Hands-on_Ex05/chap10.qmd
+    - Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.qmd
     - In-class_Ex/in-class_Ex04/in-class_Ex04.qmd
     - In-class_Ex/in-class_Ex05/in-class_Ex05.qmd
 
@@ -40,6 +41,8 @@ website:
             href: "Hands-on_Ex/Hands-on_Ex05/chap09.html"
           - text: "Exercise 5: Local Autocorrelation"
             href: "Hands-on_Ex/Hands-on_Ex05/chap10.html"
+          - text: "Hands-on Exercise 6"
+            href: "Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.html"
       - text: "Take-home Exercise 1"
         menu:
           - text: "Executive Summary"

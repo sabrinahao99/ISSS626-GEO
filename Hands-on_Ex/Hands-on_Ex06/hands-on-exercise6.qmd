@@ -1,0 +1,662 @@
+---
+title: "Geographical Segmentation with Spatially Constrained Clustering Techniques"
+subtitle: "Hands-on Exercise 6"
+author: "Zhiyi Hao"
+date: "2026-09-30"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+    number-offset: 11
+    fig-width: 8
+    fig-height: 6
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: false
+---
+
+# Geographical Segmentation with Spatially Constrained Clustering Techniques {.course-chapter-title}
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 8,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+library(sf)
+library(spdep)
+library(tmap)
+library(ClustGeo)
+library(ggpubr)
+library(cluster)
+library(factoextra)
+library(heatmaply)
+library(corrplot)
+library(psych)
+library(tidyverse)
+library(GGally)
+
+tmap_mode("plot")
+```
+
+## Overview
+
+This exercise follows the Chapter 12 workflow for geographic segmentation. The aim is to compare ordinary hierarchical clustering with spatially constrained clustering for the townships of Shan State.
+
+The workflow is kept close to the class sequence: import and join the data, derive comparable penetration rates, inspect the variables, standardise them, run hierarchical clustering, build a minimum spanning tree, apply SKATER, and compare the maps. ClustGeo is included at the end as the value-added extension.
+
+## Getting Started
+
+### The analytical question
+
+The main question is whether the Shan townships form meaningful groups from their ICT profiles, and how the result changes when neighbouring townships are required to stay connected.
+
+### The study area and data
+
+The study area contains 55 townships in Shan (East), Shan (North), and Shan (South). The spatial file provides the township polygons. The CSV contains household counts for radio, television, fixed-line phone, mobile phone, computer, and internet access.
+
+### Setting the analytical tools
+
+The package command follows the Chapter 12 workflow. The same packages are used for the local page, with `spdep` providing the neighbour graph, minimum spanning tree, and SKATER method.
+
+## Learning outcomes
+
+By the end of this exercise, I should be able to:
+
+- import polygon and tabular data with sf and readr;
+- derive rates instead of clustering on raw household counts;
+- use graphics and correlations to check the input variables;
+- compare hierarchical and spatially constrained clustering;
+- construct neighbours, edge costs, and a minimum spanning tree;
+- interpret cluster maps together with cluster profiles.
+
+## Packages
+
+```{r}
+#| label: ex06-02
+pacman::p_load(spdep, tmap, sf, ClustGeo, ggpubr, cluster, factoextra, NbClust, heatmaply, corrplot, psych, tidyverse, GGally)
+```
+
+## Data import and preparation
+
+### Import the township boundaries
+
+```{r}
+#| label: ex06-03
+shan_sf <- st_read(dsn = "data/geospatial", layer = "myanmar_township_boundaries") %>% filter(ST %in% c("Shan (East)", "Shan (North)", "Shan (South)")) %>% select(c(2:7))
+```
+
+```{r}
+#| label: ex06-04
+shan_sf
+```
+
+```{r}
+#| label: ex06-05
+glimpse(shan_sf)
+```
+
+::: callout-note
+### What the import gives me {.unnumbered}
+
+The filtered object contains 55 townships. The filtering step keeps the study area used in the course example and makes the spatial unit consistent with the ICT table.
+:::
+
+### Import the ICT table
+
+```{r}
+#| label: ex06-06
+ict <- read_csv("data/aspatial/Shan-ICT.csv")
+```
+
+```{r}
+#| label: ex06-07
+summary(ict)
+```
+
+### Derive penetration rates
+
+The raw counts are affected by township size. I therefore calculate the number of households per 1,000 households for each ICT measure.
+
+```{r}
+#| label: ex06-08
+ict_derived <- ict %>% mutate(`RADIO_PR` = `Radio`/`Total households`*1000) %>% mutate(`TV_PR` = `Television`/`Total households`*1000) %>% mutate(`LLPHONE_PR` = `Land line phone`/`Total households`*1000) %>% mutate(`MPHONE_PR` = `Mobile phone`/`Total households`*1000) %>% mutate(`COMPUTER_PR` = `Computer`/`Total households`*1000) %>% mutate(`INTERNET_PR` = `Internet at home`/`Total households`*1000) %>% rename(`DT_PCODE` = `District Pcode`, `DT` = `District Name`, `TS_PCODE` = `Township Pcode`, `TS` = `Township Name`, `TT_HOUSEHOLDS` = `Total households`, `RADIO` = `Radio`, `TV` = `Television`, `LLPHONE` = `Land line phone`, `MPHONE` = `Mobile phone`, `COMPUTER` = `Computer`, `INTERNET` = `Internet at home`)
+```
+
+```{r}
+#| label: ex06-09
+summary(ict_derived)
+```
+
+::: callout-note
+### Why I derive rates {.unnumbered}
+
+The raw counts are affected by township size. The rates make townships more comparable, so a large township does not look more connected only because it has more households.
+:::
+
+## Exploratory data analysis
+
+### Raw counts and derived rates
+
+```{r}
+#| label: ex06-10
+ggplot(data = ict_derived, aes(x = `RADIO`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+```
+
+```{r}
+#| label: ex06-11
+ggplot(data = ict_derived, aes(x = `RADIO`)) + geom_boxplot(color = "black", fill = "light blue")
+```
+
+```{r}
+#| label: ex06-12
+ggplot(data = ict_derived, aes(x = `RADIO_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+```
+
+```{r}
+#| label: ex06-13
+ggplot(data = ict_derived, aes(x = `RADIO_PR`)) + geom_boxplot(color = "black", fill = "light blue")
+```
+
+::: callout-tip
+### My observation {.unnumbered}
+
+The raw radio count is right-skewed because townships have different household totals. The penetration-rate plots are more suitable for comparing places.
+:::
+
+### Compare all six rates
+
+```{r}
+#| label: ex06-14
+radio <- ggplot(data = ict_derived, aes(x = `RADIO_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+tv <- ggplot(data = ict_derived, aes(x = `TV_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+llphone <- ggplot(data = ict_derived, aes(x = `LLPHONE_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+mphone <- ggplot(data = ict_derived, aes(x = `MPHONE_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+computer <- ggplot(data = ict_derived, aes(x = `COMPUTER_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+
+internet <- ggplot(data = ict_derived, aes(x = `INTERNET_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue")
+```
+
+```{r}
+#| label: ex06-15
+ggarrange(radio, tv, llphone, mphone, computer, internet, ncol = 3, nrow = 2)
+```
+
+::: callout-note
+### What I noticed {.unnumbered}
+
+The six rates have different spreads. Standardisation is needed before distance-based clustering so that one variable does not dominate because of its measurement scale.
+:::
+
+### Join the spatial and attribute data
+
+```{r}
+#| label: ex06-16
+dir.create("data/rds", showWarnings = FALSE)
+
+shan_sf <- left_join(shan_sf, ict_derived, by = c("TS_PCODE" = "TS_PCODE"))
+
+write_rds(shan_sf, "data/rds/shan_sf.rds")
+```
+
+```{r}
+#| label: ex06-17
+shan_sf <- read_rds("data/rds/shan_sf.rds")
+```
+
+### Choropleth maps
+
+```{r}
+#| label: ex06-18
+qtm(shan_sf, "RADIO_PR")
+```
+
+This is a first spatial check of radio penetration, not a cluster result.
+
+::: callout-tip
+### My observation {.unnumbered}
+
+Radio access is not simply a population-size effect. Ywangan has the highest radio rate at about 484.5 households per 1,000, while Konkyan is about 21.1. This is why the rate map is more useful than the raw radio-count map for comparing townships.
+:::
+
+```{r}
+#| label: ex06-19
+TT_HOUSEHOLDS.map <- tm_shape(shan_sf) + tm_fill(col = "TT_HOUSEHOLDS", n = 5, style = "jenks", title = "Total households") + tm_borders(alpha = 0.5)
+
+RADIO.map <- tm_shape(shan_sf) + tm_fill(col = "RADIO", n = 5, style = "jenks", title = "Number Radio") + tm_borders(alpha = 0.5)
+
+tmap_arrange(TT_HOUSEHOLDS.map, RADIO.map, asp = NA, ncol = 2)
+```
+
+::: callout-tip
+### My observation {.unnumbered}
+
+The count maps are diagnostic. Townships with more households can also have more ICT households even when their penetration rate is not especially high.
+:::
+
+```{r}
+#| label: ex06-20
+tm_shape(shan_sf) + tm_polygons(c("TT_HOUSEHOLDS", "RADIO_PR"), style = "jenks") + tm_facets(sync = TRUE, ncol = 2) + tm_legend(legend.position = c("right", "bottom")) + tm_layout(outer.margins = 0, asp = 0)
+```
+
+::: callout-note
+### Reading the two maps together {.unnumbered}
+
+The paired view separates population size from ICT penetration. The rate variables are therefore carried into the clustering stage.
+:::
+
+## Correlation analysis
+
+Highly correlated variables can repeat the same signal in the distance calculation. I check the correlations before selecting the final variables.
+
+```{r}
+#| label: ex06-21
+cluster_vars.cor <- cor(ict_derived[, 12:17])
+
+corrplot.mixed(cluster_vars.cor, lower = "ellipse", upper = "number", tl.pos = "lt", diag = "l", tl.col = "black")
+```
+
+The correlation plot is used to identify redundant indicators. Following the teacher workflow, INTERNET_PR is not used in the main clustering input when it is highly correlated with COMPUTER_PR.
+
+::: callout-tip
+### My finding {.unnumbered}
+
+The strongest relationship is between internet-at-home and computer ownership (correlation = 0.87). Mobile phone and computer ownership are also strongly related (correlation = 0.74). I therefore leave `INTERNET_PR` out of the main five-variable clustering input. This keeps the clustering from counting the same digital-access signal twice.
+:::
+
+## Hierarchical cluster analysis
+
+### Extract the clustering variables
+
+```{r}
+#| label: ex06-22
+cluster_vars <- shan_sf %>% st_set_geometry(NULL) %>% select("TS.x", "RADIO_PR", "TV_PR", "LLPHONE_PR", "MPHONE_PR", "COMPUTER_PR")
+
+head(cluster_vars, 10)
+```
+
+```{r}
+#| label: ex06-23
+row.names(cluster_vars) <- cluster_vars$"TS.x"
+head(cluster_vars, 10)
+```
+
+```{r}
+#| label: ex06-24
+shan_ict <- select(cluster_vars, c(2:6))
+head(shan_ict, 10)
+```
+
+```{r}
+#| label: ex06-25
+write_rds(shan_ict, "data/rds/shan_ict.rds")
+shan_ict <- read_rds("data/rds/shan_ict.rds")
+```
+
+### Standardise the data
+
+```{r}
+#| label: ex06-26
+shan_ict.std <- normalize(shan_ict)
+summary(shan_ict.std)
+```
+
+::: callout-note
+### What min-max standardisation does {.unnumbered}
+
+The min-max version puts every variable between 0 and 1. This keeps the five selected ICT indicators on a common scale before calculating distances.
+:::
+
+```{r}
+#| label: ex06-27
+shan_ict.z <- scale(shan_ict)
+describe(shan_ict.z)
+```
+
+::: callout-note
+### What z-score standardisation does {.unnumbered}
+
+The z-score version has mean 0 and standard deviation 1. It is included as the course comparison before the clustering stage.
+:::
+
+```{r}
+#| label: ex06-28
+r <- ggplot(data = ict_derived, aes(x = `RADIO_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue") + ggtitle("Raw values without standardisation")
+
+shan_ict_s_df <- as.data.frame(shan_ict.std)
+s <- ggplot(data = shan_ict_s_df, aes(x = `RADIO_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue") + ggtitle("Min-Max Standardisation")
+
+shan_ict_z_df <- as.data.frame(shan_ict.z)
+z <- ggplot(data = shan_ict_z_df, aes(x = `RADIO_PR`)) + geom_histogram(bins = 20, color = "black", fill = "light blue") + ggtitle("Z-score Standardisation")
+
+ggarrange(r, s, z, ncol = 3, nrow = 1)
+```
+
+```{r}
+#| label: ex06-29
+r <- ggplot(data = ict_derived, aes(x = `RADIO_PR`)) + geom_density(color = "black", fill = "light blue") + ggtitle("Raw values without standardisation")
+
+shan_ict_s_df <- as.data.frame(shan_ict.std)
+s <- ggplot(data = shan_ict_s_df, aes(x = `RADIO_PR`)) + geom_density(color = "black", fill = "light blue") + ggtitle("Min-Max Standardisation")
+
+shan_ict_z_df <- as.data.frame(shan_ict.z)
+z <- ggplot(data = shan_ict_z_df, aes(x = `RADIO_PR`)) + geom_density(color = "black", fill = "light blue") + ggtitle("Z-score Standardisation")
+
+ggarrange(r, s, z, ncol = 3, nrow = 1)
+```
+
+### Compute the proximity matrix
+
+```{r}
+#| label: ex06-30
+proxmat <- dist(shan_ict, method = "euclidean")
+proxmat
+```
+
+### Compute hierarchical clustering
+
+```{r}
+#| label: ex06-31
+hclust_ward <- hclust(proxmat, method = "ward.D")
+plot(hclust_ward, cex = 0.6)
+```
+
+### Select the clustering algorithm
+
+```{r}
+#| label: ex06-32
+m <- c("average", "single", "complete", "ward")
+names(m) <- c("average", "single", "complete", "ward")
+
+ac <- function(x) { agnes(shan_ict, method = x)$ac }
+
+map_dbl(m, ac)
+```
+
+::: callout-tip
+### My observation {.unnumbered}
+
+Ward's agglomerative coefficient is 0.943, higher than complete linkage (0.895), average linkage (0.813), and single linkage (0.663). The Ward tree is therefore the clearest attribute-only baseline in this dataset.
+:::
+
+### Determine the number of clusters
+
+```{r}
+#| label: ex06-33
+set.seed(12345)
+gap_stat <- clusGap(shan_ict, FUN = hcut, nstart = 25, K.max = 10, B = 50)
+
+print(gap_stat, method = "firstmax")
+```
+
+```{r}
+#| label: ex06-34
+fviz_gap_stat(gap_stat)
+```
+
+::: callout-note
+### How I use the gap statistic {.unnumbered}
+
+The gap statistic is a guide. I compare it with the dendrogram and choose a cluster count that is useful for the spatial comparison. The first-max gap rule returns one cluster. I keep six groups for the class comparison because the course workflow uses six segments and the six-group maps give readable regional profiles. This is a descriptive segmentation, not evidence that six is the only statistically optimal choice.
+:::
+
+```{r}
+#| label: ex06-35
+plot(hclust_ward, cex = 0.6)
+rect.hclust(hclust_ward, k = 6, border = 2:5)
+```
+
+### Visualise the hierarchical solution
+
+```{r}
+#| label: ex06-36
+shan_ict_mat <- data.matrix(shan_ict)
+```
+
+```{r}
+#| label: ex06-37
+heatmaply(normalize(shan_ict_mat), Colv = NA, dist_method = "euclidean", hclust_method = "ward.D", seriate = "OLO", colors = RColorBrewer::brewer.pal(9, "Blues"), k_row = 6, margins = c(NA, 200, 60, NA), fontsize_row = 4, fontsize_col = 5, main = "Geographic Segmentation of Shan State by ICT indicators", xlab = "ICT Indicators", ylab = "Townships of Shan State")
+```
+
+The heatmap shows the multivariate profile of each township. Similar colour patterns indicate similarity in ICT space before spatial contiguity is imposed.
+
+```{r}
+#| label: ex06-38
+groups <- as.factor(cutree(hclust_ward, k = 6))
+
+shan_sf_cluster <- cbind(shan_sf, as.matrix(groups)) %>% rename(`CLUSTER` = `as.matrix.groups.`)
+
+qtm(shan_sf_cluster, "CLUSTER")
+```
+
+::: callout-tip
+### My observation {.unnumbered}
+
+The ordinary hierarchical map can contain separated areas in the same cluster. The attribute-only solution groups townships with similar ICT profiles even when they are not neighbours. The map is useful for identifying profiles, but it is not yet a set of contiguous regions.
+:::
+
+## Spatially constrained clustering: SKATER
+
+### Convert to SpatialPolygonsDataFrame
+
+```{r}
+#| label: ex06-39
+shan_sp <- as_Spatial(shan_sf)
+```
+
+### Compute the neighbour list
+
+```{r}
+#| label: ex06-40
+shan.nb <- poly2nb(shan_sp)
+summary(shan.nb)
+```
+
+```{r}
+#| label: ex06-41
+coords <- st_coordinates( st_centroid(st_geometry(shan_sf)))
+
+plot(st_geometry(shan_sf), border = grey(.5))
+plot(shan.nb, coords, col = "blue", add = TRUE)
+```
+
+::: callout-note
+### What the neighbour graph means {.unnumbered}
+
+The neighbour graph connects polygons that share a boundary. It is the spatial constraint used to prevent the final regions from becoming fragmented. The graph has 55 regions, 264 links, and an average of 4.8 links per township.
+:::
+
+### Compute edge costs and the minimum spanning tree
+
+```{r}
+#| label: ex06-42
+lcosts <- nbcosts(shan.nb, shan_ict)
+
+shan.w <- nb2listw(shan.nb, lcosts, style = "B")
+summary(shan.w)
+```
+
+```{r}
+#| label: ex06-43
+shan.mst <- mstree(shan.w)
+class(shan.mst)
+dim(shan.mst)
+head(shan.mst)
+```
+
+::: callout-note
+### Reading the minimum spanning tree {.unnumbered}
+
+The minimum spanning tree has one fewer edge than the number of townships. It keeps the graph connected while retaining the least costly links. The edge costs are based on differences in the five ICT indicators.
+:::
+
+```{r}
+#| label: ex06-44
+plot(st_geometry(shan_sf), border = gray(.5))
+plot.mst(shan.mst, coords, col = "blue", cex.lab = 0.7, cex.circles = 0.005, add = TRUE)
+```
+
+### Apply SKATER
+
+```{r}
+#| label: ex06-45
+clust6 <- spdep::skater(edges = shan.mst[, 1:2], data = shan_ict, method = "euclidean", ncuts = 5)
+
+str(clust6)
+```
+
+ncuts = 5 produces six clusters because the tree is cut five times.
+
+```{r}
+#| label: ex06-46
+ccs6 <- clust6$groups
+ccs6
+table(ccs6)
+```
+
+```{r}
+#| label: ex06-47
+plot(st_geometry(shan_sf), border = gray(.5))
+plot(clust6, coords, cex.lab = 0.7, groups.colors = c("red", "green", "blue", "brown", "pink", "orange"), cex.circles = 0.005, add = TRUE)
+```
+
+```{r}
+#| label: ex06-48
+groups_mat <- as.matrix(clust6$groups)
+
+shan_sf_spatialcluster <- cbind(shan_sf_cluster, as.factor(groups_mat)) %>% rename(`SP_CLUSTER` = `as.factor.groups_mat.`)
+
+qtm(shan_sf_spatialcluster, "SP_CLUSTER")
+```
+
+::: callout-note
+### What SKATER changes {.unnumbered}
+
+The SKATER map should be more geographically coherent than the ordinary hierarchical map. It keeps the attribute objective but only cuts links in the minimum spanning tree.
+:::
+
+::: callout-tip
+### My finding {.unnumbered}
+
+SKATER produces groups of 22, 18, 11, 2, 1, and 1 townships. The two singleton groups are Narphan and Ywangan, which have distinctive ICT profiles rather than average values. The main groups are much larger and follow the neighbour graph, so the result is more suitable for regional planning than the attribute-only map.
+:::
+
+```{r}
+#| label: ex06-49
+hclust.map <- qtm(shan_sf_cluster, "CLUSTER") + tm_borders(alpha = 0.5)
+
+shclust.map <- qtm(shan_sf_spatialcluster, "SP_CLUSTER") + tm_borders(alpha = 0.5)
+
+tmap_arrange(hclust.map, shclust.map, asp = NA, ncol = 2)
+```
+
+The left map shows attribute-only groups. The right map shows groups constrained by the township neighbour graph.
+
+## Value-added: ClustGeo comparison
+
+ClustGeo combines an attribute dissimilarity matrix with a geographical dissimilarity matrix. The mixing parameter alpha controls the balance between the two.
+
+### Attribute-only Ward-like clustering
+
+```{r}
+#| label: ex06-50
+nongeo_cluster <- hclustgeo(proxmat)
+
+plot(nongeo_cluster, cex = 0.5)
+rect.hclust(nongeo_cluster, k = 6, border = 2:5)
+```
+
+```{r}
+#| label: ex06-51
+groups <- as.factor(cutree(nongeo_cluster, k = 6))
+
+shan_sf_ngeo_cluster <- cbind(shan_sf, as.matrix(groups)) %>% rename(`CLUSTER` = `as.matrix.groups.`)
+
+qtm(shan_sf_ngeo_cluster, "CLUSTER")
+```
+
+### Select a spatial mixing parameter
+
+```{r}
+#| label: ex06-52
+dist <- st_distance(shan_sf, shan_sf)
+distmat <- as.dist(dist)
+
+cr <- choicealpha(proxmat, distmat, range.alpha = seq(0, 1, 0.1), K = 6, graph = TRUE)
+```
+
+The choicealpha graph shows how much spatial coherence is gained as the weight on geographical dissimilarity increases.
+
+```{r}
+#| label: ex06-53
+clustG <- hclustgeo(proxmat, distmat, alpha = 0.2)
+groups <- as.factor(cutree(clustG, k = 6))
+
+shan_sf_Gcluster <- cbind(shan_sf, as.matrix(groups)) %>% rename(`CLUSTER` = `as.matrix.groups.`)
+
+qtm(shan_sf_Gcluster, "CLUSTER")
+```
+
+::: callout-note
+### Why I add ClustGeo {.unnumbered}
+
+ClustGeo is a sensitivity check. It combines attribute and geographical dissimilarity, but it does not impose the same hard contiguity rule as SKATER.
+:::
+
+::: callout-tip
+### My observation {.unnumbered}
+
+With alpha = 0.2, ClustGeo gives groups of 10, 9, 7, 9, 12, and 8 townships. The groups are more balanced than the SKATER result. The difference shows that the final regional pattern depends on how strongly spatial structure is enforced.
+:::
+
+## Visual interpretation of clusters
+
+### One-variable comparison
+
+```{r}
+#| label: ex06-54
+ggplot(data = shan_sf_ngeo_cluster, aes(x = CLUSTER, y = RADIO_PR)) + geom_boxplot()
+```
+
+The boxplot compares radio penetration between clusters.
+
+### Parallel coordinates
+
+```{r}
+#| label: ex06-55
+ggparcoord(data = shan_sf_ngeo_cluster, columns = c(17:21), scale = "globalminmax", alphaLines = 0.2, boxplot = TRUE, title = "Multiple Parallel Coordinates Plots of ICT Variables by Cluster") + facet_grid(~ CLUSTER) + theme(axis.text.x = element_text(angle = 30))
+```
+
+The parallel coordinates show the full ICT profile instead of one variable at a time.
+
+```{r}
+#| label: ex06-56
+shan_sf_ngeo_cluster %>% st_set_geometry(NULL) %>% group_by(CLUSTER) %>% summarise(mean_RADIO_PR = mean(RADIO_PR), mean_TV_PR = mean(TV_PR), mean_LLPHONE_PR = mean(LLPHONE_PR), mean_MPHONE_PR = mean(MPHONE_PR), mean_COMPUTER_PR = mean(COMPUTER_PR))
+```
+
+## Summary
+
+The analysis shows three useful points. First, ICT access varies widely between townships, and the strongest digital-access relationships are between computer, internet, and mobile-phone rates. Second, Ward clustering gives a clear attribute baseline, but the gap statistic does not provide strong support for a fixed six-group solution. Third, the spatial constraint changes the result: SKATER creates contiguous regions and isolates distinctive townships, while ClustGeo gives a more balanced sensitivity check.
+
+The main finding is that the segmentation method changes the planning story. An attribute-only map answers which townships have similar ICT profiles. SKATER answers how those profiles can be grouped into connected regions. The results should therefore be used as a starting point for regional targeting, not as a final boundary for policy.
+
+## References
+
+- Assuncao, R. M., Neves, M. C., Camara, G. and Costa Freitas, C. D. (2006). Efficient regionalization techniques for socio-economic geographical units using minimum spanning trees. International Journal of Geographical Information Science, 20, 797-811.
+- Chavent, M., Kuentz-Simonet, V., Labenne, A. and Saracco, J. (2018). ClustGeo: an R package for hierarchical clustering with spatial constraints. Computational Statistics, 33, 1799-1822.
+- Chapter 12: Geographical Segmentation with Spatially Constrained Clustering Techniques: https://r4gdsa.netlify.app/chap12.html
+- spdep skater reference: https://r-spatial.github.io/spdep/reference/skater.html
+- ClustGeo introduction: https://cran.r-project.org/web/packages/ClustGeo/vignettes/intro_ClustGeo.html
