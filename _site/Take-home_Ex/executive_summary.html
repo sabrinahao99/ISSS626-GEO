@@ -454,28 +454,40 @@ Zhiyi Hao
 </section>
 <section id="data-quality-and-network-preparation" class="slide level2">
 <h2>Data quality and network preparation</h2>
+<div class="columns">
+<div class="column" style="width:50%;">
 <ul>
 <li>189 BGMA records have missing or invalid coordinates and are kept only for non-spatial counts.</li>
 <li>Duplicate accident IDs: 0.</li>
 <li>321 rows share coordinates with another event. They remain separate because their accident IDs are different.</li>
 <li>Coordinates and roads are transformed to EPSG:32647 before matching and network analysis.</li>
+</ul>
+</div><div class="column" style="width:50%;">
+<ul>
 <li>The median point-to-road offset is about 3.97 m; the 95th percentile is about 10.8 m.</li>
 <li>The graph check found 5,187 connected components in the major-road extract. The results are limited to the available connected road support.</li>
 <li>A support sensitivity retaining the components containing snapped events keeps all events while retaining about 66.8% of the full network length. The full network remains the primary reference support.</li>
 </ul>
+</div></div>
 </section>
 <section id="analytical-workflow" class="slide level2">
 <h2>Analytical workflow</h2>
 <p>The analysis follows the Chapter 7 network workflow:</p>
+<div class="columns">
+<div class="column" style="width:50%;">
 <ol type="1">
 <li>clean and project the event, boundary and road data;</li>
 <li>match recorded events to the road network;</li>
 <li>split roads into lixels and create line-centre samples;</li>
 <li>estimate discontinuous network KDE and compare bandwidths;</li>
+</ol>
+</div><div class="column" style="width:50%;">
+<ol start="5" type="1">
 <li>use network K and G functions with a network-random reference;</li>
 <li>use TNKDE to compare network intensity across time;</li>
 <li>use cross-K and cross-G for fatal versus non-fatal events.</li>
 </ol>
+</div></div>
 <p>All distances are measured along the network. The main NKDE bandwidth is 1,000 m and the TNKDE time bandwidth is 30 days. The K/G and cross-K/G runs use 99 simulations over 0–3,000 m, so these envelopes are exploratory pointwise comparisons rather than formal global tests.</p>
 </section>
 <section id="key-findings" class="slide level2">

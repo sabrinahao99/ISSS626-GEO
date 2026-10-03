@@ -341,25 +341,39 @@ The study window is the six-province Bangkok Greater Metropolitan Area. The acci
 
 ## Data quality and network preparation
 
+::::: columns
+::: {.column width="50%"}
 - 189 BGMA records have missing or invalid coordinates and are kept only for non-spatial counts.
 - Duplicate accident IDs: 0.
 - 321 rows share coordinates with another event. They remain separate because their accident IDs are different.
 - Coordinates and roads are transformed to EPSG:32647 before matching and network analysis.
+:::
+
+::: {.column width="50%"}
 - The median point-to-road offset is about 3.97 m; the 95th percentile is about 10.8 m.
 - The graph check found 5,187 connected components in the major-road extract. The results are limited to the available connected road support.
 - A support sensitivity retaining the components containing snapped events keeps all events while retaining about 66.8% of the full network length. The full network remains the primary reference support.
+:::
+:::::
 
 ## Analytical workflow
 
 The analysis follows the Chapter 7 network workflow:
 
+::::: columns
+::: {.column width="50%"}
 1.  clean and project the event, boundary and road data;
 2.  match recorded events to the road network;
 3.  split roads into lixels and create line-centre samples;
 4.  estimate discontinuous network KDE and compare bandwidths;
+:::
+
+::: {.column width="50%"}
 5.  use network K and G functions with a network-random reference;
 6.  use TNKDE to compare network intensity across time;
 7.  use cross-K and cross-G for fatal versus non-fatal events.
+:::
+:::::
 
 All distances are measured along the network. The main NKDE bandwidth is 1,000 m and the TNKDE time bandwidth is 30 days. The K/G and cross-K/G runs use 99 simulations over 0--3,000 m, so these envelopes are exploratory pointwise comparisons rather than formal global tests.
 
