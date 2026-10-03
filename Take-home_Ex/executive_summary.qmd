@@ -243,6 +243,22 @@ execute:
   border-left-color: var(--portfolio-green);
 }
 
+.reveal .slides section.dense {
+  font-size: 0.74em;
+}
+
+.reveal .slides section.dense .columns > .column {
+  padding: 0.5rem 0.65rem 0.4rem;
+}
+
+.reveal .slides section.dense li {
+  margin-bottom: 0.25em;
+}
+
+.reveal .slides section.dense > p {
+  margin-top: 0.35em;
+}
+
 .reveal .title-slide h1,
 .reveal .title-slide .subtitle,
 .reveal .title-slide .quarto-title-author-name,
@@ -339,7 +355,7 @@ The study window is the six-province Bangkok Greater Metropolitan Area. The acci
 :::
 :::::::
 
-## Data quality and network preparation
+## Data quality and network preparation {.dense}
 
 ::::: columns
 ::: {.column width="50%"}
@@ -356,7 +372,7 @@ The study window is the six-province Bangkok Greater Metropolitan Area. The acci
 :::
 :::::
 
-## Analytical workflow
+## Analytical workflow {.dense}
 
 The analysis follows the Chapter 7 network workflow:
 
