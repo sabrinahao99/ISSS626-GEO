@@ -347,6 +347,7 @@ The study window is the six-province Bangkok Greater Metropolitan Area. The acci
 - Coordinates and roads are transformed to EPSG:32647 before matching and network analysis.
 - The median point-to-road offset is about 3.97 m; the 95th percentile is about 10.8 m.
 - The graph check found 5,187 connected components in the major-road extract. The results are limited to the available connected road support.
+- A support sensitivity retaining the components containing snapped events keeps all events while retaining about 66.8% of the full network length. The full network remains the primary reference support.
 
 ## Analytical workflow
 
@@ -360,7 +361,7 @@ The analysis follows the Chapter 7 network workflow:
 6.  use TNKDE to compare network intensity across time;
 7.  use cross-K and cross-G for fatal versus non-fatal events.
 
-All distances are measured along the network. The main NKDE bandwidth is 1,000 m and the TNKDE time bandwidth is 30 days. The K/G and cross-K/G runs use nine simulations over 0--3,000 m, so these envelopes are exploratory.
+All distances are measured along the network. The main NKDE bandwidth is 1,000 m and the TNKDE time bandwidth is 30 days. The K/G and cross-K/G runs use 99 simulations over 0--3,000 m, so these envelopes are exploratory pointwise comparisons rather than formal global tests.
 
 ## Key findings
 
@@ -437,6 +438,6 @@ The maps do not estimate crash probability. They show where recorded events dese
 
 ## Limitations and reproducibility
 
-The road layer is an OSM-derived major-road extract, not a complete official traffic network. Missing traffic exposure, omitted road classes, reporting coverage and disconnected components limit the conclusions. The K/G and cross-K/G envelopes use nine simulations, so they are exploratory and should not be read as precise significance tests.
+The road layer is an OSM-derived major-road extract, not a complete official traffic network. Missing traffic exposure, omitted road classes, reporting coverage and disconnected components limit the conclusions. The K/G and cross-K/G envelopes use 99 simulations, so they are exploratory pointwise comparisons and should not be read as precise global significance tests.
 
 The full code, data-quality decisions, parameters, saved results and references are documented in the [technical report](assignment1.html). The report keeps the original events, snapped events, matched road IDs and offset distances so the analysis can be checked and reproduced.

@@ -16,6 +16,7 @@ project:
     - Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.qmd
     - In-class_Ex/in-class_Ex04/in-class_Ex04.qmd
     - In-class_Ex/in-class_Ex05/in-class_Ex05.qmd
+    - In-class_Ex/in-class_Ex06/In-class_Ex06.qmd
 
 website:
   title: "ISSS626"
@@ -55,6 +56,8 @@ website:
             href: "In-class_Ex/in-class_Ex04/in-class_Ex04.html"
           - text: "In-class Exercise 5"
             href: "In-class_Ex/in-class_Ex05/in-class_Ex05.html"
+          - text: "In-class Exercise 6"
+            href: "In-class_Ex/in-class_Ex06/In-class_Ex06.html"
       - about.qmd
     right:
       - icon: github

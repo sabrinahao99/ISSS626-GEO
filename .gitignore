@@ -12,3 +12,5 @@ AGENTS.md
 Take-home_Ex/assignment1_files/
 *_cache/
 _freeze/
+*.rmarkdown
+Take-home_Ex/takehome_exercise1_submission.zip

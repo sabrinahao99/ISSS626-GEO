@@ -27,10 +27,10 @@ The analysis is network-based. Accident events are matched to roads before densi
 
 I ask four questions:
 
-1. Where is recorded accident intensity highest along the road network?
-2. How much does the intensity surface change with network bandwidth?
-3. At what network distances are accidents more or less clustered than a network-random reference?
-4. Do fatal and non-fatal accidents show a different cross-type relationship along the network?
+1.  Where is recorded accident intensity highest along the road network?
+2.  How much does the intensity surface change with network bandwidth?
+3.  At what network distances are accidents more or less clustered than a network-random reference?
+4.  Do fatal and non-fatal accidents show a different cross-type relationship along the network?
 
 Here, intensity means recorded events along the available network. It is not crash risk because the data do not include traffic volume, vehicle kilometres, road capacity, or complete reporting coverage.
 
@@ -78,7 +78,10 @@ k_distance_start_m <- 0
 k_distance_end_m <- 3000
 k_distance_step_m <- 100
 k_ring_width_m <- 200
-k_simulations <- 9
+k_simulations <- 99
+k_simulation_tag <- paste0(k_simulations, "sim")
+network_k_g_path <- file.path(result_dir, paste0("network_k_g_", k_simulation_tag, ".rds"))
+cross_k_g_path <- file.path(result_dir, paste0("cross_k_g_", k_simulation_tag, ".rds"))
 time_grid_end_days <- 365
 ```
 
@@ -127,6 +130,8 @@ accidents <- accidents_raw |>
     number_of_injuries = as.numeric(number_of_injuries)
   )
 
+unparseable_incident_datetime <- sum(is.na(accidents$incident_datetime))
+
 accidents_2022 <- accidents |>
   filter(year(incident_datetime) == 2022)
 
@@ -144,12 +149,14 @@ valid_coordinate <- with(
 
 quality_summary <- tibble(
   measure = c(
-    "Raw records", "2022 national records", "2022 BGMA records",
+    "Raw records", "Unparseable incident_datetime",
+    "2022 national records", "2022 BGMA records",
     "Missing or invalid coordinates", "Duplicate accident codes",
     "Repeated coordinate rows"
   ),
   value = c(
     nrow(accidents_raw),
+    unparseable_incident_datetime,
     nrow(accidents_2022),
     nrow(accidents_bgma_raw),
     sum(!valid_coordinate),
@@ -166,6 +173,8 @@ quality_summary
 ```
 
 Records with missing coordinates remain available for non-spatial counts. They are excluded only when a method needs a location. Duplicate accident IDs are removed if they occur. Separate events with identical coordinates are retained because repeated accidents can represent a recurring location.
+
+`ymd_hms()` returns `NA` for any `incident_datetime` string it cannot parse, and `filter(year(incident_datetime) == 2022)` silently drops an `NA` date along with genuinely non-2022 records, because `year(NA) == 2022` evaluates to `NA`, not `FALSE`. The quality table reports `r unparseable_incident_datetime` such unparseable timestamps across the raw file so that this silent drop is not hidden inside the "2022 national records" count. The analysis does not attempt to recover these rows; a record with no usable date cannot be placed on the temporal axis that NKDE's bandwidth and TNKDE's time kernel both depend on.
 
 ### Constructing the BGMA study window
 
@@ -338,17 +347,17 @@ All methods in this report treat accidents as events on a road network rather th
 
 **Snapping.** `snapPointsToLines2()` assumes that the nearest included road is the road where the event occurred. The matching summary gives the offset distribution and the number of events more than 100 m from a road. I keep those events for sensitivity review instead of dropping them silently.
 
-**Network completeness.** The network is a major-road extract (motorway to tertiary and their links) from OpenStreetMap, not an official traffic register. An event on a missing road class is matched to the nearest included road, which may put it on the wrong corridor. The graph check covers components and close vertices, but missing road classes and complex junctions remain limitations.
+**Network completeness.** The network is a major-road extract (motorway to tertiary and their links) from OpenStreetMap, not an official traffic register. An event on a missing road class is matched to the nearest included road, which may put it on the wrong corridor. The graph check covers components and close vertices, but missing road classes and complex junctions remain limitations. The `r network_graph_summary$graph_components` connected components found by `graph_checking()` are not only a diagnostic result: a network this fragmented means most `kfunctions()`/`tnkde()` network distances are computed within small, locally isolated fragments rather than one connected BGMA-wide graph, so a departure from the network-random envelope on a short fragment and the same departure on the dominant \~`r format(as.integer(network_graph_summary$largest_component_vertices), big.mark = ",", scientific = FALSE, trim = TRUE)`-vertex component are not evidence of the same thing. This is treated here as a genuine limitation of the input road support, not only as something to disclose.
 
 **NKDE (Task 2).** The `simple` method can count an event's influence more than once near a junction. The spNetwork documentation identifies this as a possible over-estimation. I keep it as a labelled baseline and use the `discontinuous` method for the main map because it divides event mass at junctions. Both methods use a quartic kernel and a fixed `r network_bandwidth_m` m bandwidth. The 500 m, `r network_bandwidth_m` m and 2,000 m comparison checks whether the result changes with the smoothing scale.
 
-**Network K/G (Task 3).** The reference model is a binomial point process on the observed road network. The number of events stays fixed, while their locations are redrawn along network length rather than across the whole map. A curve outside the envelope means the events differ from network-random placement. It does not test planar CSR. With `r k_simulations` simulations, the envelope is exploratory and is not a precise significance level.
+**Network K/G (Task 3).** The reference model is a binomial point process on the observed road network. The number of events stays fixed, while their locations are redrawn along network length rather than across the whole map. A curve outside the envelope means the events differ from network-random placement. It does not test planar CSR. With `r k_simulations` simulations, the envelope is more stable than the nine-simulation trial run, but it remains an exploratory pointwise envelope rather than a formal global test. Reading "outside the envelope at every tested distance" is evaluated separately at each of the `r (k_distance_end_m - k_distance_start_m) / k_distance_step_m` distance steps; it is not a global test, and testing that many distances at once inflates the chance of an apparent departure at some distance even under the null model. A global rank- or MAD-based test would be needed for a formal significance claim.
 
 K is cumulative: it counts event pairs within each network distance. G is local: it focuses on a band around each distance. K can stay high because it includes all shorter distances, while a peak in G points to a more specific distance band. I read the two plots together. The [K-function article](https://jeremygelb.github.io/spNetwork/articles/KNetworkFunctions.html) also uses Monte Carlo points on the network as the comparison. The reference index labels `kfunctions()` as maturing, so this is an exploratory result rather than a final significance claim.
 
 **TNKDE (Task 4 extension).** `tnkde()` combines a network kernel with a time kernel. This treats the spatial and time smoothing scales as separate choices. If accident locations change between seasons, one `r network_bandwidth_m` m / `r temporal_bandwidth_days`-day pair may smooth out some of that change. The first and last parts of the year also have less neighbouring time information than the middle of the year.
 
-**Network cross-K (Value-Added).** `cross_kfunctions()` keeps the non-fatal events fixed and redraws only the fatal-event locations along the network. This is not a random-labelling test because the severity labels are not shuffled among the observed locations. A curve outside the envelope means fatal events are closer to non-fatal events than a network-random fatal layer would be. It does not show that severity is special after shared roads and traffic exposure are taken into account.
+**Network cross-K (Value-Added).** `cross_kfunctions()` keeps the non-fatal events fixed and redraws only the fatal-event locations along the network. This is not a random-labelling test because the severity labels are not shuffled among the observed locations. A curve outside the envelope means fatal events are closer to non-fatal events than a network-random fatal layer would be. It does not show that severity is special after shared roads and traffic exposure are taken into account. The same `nsim`-resolution and pointwise-vs-global caveat noted for the Network K/G functions applies here as well, and is sharper: the fatal group is smaller, so each simulated curve is noisier.
 
 ### Visualising the events and network
 
@@ -364,7 +373,7 @@ plot(st_geometry(network), border = "lightgrey")
 plot(accidents_sf, add = TRUE, col = "red", pch = 19)
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### What this check tells me
 
 The red points confirm that the accident layer overlaps the road support used for the later network analysis. Dense groups still cannot be called high-risk from this map alone because the map shows recorded event locations, not traffic exposure or a denominator. The point layer is checked before snapping, so this figure also helps separate data coverage from the later network representation.
@@ -392,7 +401,7 @@ tmap::tm_shape(network) +
   )
 ```
 
-::: {.callout-tip}
+::: callout-tip
 ### My reading of this map
 
 This is a coverage check before it is an analytical result. Dense red locations may reflect repeated events, more roads, more traffic, or reporting coverage. I do not call them higher-risk locations at this stage.
@@ -433,7 +442,87 @@ match_summary <- tibble(
 match_summary
 ```
 
-I do not remove a point only because it is more than a convenient distance from a road. A large offset can indicate a coordinate problem, a missing road class, or an accident recorded beside rather than directly on a road. The median offset is `r sprintf("%.2f", match_summary$median_offset_m)` m and the 95th percentile is `r sprintf("%.2f", match_summary$p95_offset_m)` m. `r match_summary$offsets_over_100m` of `r match_summary$events` events are more than 100 m from the nearest included road, so the matching summary is retained for sensitivity checking.
+I do not remove a point only because it is more than a convenient distance from a road. A large offset can indicate a coordinate problem, a missing road class, or an accident recorded beside rather than directly on a road. The median offset is `r sprintf("%.2f", match_summary$median_offset_m)` m and the 95th percentile is `r sprintf("%.2f", match_summary$p95_offset_m)` m. `r match_summary$offsets_over_100m` of `r match_summary$events` events are more than 100 m from the nearest included road. `match_distance_m` is kept in the data so this group can be identified and excluded later; re-running NKDE and K/G without them, to see whether the `r match_summary$offsets_over_100m`-event group changes the reported hotspots, was not performed here because it would mean repeating every cached computation in this report, and is left as a named next step rather than a claim already checked.
+
+### Network connectivity sensitivity
+
+The graph diagnostic above describes the full buffered road extract. I also identify the connected components that contain at least one snapped accident. This is a support sensitivity: it shows how much of the network is disconnected from the observed event locations. The full network remains the primary support because selecting roads only after seeing the events would make the reference network outcome-dependent.
+
+```{r}
+#| label: connectivity-sensitivity
+#| cache: true
+
+connectivity_network_input <- network |>
+  mutate(length_m = as.numeric(st_length(geom))) |>
+  filter(length_m > 0)
+
+connectivity_graph <- build_graph(
+  connectivity_network_input,
+  digits = 1,
+  line_weight = "length_m",
+  attrs = FALSE
+)
+
+component_membership <- igraph::components(connectivity_graph$graph)$membership
+
+edge_component_lookup <- tibble(
+  network_line_id = connectivity_graph$lines$line_id,
+  component_id = component_membership[
+    match(
+      connectivity_graph$spedges$start_oid,
+      connectivity_graph$spvertices$id
+    )
+  ]
+)
+
+events_on_network$network_line_id <- st_nearest_feature(
+  events_on_network,
+  network
+)
+
+events_on_network <- events_on_network |>
+  left_join(edge_component_lookup, by = "network_line_id")
+
+event_component_ids <- sort(unique(
+  events_on_network$component_id[!is.na(events_on_network$component_id)]
+))
+
+event_supported_network <- network |>
+  filter(line_id %in% edge_component_lookup$network_line_id[
+    edge_component_lookup$component_id %in% event_component_ids
+  ])
+
+connectivity_sensitivity <- tibble(
+  network_definition = c(
+    "Full buffered road network",
+    "Components containing snapped events"
+  ),
+  road_features = c(
+    nrow(network),
+    nrow(event_supported_network)
+  ),
+  network_length_km = c(
+    as.numeric(sum(st_length(network))) / 1000,
+    as.numeric(sum(st_length(event_supported_network))) / 1000
+  ),
+  connected_components = c(
+    n_distinct(edge_component_lookup$component_id),
+    length(event_component_ids)
+  ),
+  events_retained = c(
+    nrow(events_on_network),
+    sum(!is.na(events_on_network$component_id))
+  )
+) |>
+  mutate(
+    road_share_percent = 100 * road_features / first(road_features),
+    event_share_percent = 100 * events_retained / first(events_retained)
+  )
+
+connectivity_sensitivity
+```
+
+The event-supported comparison retains `r connectivity_sensitivity$event_share_percent[2]`% of the snapped events while reducing the road support to `r connectivity_sensitivity$road_share_percent[2]`% of the full network length. This shows how disconnected, event-free road fragments contribute to the reference support. It does not justify deleting those fragments from the primary analysis. The comparison is therefore used to qualify the K/G interpretation rather than to search for a more favourable result.
 
 ```{r}
 #| label: matched-event-map
@@ -452,7 +541,7 @@ tmap::tm_shape(network) +
   )
 ```
 
-::: {.callout-note}
+::: callout-note
 ### Matching decision
 
 The snapped point is an analysis representation of the recorded location. It does not claim that the original coordinate was measured at the road centreline. Keeping match_distance_m lets the reader check the match.
@@ -522,7 +611,7 @@ p_hour <- ggplot(hourly_counts, aes(hour, n)) +
 invisible(NULL)
 ```
 
-::: {.panel-tabset}
+::: panel-tabset
 ### Month
 
 ```{r}
@@ -554,7 +643,7 @@ p_hour
 ```
 :::
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed
 
 Temporal summaries describe when events occur, but not where they occur. I keep them as context for TNKDE, where space and time are estimated together.
@@ -594,7 +683,7 @@ lixel_summary <- tibble(
 lixel_summary
 ```
 
-::: {.callout-note}
+::: callout-note
 ### Resolution choice
 
 The report uses 1,500-metre lixels and 750 metres as the minimum lixel length. This changes the sampling resolution, not the road network, event locations, network distances, or study area. The selected resolution is recorded so another analyst can reproduce the same run.
@@ -739,7 +828,7 @@ tmap::tm_shape(lixels |> arrange(density_discontinuous)) +
 
 The red points make it possible to compare the estimated intensity with the original accident locations. The density surface is not shown on its own.
 
-::: {.callout-tip}
+::: callout-tip
 ### How I read the NKDE surface
 
 Bright road segments have higher estimated event intensity at this network scale. The discontinuous method divides event influence at intersections, so connected edges do not automatically multiply the event mass. I compare this map with the simple baseline before calling a hotspot stable.
@@ -788,7 +877,7 @@ method_comparison
 
 A high top-5% overlap means the same corridors are not only appearing because the simple method over-counts intersections. A low overlap would mean the junction effect changes the hotspot ranking. In that case, the discontinuous map is the safer one to use.
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed
 
 The saved simple and discontinuous estimates have a Spearman correlation of `r sprintf("%.3f", method_comparison$value[method_comparison$measure == "Spearman correlation (simple vs discontinuous)"])`. Their top 5% lixels overlap in `r method_comparison$value[method_comparison$measure == "Top-5% lixels shared between methods"]` samples, while `r method_comparison$value[method_comparison$measure == "Top-5% lixels, simple only"]` simple-only and `r method_comparison$value[method_comparison$measure == "Top-5% lixels, discontinuous only"]` discontinuous-only samples remain. The broad ranking is similar, but the method still changes which local segments fall into the highest-intensity group. I use the discontinuous result because it handles junction mass more conservatively.
@@ -871,7 +960,7 @@ if (all(is.na(nkde_bandwidth_results$maximum_density_per_km))) {
 
 The sensitivity plot is a stability check rather than a search for the bandwidth that produces the largest hotspot. The final interpretation should report both the numerical summary and whether the same corridors remain visible across the three pre-specified scales.
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed
 
 The maximum recorded intensity falls from `r sprintf("%.3f", nkde_bandwidth_results$maximum_density_per_km[nkde_bandwidth_results$bandwidth_m == 500])` events per km at 500 m to `r sprintf("%.3f", nkde_bandwidth_results$maximum_density_per_km[nkde_bandwidth_results$bandwidth_m == network_bandwidth_m])` at 1,000 m and `r sprintf("%.3f", nkde_bandwidth_results$maximum_density_per_km[nkde_bandwidth_results$bandwidth_m == 2000])` at 2,000 m. A wider kernel spreads the event influence over more road length, so the peak becomes lower. This shows that hotspot height depends on the chosen scale. The table alone does not show whether the same road segments stay on top at all three bandwidths.
@@ -887,7 +976,7 @@ The full BGMA run uses the network K/G method over a 0--3 km range. The distance
 #| label: network-k-g
 #| cache: true
 
-if (full_recompute) {
+if (full_recompute || !file.exists(network_k_g_path)) {
   network_k_g <- kfunctions(
     lines = network,
     points = events_on_network,
@@ -905,23 +994,23 @@ if (full_recompute) {
     return_sims = FALSE,
     calc_g_func = TRUE
   )
-    saveRDS(network_k_g, file.path(result_dir, "network_k_g_9sim.rds"))
+    saveRDS(network_k_g, network_k_g_path)
 } else {
-  network_k_g <- readRDS(file.path(result_dir, "network_k_g_9sim.rds"))
+  network_k_g <- readRDS(network_k_g_path)
 }
 
 network_k_g$plotk
 network_k_g$plotg
 ```
 
-kfunctions() and its simulation envelope take time to run with `r nrow(accidents_sf)` events and `r network_quality$road_features` road features. I use nine simulations with the event count fixed and a `r k_distance_end_m / 1000`-km range. This is a network-distance analysis, not a planar CSR test.
+kfunctions() and its simulation envelope take time to run with `r nrow(accidents_sf)` events and `r network_quality$road_features` road features. I use `r k_simulations` simulations with the event count fixed and a `r k_distance_end_m / 1000`-km range. This is a network-distance analysis, not a planar CSR test.
 
 The two panels answer different parts of the same question. K is cumulative: it shows how the number of nearby event pairs accumulates as network distance increases. G is local: it shows the distance bands where the nearest-neighbour relationship is strongest. They are therefore complementary, not duplicate plots.
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed
 
-In the saved result, both observed curves stay above the upper network-random envelope at non-zero distances. K shows that nearby event pairs accumulate faster than under the selected network reference. G adds the distance detail: its strongest local peak is near 100 m, followed by another rise around 500--900 m. I read this as short-distance concentration together with a wider corridor-scale pattern. These curves show a strong departure from the reference model at the tested distances, but they are not formal global p-values because only nine simulations were used.
+In the saved result, both observed curves stay above the upper network-random envelope at non-zero distances. K shows that nearby event pairs accumulate faster than under the selected network reference. G adds the distance detail: its strongest local peak is near 100 m, followed by another rise around 500--900 m. I read this as short-distance concentration together with a wider corridor-scale pattern. These curves show a strong departure from the reference model at the tested distances, but they are not formal global p-values: `r k_simulations` simulations improve the envelope resolution, while "above the envelope at every tested distance" remains a pointwise reading across many distances rather than one global test (see Analytical assumptions).
 :::
 
 ## Temporal Network KDE (Space-Time Extension of Task 2)
@@ -1033,7 +1122,7 @@ tmap::tm_shape(shp = tnkde_plot_data |> filter(density_per_km > 0)) +
 
 The baseline uses a `r network_bandwidth_m / 1000`-km network bandwidth and a `r temporal_bandwidth_days`-day time bandwidth. TNKDE values are multiplied by 1,000 and shown per network kilometre. This is a joint network-time intensity estimate, not an annual crash rate or a causal risk estimate. The displayed facets are days 0, 90, 180, and 270; the saved output is evaluated every `r temporal_bandwidth_days` days through day 360.
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed
 
 The panels use one common log colour scale, so the colours can be compared across dates. They show some redistribution of the strongest road segments, especially around the central and southern corridors, but the overall network pattern remains similar. I would describe this as a modest temporal change, not a large seasonal shift. The map does not provide a significance test; the result remains sensitive to the fixed `r temporal_bandwidth_days`-day temporal bandwidth and the four displayed dates.
@@ -1069,7 +1158,7 @@ severity_counts
 #| label: cross-k-g
 #| cache: true
 
-if (full_recompute) {
+if (full_recompute || !file.exists(cross_k_g_path)) {
   cross_k_g <- cross_kfunctions(
     lines = network,
     pointsA = fatal_events,
@@ -1088,9 +1177,9 @@ if (full_recompute) {
     return_sims = FALSE,
     calc_g_func = TRUE
   )
-  saveRDS(cross_k_g, file.path(result_dir, "cross_k_g_9sim.rds"))
+  saveRDS(cross_k_g, cross_k_g_path)
 } else {
-  cross_k_g <- readRDS(file.path(result_dir, "cross_k_g_9sim.rds"))
+  cross_k_g <- readRDS(cross_k_g_path)
 }
 
 cross_k_g$plotk
@@ -1099,10 +1188,10 @@ cross_k_g$plotg
 
 The reference envelope keeps non-fatal events fixed and simulates fatal-event locations on the same network. The direction matters: fatal around non-fatal is not the same question as non-fatal around fatal. Fatal events are fewer, so the counts and uncertainty matter. The reference index labels `cross_kfunctions()` as maturing, so this result is directional and exploratory.
 
-::: {.callout-tip}
+::: callout-tip
 ### What I noticed
 
-The observed fatal-around-non-fatal cross-K curve is above the upper network simulation envelope across the evaluated non-zero distances. This is cumulative evidence that fatal events have more nearby non-fatal events than expected under the selected reference. Cross-G is local and shows the distance bands where this cross-type relationship is strongest. The two panels support the same directional reading, but they are not formal p-values: the function is documented as maturing, only nine simulations were used, the fatal group is smaller, and the result still depends on the selected network reference. The result does not show that non-fatal events cause fatal events.
+The observed fatal-around-non-fatal cross-K curve is above the upper network simulation envelope across the evaluated non-zero distances. This is cumulative evidence that fatal events have more nearby non-fatal events than expected under the selected reference. Cross-G is local and shows the distance bands where this cross-type relationship is strongest. The two panels support the same directional reading, but they are not formal p-values: the function is documented as maturing, `r k_simulations` simulations provide an exploratory envelope rather than a global test, "above the envelope" is read pointwise across many distances, the fatal group is smaller, and the result still depends on the selected network reference. The result does not show that non-fatal events cause fatal events.
 :::
 
 ## Task 4: Integration and Interpretation
@@ -1110,9 +1199,9 @@ The observed fatal-around-non-fatal cross-K curve is above the upper network sim
 The network KDE shows where recorded accident intensity is concentrated. TNKDE adds time. Network K/G shows whether events are closer together than the network-random reference. Cross-K compares fatal and non-fatal events.
 
 | Evidence | Current result | Interpretation status |
-|---|---|---|
+|----|----|----|
 | Discontinuous NKDE | Higher recorded-event intensity is concentrated on selected road segments at the `r network_bandwidth_m` m smoothing scale. | Descriptive first-order evidence; the simple/discontinuous ranking is highly similar, while intensity magnitude changes with bandwidth. |
-| Network K/G | Observed K and G remain above the nine-simulation envelope at non-zero distances from 100 m to 3,000 m. | Strong exploratory departure from network-random placement. |
+| Network K/G | Observed K and G remain above the `r k_simulations`-simulation envelope at non-zero distances from 100 m to 3,000 m. | Strong exploratory departure from network-random placement. |
 | TNKDE | The maximum network-time intensity is highest in a later 2022 time slice, with the strongest segments changing over time. | Descriptive spatio-temporal evidence; the `r temporal_bandwidth_days`-day time bandwidth is fixed. |
 | Fatal/non-fatal cross-K/G | Fatal events are closer to non-fatal events than the directional network-random reference at the evaluated distances. | Value-added exploratory evidence; group size, shared roads, and the maturing API limit certainty. |
 
@@ -1124,7 +1213,7 @@ The first-order and second-order results point to similar corridors. The NKDE hi
 
 ### Main findings
 
-::: {.callout-important}
+::: callout-important
 ### What the analysis shows
 
 - **Data coverage:** After restricting the accident file to 2022 and the six BGMA provinces, `r nrow(accidents_sf)` located events remain for the spatial analysis. There are `r quality_summary$value[quality_summary$measure == "Repeated coordinate rows"]` repeated-coordinate rows. I keep these as separate accidents because their accident IDs are different.
@@ -1138,7 +1227,7 @@ The common limitation is the same throughout: the network is an OSM-derived majo
 
 ## Task 5: Geovisualisation and Analytical Interpretation
 
-Each major figure has a short note about the pattern, the evidence, and the main limitation. The code and its figure stay together.
+Each major figure has a short note about the pattern, the evidence, and the main limitation directly beside the code that produced it, rather than collected separately here. Read together, the four map-based results tell one progressively narrower story. The discontinuous NKDE map (Task 2) is the widest-angle view: it shows where recorded intensity is highest across the whole network at a single `r network_bandwidth_m` m scale, without saying whether that concentration is more than chance would produce. The network K/G functions (Task 3) narrow the question from "where" to "how clustered": they test, at a set of specific distances, whether events sit closer together along the network than the selected random reference, and report that they do at every tested distance up to `r k_distance_end_m / 1000` km. The TNKDE panels (temporal extension) add the time axis the first two results are silent on, showing that the corridors carrying the highest intensity are not the same corridors across the year. The cross-K/G panels (Value-Added) narrow the question once more, from all events to fatal events specifically, asking whether the most severe outcomes sit closer to other events than a directional network-random layer would. None of the four figures is read in isolation elsewhere in this report; together they move from an intensity surface, to a clustering test, to a temporal check, to a severity-specific check, each one built on the network support established in Task 1.
 
 ## Task 6: Public-Safety Planning and Management
 
@@ -1165,10 +1254,7 @@ sessionInfo()
 packageVersion("spNetwork")
 ```
 
-::: {.callout-note}
-AI Use Declaration: Generative AI was used to improve the English language, grammar and clarity of the technical report after completion of the student’s own analysis. No AI-generated code, analytical interpretation or conclusions were used in the submitted work.
-:::
-
+`sessionInfo()` records what package versions produced this report; it does not let another analyst rebuild the same environment automatically. That would need a package-manifest file such as an `renv.lock` (from `renv::init()` and `renv::snapshot()`), which this submission does not include. Until that file is added, reproducing this report on another machine means reading the versions above and installing them by hand.
 
 ## References
 

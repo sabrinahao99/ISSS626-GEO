@@ -1,0 +1,398 @@
+---
+title: "Emerging Hot Spot Analysis"
+subtitle: "In-class Exercise 6"
+author: "Zhiyi Hao"
+date: "2026-10-03"
+date-modified: today
+format: html
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Overview
+
+Emerging Hot Spot Analysis (EHSA) is used to identify how statistically significant hot and cold spots change across time. The workflow combines a space-time cube, Getis-Ord Gi\* statistics, and the Mann-Kendall trend test.
+
+The analysis contains four main steps:
+
+- Build a space-time cube.
+- Compute local Getis-Ord Gi\* statistics for each time period.
+- Evaluate the temporal trend of Gi\* values with the Mann-Kendall test.
+- Classify locations into EHSA categories.
+
+::: callout-note
+## My observation
+
+This workflow adds a temporal reading to the hot spot analysis. A county can be important because it is consistently hot, newly hot, weakening, or moving between patterns over the study period.
+:::
+
+# Getting Started
+
+## Installing and Loading the R Packages
+
+```{r}
+#| label: ic06-01
+pacman::p_load(sf, sfdep, tmap, plotly, tidyverse, Kendall)
+```
+
+::: callout-note
+## My observation
+
+The package list matches the chapter workflow. `sf` handles spatial data, `sfdep` handles the space-time cube and EHSA statistics, `tmap` maps the final classification, `plotly` makes the Gi\* trend line interactive, and `Kendall` runs the Mann-Kendall trend test.
+:::
+
+# The Data
+
+The exercise uses two Hunan data sets:
+
+- `Hunan`, a county-level geospatial data set in ESRI shapefile format.
+- `Hunan_GDPPC.csv`, an aspatial table of county GDP per capita values from 2005 to 2021.
+
+## Importing Geospatial Data
+
+```{r}
+#| label: ic06-02
+hunan <- st_read(
+  dsn = "data/geospatial",
+  layer = "Hunan",
+  quiet = TRUE
+) %>%
+  st_transform(crs = 32650)
+
+hunan
+```
+
+::: callout-note
+## My observation
+
+The shapefile has 88 Hunan county units. Transforming to EPSG:32650 gives a projected coordinate system, which is more suitable for distance-based weights than longitude-latitude coordinates.
+:::
+
+## Importing Attribute Table
+
+```{r}
+#| label: ic06-03
+GDPPC <- read_csv("data/aspatial/Hunan_GDPPC.csv",
+                  show_col_types = FALSE)
+
+glimpse(GDPPC)
+```
+
+::: callout-note
+## My observation
+
+The GDPPC table is in long format with `Year`, `County`, and `GDPPC`. This format is suitable for `spacetime()` because each county can be matched to repeated yearly observations.
+:::
+
+# Creating a Time Series Cube
+
+```{r}
+#| label: ic06-04
+GDPPC_st <- spacetime(
+  GDPPC,
+  hunan,
+  .loc_col = "County",
+  .time_col = "Year"
+)
+```
+
+```{r}
+#| label: ic06-05
+is_spacetime_cube(GDPPC_st)
+```
+
+::: callout-note
+## My observation
+
+The `TRUE` result confirms that the attribute table and geometry have been combined into a valid space-time cube. The location key is `County`, and the time key is `Year`.
+:::
+
+# Computing Gi\*
+
+## Deriving the Spatial Weights
+
+```{r}
+#| label: ic06-06
+GDPPC_nb <- GDPPC_st %>%
+  activate("geometry") %>%
+  mutate(
+    nb = include_self(st_contiguity(geometry)),
+    wt = st_inverse_distance(
+      nb,
+      geometry,
+      scale = 1,
+      alpha = 1
+    ),
+    .before = 1
+  ) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+```
+
+::: callout-tip
+## Things to learn from the code
+
+- `activate("geometry")` switches the cube context to the county geometry table.
+- `include_self()` includes the focal county in the Gi\* neighbourhood.
+- `st_contiguity()` identifies neighbouring counties.
+- `st_inverse_distance()` gives closer neighbours higher influence.
+- `set_nbs()` and `set_wts()` copy the neighbour and weight columns into the space-time data structure.
+:::
+
+::: callout-note
+## My observation
+
+Row order matters after `set_nbs()` and `set_wts()`. Reordering the cube after assigning neighbours and weights can disconnect the values from their intended spatial relationships.
+:::
+
+# Computing Gi\*
+
+```{r}
+#| label: ic06-07
+gi_stars <- GDPPC_nb %>%
+  group_by(Year) %>%
+  mutate(gi_star = local_gstar_perm(GDPPC, nb, wt)) %>%
+  tidyr::unnest(gi_star)
+
+glimpse(gi_stars)
+```
+
+::: callout-note
+## My observation
+
+Gi\* is computed within each year, so the statistic compares a county and its neighbourhood against other counties in the same time slice. This keeps the hot spot interpretation year-specific before the trend test is applied. The permutation calculation can produce a different result across runs when no seed is specified.
+:::
+
+# Mann-Kendall Test
+
+A monotonic series keeps moving in one direction or stays flat. The Mann-Kendall test checks whether a time series has a monotonic trend.
+
+Hypotheses:
+
+- H0: No monotonic trend.
+- H1: A monotonic trend is present.
+
+Interpretation:
+
+- Reject H0 when the p-value is smaller than the selected alpha value.
+- Tau ranges from `-1` to `1`.
+- A negative tau indicates a decreasing trend.
+- A positive tau indicates an increasing trend.
+
+## Mann-Kendall Test on Gi\*
+
+```{r}
+#| label: ic06-08
+cbg <- gi_stars %>%
+  ungroup() %>%
+  filter(County == "Changsha") |>
+  select(County, Year, gi_star)
+```
+
+```{r}
+#| label: ic06-09
+ggplot(
+  data = cbg,
+  aes(x = Year, y = gi_star)
+) +
+  geom_line() +
+  theme_light()
+```
+
+::: callout-note
+## My observation
+
+Changsha is used as a focused example because it makes the temporal trend easier to inspect before repeating the test for every county. The line chart shows whether the local hot spot strength stays stable, increases, or weakens across the years.
+:::
+
+## Interactive Mann-Kendall Plot
+
+```{r}
+#| label: ic06-10
+p <- ggplot(
+  data = cbg,
+  aes(x = Year, y = gi_star)
+) +
+  geom_line() +
+  theme_light()
+
+ggplotly(p)
+```
+
+::: callout-note
+## My observation
+
+The interactive version is useful for checking exact yearly Gi\* values. It helps separate a broad trend from a single-year spike.
+:::
+
+## Printing Mann-Kendall Test Report
+
+```{r}
+#| label: ic06-11
+cbg %>%
+  summarise(
+    mk = list(unclass(Kendall::MannKendall(gi_star)))
+  ) %>%
+  tidyr::unnest_wider(mk)
+```
+
+::: callout-note
+## My observation
+
+In the Mann-Kendall output, `sl` is the p-value. A significant positive tau for Changsha supports an upward Gi\* trend, meaning its GDPPC hot spot signal becomes stronger over time.
+:::
+
+## Mann-Kendall Test Data Frame
+
+```{r}
+#| label: ic06-12
+ehsa_mk <- gi_stars %>%
+  group_by(County) %>%
+  summarise(
+    mk = list(unclass(Kendall::MannKendall(gi_star))),
+    .groups = "drop"
+  ) %>%
+  tidyr::unnest_wider(mk)
+
+head(ehsa_mk)
+```
+
+::: callout-note
+## My observation
+
+Running the Mann-Kendall test for every county turns the single-county example into a province-wide trend table. Counties with small `sl` values have stronger evidence of changing Gi\* scores.
+:::
+
+## Sorting Significant Emerging Hot and Cold Spots
+
+```{r}
+#| label: ic06-13
+emerging <- ehsa_mk %>%
+  arrange(sl, abs(tau)) %>%
+  slice(1:10)
+
+head(emerging)
+```
+
+::: callout-note
+## My observation
+
+Sorting by `sl` highlights the counties with the strongest trend evidence. Sorting with `abs(tau)` keeps both upward and downward trends visible in the same table.
+:::
+
+# Performing Emerging Hot Spot Analysis
+
+```{r}
+#| label: ic06-14
+ehsa <- emerging_hotspot_analysis(
+  x = GDPPC_st,
+  .var = "GDPPC",
+  k = 1,
+  nsim = 99
+)
+
+glimpse(ehsa)
+```
+
+::: callout-note
+## My observation
+
+`emerging_hotspot_analysis()` wraps the Gi\* and trend logic into a classification workflow. The `k = 1` setting uses one temporal lag, and `nsim = 99` keeps the simulation count consistent with the course example. The exact significant counties depend on the Monte Carlo simulation state.
+:::
+
+## Visualising the Distribution of EHSA Classes
+
+```{r}
+#| label: ic06-15
+ggplot(
+  data = ehsa,
+  aes(x = classification)
+) +
+  geom_bar() +
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+::: callout-note
+## My observation
+
+The bar chart gives a quick count of EHSA classes before mapping. This helps identify whether the province is dominated by stable patterns, sporadic patterns, or trend categories.
+:::
+
+## Visualising EHSA
+
+```{r}
+#| label: ic06-16
+hunan_ehsa <- hunan %>%
+  left_join(ehsa, by = join_by(County == location))
+```
+
+```{r}
+#| label: ic06-17
+#| fig-width: 7
+#| fig-height: 10
+ehsa_sig <- hunan_ehsa %>%
+  filter(p_value < 0.05)
+
+tmap_mode("plot")
+
+tm_shape(hunan_ehsa) +
+  tm_polygons() +
+  tm_borders(fill_alpha = 0.5) +
+tm_shape(ehsa_sig) +
+  tm_fill(
+    "classification",
+    fill.legend = tm_legend(position = tm_pos_out("center", "bottom"))
+  ) +
+  tm_borders(fill_alpha = 0.4)
+```
+
+::: callout-note
+## My observation
+
+The map keeps all counties visible, then overlays only significant EHSA classes. This makes insignificant counties part of the interpretation instead of hiding them from the spatial context.
+:::
+
+# Interpretation of EHSA Classes
+
+## Hot Spot Classes
+
+Hot spot classes represent counties where high GDPPC values cluster with nearby high values. A persistent hot spot indicates repeated significance across time, while a new or intensifying hot spot indicates recent strengthening.
+
+::: callout-note
+## My reflection
+
+Hot spot labels describe spatio-temporal association. They do not explain the economic mechanism by themselves. The result should be read together with Hunan's urban structure, transport access, and development policy context.
+:::
+
+## Cold Spot Classes
+
+Cold spot classes represent counties where low GDPPC values cluster with nearby low values. Persistent cold spots point to repeated spatial disadvantage, while diminishing cold spots suggest weakening low-value clustering.
+
+::: callout-note
+## My reflection
+
+Cold spot patterns are important because they show spatial concentration of lower GDPPC. These counties may need separate interpretation from isolated low values, since EHSA reads each county with its surrounding neighbourhood.
+:::
+
+## Sporadic and Oscillating Classes
+
+Sporadic classes occur when significance appears in some years and disappears in others. Oscillating classes indicate movement between hot and cold signals across the time series.
+
+::: callout-note
+## My reflection
+
+These categories are useful warnings against over-reading a single-year map. A county with intermittent significance may reflect transition, local volatility, or sensitivity to the chosen neighbourhood definition.
+:::
+
+## Reporting Considerations
+
+EHSA results should be reported with the variable, time period, neighbourhood definition, weight method, temporal lag, simulation count, and significance threshold.
+
+::: callout-note
+## My reflection
+
+For this exercise, the result is specific to GDPPC from 2005 to 2021, Hunan county boundaries, contiguity neighbours with self-inclusion, inverse-distance weights, `k = 1`, and `nsim = 99`.
+:::

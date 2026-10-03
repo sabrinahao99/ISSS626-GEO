@@ -461,6 +461,7 @@ Zhiyi Hao
 <li>Coordinates and roads are transformed to EPSG:32647 before matching and network analysis.</li>
 <li>The median point-to-road offset is about 3.97 m; the 95th percentile is about 10.8 m.</li>
 <li>The graph check found 5,187 connected components in the major-road extract. The results are limited to the available connected road support.</li>
+<li>A support sensitivity retaining the components containing snapped events keeps all events while retaining about 66.8% of the full network length. The full network remains the primary reference support.</li>
 </ul>
 </section>
 <section id="analytical-workflow" class="slide level2">
@@ -475,7 +476,7 @@ Zhiyi Hao
 <li>use TNKDE to compare network intensity across time;</li>
 <li>use cross-K and cross-G for fatal versus non-fatal events.</li>
 </ol>
-<p>All distances are measured along the network. The main NKDE bandwidth is 1,000 m and the TNKDE time bandwidth is 30 days. The K/G and cross-K/G runs use nine simulations over 0–3,000 m, so these envelopes are exploratory.</p>
+<p>All distances are measured along the network. The main NKDE bandwidth is 1,000 m and the TNKDE time bandwidth is 30 days. The K/G and cross-K/G runs use 99 simulations over 0–3,000 m, so these envelopes are exploratory pointwise comparisons rather than formal global tests.</p>
 </section>
 <section id="key-findings" class="slide level2">
 <h2>Key findings</h2>
@@ -571,7 +572,7 @@ Zhiyi Hao
 </section>
 <section id="limitations-and-reproducibility" class="slide level2">
 <h2>Limitations and reproducibility</h2>
-<p>The road layer is an OSM-derived major-road extract, not a complete official traffic network. Missing traffic exposure, omitted road classes, reporting coverage and disconnected components limit the conclusions. The K/G and cross-K/G envelopes use nine simulations, so they are exploratory and should not be read as precise significance tests.</p>
+<p>The road layer is an OSM-derived major-road extract, not a complete official traffic network. Missing traffic exposure, omitted road classes, reporting coverage and disconnected components limit the conclusions. The K/G and cross-K/G envelopes use 99 simulations, so they are exploratory pointwise comparisons and should not be read as precise global significance tests.</p>
 <p>The full code, data-quality decisions, parameters, saved results and references are documented in the <a href="assignment1.html">technical report</a>. The report keeps the original events, snapped events, matched road IDs and offset distances so the analysis can be checked and reproduced.</p>
 
 
