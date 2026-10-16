@@ -1,0 +1,802 @@
+---
+title: "Geospatial Analytics for Peace"
+subtitle: "Take-home Exercise 2"
+author: "Zhiyi Hao"
+date: "2026-10-04"
+date-modified: today
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    code-fold: false
+    number-sections: true
+    css: take-home-exercise2.css
+    fig-width: 12
+    fig-height: 8
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: false
+---
+
+# Overview
+
+This report studies recorded armed conflict events in Myanmar from 1 January 2021 to 30 September 2025. The spatial unit is the township and the main time unit is the month.
+
+The analysis asks:
+
+1.  Where do recorded conflict events form significant local clusters or spatial outliers?
+2.  Which township-level hot and cold spot patterns persist, emerge, intensify, or weaken through time?
+
+The workflow follows the course sequence. I first clean and aggregate the event data, then build a complete space-time cube, apply Local Measures of Spatial Autocorrelation, and finally run Emerging Hot Spot Analysis.
+
+::: callout-note
+## Reading the results
+
+The results describe the geography of recorded events. They do not measure all violence, population risk, or causal effects. A significant result is interpreted under the selected township boundaries, monthly time bins, neighbourhood rule, and permutation model.
+:::
+
+# Data and study design
+
+## Data sources
+
+The aspatial data are the ACLED Myanmar event export supplied for this exercise. The spatial data are Myanmar township boundaries from the MIMU GeoNode, Admin 3, P-code version 9.4.
+
+The raw files are kept separately:
+
+- `data/aspatial/raw/ACLED_Data_Myanmar_Jan2021-Sep2025.csv`
+- `data/geospatial/raw/myanmar_townships_mimu_v9_4.geojson`
+
+The MIMU township boundary layer has 330 polygon features. ACLED records are event-level observations, so the final analytical table is created by linking events to the township polygons and then aggregating by township and month.
+
+## Packages and setup
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 12,
+  fig.height = 8,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+pacman::p_load(
+  sf, sfdep, tmap, tidyverse, lubridate,
+  Kendall, scales, knitr
+)
+
+set.seed(626)
+tmap_mode("plot")
+
+data_root <- "data"
+acled_path <- file.path(
+  data_root, "aspatial", "raw",
+  "ACLED_Data_Myanmar_Jan2021-Sep2025.csv"
+)
+township_path <- file.path(
+  data_root, "geospatial", "raw",
+  "myanmar_townships_mimu_v9_4.geojson"
+)
+```
+
+## Import the event table
+
+```{r}
+#| label: import-acled
+acled_raw <- read_csv(acled_path, show_col_types = FALSE)
+
+glimpse(acled_raw)
+```
+
+The ACLED export contains the event identifier, event date, event type, administrative fields, coordinates, fatalities, and source information. The `event_date` field is used because it describes when the event took place.
+
+## Import the township polygons
+
+```{r}
+#| label: import-townships
+townships_wgs84 <- st_read(township_path, quiet = TRUE) %>%
+  st_make_valid()
+
+townships_wgs84
+```
+
+```{r}
+#| label: prepare-townships
+townships <- townships_wgs84 %>%
+  select(TS, TS_PCODE, ST, DT, geometry)
+
+townships_proj <- townships %>%
+  st_transform(6933)
+
+st_crs(townships)
+st_crs(townships_proj)
+```
+
+The source layer is in WGS 84. A projected working copy is kept for geometry-based operations. The MIMU P-code is retained as the stable township key.
+
+# Data quality and spatial matching
+
+## Clean the event fields
+
+```{r}
+#| label: clean-events
+acled <- acled_raw %>%
+  transmute(
+    event_id = event_id_cnty,
+    event_date = as.Date(event_date),
+    year = as.integer(year),
+    time_precision = as.integer(time_precision),
+    country,
+    admin1 = na_if(str_squish(admin1), ""),
+    admin2 = na_if(str_squish(admin2), ""),
+    admin3 = na_if(str_squish(admin3), ""),
+    location = na_if(str_squish(location), ""),
+    event_type,
+    sub_event_type,
+    civilian_targeting,
+    latitude = as.numeric(latitude),
+    longitude = as.numeric(longitude),
+    geo_precision = as.integer(geo_precision),
+    fatalities = as.numeric(fatalities),
+    source
+  ) %>%
+  filter(
+    country == "Myanmar",
+    event_date >= as.Date("2021-01-01"),
+    event_date <= as.Date("2025-09-30")
+  ) %>%
+  mutate(
+    month = floor_date(event_date, unit = "month"),
+    admin1_key = str_remove_all(str_to_lower(admin1), "[^a-z0-9]"),
+    admin3_key = str_remove_all(str_to_lower(admin3), "[^a-z0-9]")
+  )
+
+glimpse(acled)
+```
+
+## Audit the raw and filtered records
+
+```{r}
+#| label: data-quality-table
+data_quality <- tibble(
+  check = c(
+    "Raw rows",
+    "Rows in study period",
+    "Duplicate event IDs",
+    "Missing event dates",
+    "Missing coordinates",
+    "Coordinates outside valid ranges",
+    "Missing township field",
+    "Missing fatality values"
+  ),
+  value = c(
+    nrow(acled_raw),
+    nrow(acled),
+    sum(duplicated(acled$event_id)),
+    sum(is.na(acled$event_date)),
+    sum(is.na(acled$latitude) | is.na(acled$longitude)),
+    sum(
+      acled$latitude < -90 | acled$latitude > 90 |
+        acled$longitude < -180 | acled$longitude > 180,
+      na.rm = TRUE
+    ),
+    sum(is.na(acled$admin3)),
+    sum(is.na(acled$fatalities))
+  )
+)
+
+kable(data_quality)
+```
+
+The event count is the main measure because it is available for every event. Fatalities are retained as a secondary measure, but missing fatality values are not silently changed into a claim of zero deaths.
+
+::: callout-tip
+## My observation
+
+The filtered file is large and mostly complete for date and coordinates: 87,103 records remain in the study period, with no duplicate event IDs and no missing coordinates. The main quality issue is the 1,112 missing ACLED township names. I therefore use the MIMU coordinate join as the analytical key and keep the original ACLED names for comparison. This follows ACLED's advice to treat event records and administrative labels as fields that still need checking.
+:::
+
+## Match events to MIMU townships
+
+The supplied ACLED file does not contain MIMU P-codes. I use the coordinates to assign each event to a MIMU township polygon, then compare the assigned township with the ACLED `admin3` field. This creates a reproducible P-code key and also exposes records that need checking.
+
+```{r}
+#| label: spatial-event-match
+event_points <- acled %>%
+  st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
+
+data_preparation_summary <- tibble(
+  stage = c(
+    "Raw ACLED records",
+    "Records in the study period",
+    "Records converted to spatial points"
+  ),
+  records = c(
+    nrow(acled_raw),
+    nrow(acled),
+    nrow(event_points)
+  )
+)
+
+kable(data_preparation_summary)
+
+event_points_matched <- st_join(
+  event_points,
+  townships %>% select(TS, TS_PCODE),
+  join = st_within,
+  left = TRUE
+)
+
+event_table <- event_points_matched %>%
+  st_drop_geometry() %>%
+  mutate(
+    mimu_ts_key = str_remove_all(str_to_lower(TS), "[^a-z0-9]"),
+    name_check = case_when(
+      is.na(TS_PCODE) ~ "unmatched spatially",
+      is.na(admin3) ~ "admin3 missing; spatial match retained",
+      admin3_key == mimu_ts_key ~ "name agrees",
+      admin3 == "Pangsang" & TS == "Pangsang (Panghkam)" ~ "known name variant",
+      TRUE ~ "name needs review"
+    )
+  )
+
+event_table %>%
+  count(name_check, sort = TRUE) %>%
+  kable()
+```
+
+This short audit separates the original file from the records used in the study period. The point conversion does not remove observations; it only adds the spatial geometry needed for the township match.
+
+```{r}
+#| label: unmatched-events
+event_table %>%
+  filter(is.na(TS_PCODE)) %>%
+  count(admin1, admin2, admin3, sort = TRUE) %>%
+  head(20) %>%
+  kable()
+```
+
+```{r}
+#| label: spatial-match-summary
+spatial_match_summary <- tibble(
+  match_status = c(
+    "Matched to a MIMU township",
+    "Not matched to a MIMU township"
+  ),
+  records = c(
+    sum(!is.na(event_table$TS_PCODE)),
+    sum(is.na(event_table$TS_PCODE))
+  ),
+  share_percent = c(
+    mean(!is.na(event_table$TS_PCODE)) * 100,
+    mean(is.na(event_table$TS_PCODE)) * 100
+  )
+)
+
+kable(
+  spatial_match_summary,
+  digits = 2,
+  col.names = c("Spatial match", "Records", "Share (%)")
+)
+```
+
+The spatial match is the key transition from event-level data to township-level analysis. Records without a township P-code remain in the audit, but they are excluded from township aggregation rather than assigned by guesswork.
+
+Only events with a valid MIMU township P-code enter township-level spatial analysis. Unmatched records remain visible in the quality table and are not silently assigned.
+
+::: callout-note
+## My observation
+
+Most records agree with the MIMU township name. The 1,112 records with missing ACLED admin3 are still spatially usable, while 9 points fall outside the township polygons and 7 name mismatches need review. This is why I do not join by text alone. The coordinate-to-P-code join is the stronger link for the cube, and the exceptions remain visible instead of being silently forced into a township.
+:::
+
+# Aggregation and the space-time cube
+
+## Build a complete township-month table
+
+The aggregation follows the time-cube logic used in the course exercises. I define the spatial and temporal grain first, count events, and then complete every township-month combination. A missing combination therefore becomes an observed zero, not an unknown value.
+
+```{r}
+#| label: township-month-aggregation
+months <- seq(
+  as.Date("2021-01-01"),
+  as.Date("2025-09-01"),
+  by = "month"
+)
+
+event_counts <- event_table %>%
+  filter(!is.na(TS_PCODE)) %>%
+  group_by(TS_PCODE, month) %>%
+  summarise(
+    event_count = n(),
+    fatality_count = sum(fatalities, na.rm = TRUE),
+    battle_count = sum(event_type == "Battles", na.rm = TRUE),
+    civilian_count = sum(
+      event_type == "Violence against civilians",
+      na.rm = TRUE
+    ),
+    .groups = "drop"
+  )
+
+township_month <- tidyr::expand_grid(
+  TS_PCODE = townships$TS_PCODE,
+  month = months
+) %>%
+  left_join(event_counts, by = c("TS_PCODE", "month")) %>%
+  mutate(
+    across(
+      c(event_count, fatality_count, battle_count, civilian_count),
+      ~ replace_na(.x, 0)
+    )
+  ) %>%
+  left_join(
+    townships %>% st_drop_geometry() %>% select(TS_PCODE, TS, ST, DT),
+    by = "TS_PCODE"
+  ) %>%
+  arrange(TS_PCODE, month)
+
+township_month %>%
+  summarise(
+    townships = n_distinct(TS_PCODE),
+    months = n_distinct(month),
+    rows = n(),
+    zero_event_bins = sum(event_count == 0),
+    missing_event_counts = sum(is.na(event_count))
+  ) %>%
+  kable()
+```
+
+```{r}
+#| label: cube-check
+cube_check <- township_month %>%
+  count(TS_PCODE) %>%
+  summarise(
+    minimum_months = min(n),
+    maximum_months = max(n),
+    expected_months = length(months)
+  )
+
+kable(cube_check)
+```
+
+::: callout-note
+## What this means
+
+The complete cube has 330 townships and 57 monthly slices, so every township has the same time support. Zero-event township-months are retained as zeros. This matters because Emerging Hot Spot Analysis needs a regular sequence; dropping quiet months would turn the absence of recorded events into missing data and would bias temporal comparisons.
+:::
+
+## Create the space-time cube
+
+```{r}
+#| label: create-space-time-cube
+conflict_st <- spacetime(
+  township_month,
+  townships_proj,
+  .loc_col = "TS_PCODE",
+  .time_col = "month"
+)
+
+is_spacetime_cube(conflict_st)
+```
+
+The cube has one regular monthly series for every township. This structure is required before calculating the time sequence of local Gi\* values.
+
+# Descriptive distribution
+
+## Total recorded events by township
+
+```{r}
+#| label: township-total-map
+township_totals <- townships_proj %>%
+  left_join(
+    township_month %>%
+      group_by(TS_PCODE) %>%
+      summarise(
+        event_count = sum(event_count),
+        fatality_count = sum(fatality_count),
+        .groups = "drop"
+      ),
+    by = "TS_PCODE"
+  )
+
+tm_shape(township_totals) +
+  tm_polygons(
+    "event_count",
+    fill.scale = tm_scale_intervals(
+      style = "quantile",
+      n = 6,
+      values = "brewer.yl_or_rd"
+    ),
+    fill.legend = tm_legend(title = "Recorded events")
+  ) +
+  tm_borders(col = "grey60", lwd = 0.4) +
+  tm_title("Recorded conflict events by township")
+```
+
+This map shows recorded event burden over the whole study period. It is a descriptive baseline for the local and emerging hotspot analyses.
+
+::: callout-tip
+## My observation
+
+The total-count map is a burden map, not a significance map. It helps locate where recorded events accumulate over the whole period, but it cannot separate a persistent hotspot from a short intense episode. That is why the next steps use local statistics and monthly cube values.
+:::
+
+## Monthly pattern
+
+```{r}
+#| label: monthly-event-trend
+monthly_totals <- township_month %>%
+  group_by(month) %>%
+  summarise(
+    event_count = sum(event_count),
+    fatality_count = sum(fatality_count),
+    .groups = "drop"
+  )
+
+ggplot(monthly_totals, aes(month, event_count)) +
+  geom_line(colour = "#1B5E5A", linewidth = 0.8) +
+  geom_point(colour = "#1B5E5A", size = 1.2) +
+  scale_y_continuous(labels = comma) +
+  labs(
+    title = "Monthly recorded conflict events",
+    x = NULL,
+    y = "Events"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+The time series is used to identify broad changes in recorded event volume. It does not replace the township-level analysis because national totals can hide local changes in where events occur.
+
+::: callout-tip
+## My observation
+
+The monthly curve gives the background rhythm of recorded conflict activity. A high month does not mean every township was high at the same time. This is the reason for keeping the local monthly Gi\* sequence rather than interpreting the national total alone. It follows the space-time cube logic used by Kim and Lee (2023).
+:::
+
+# Local Measures of Spatial Association
+
+## Queen neighbours and row-standardised weights
+
+The first local analysis follows Chapter 10. Queen contiguity defines neighbours that share either a boundary or a vertex. Row-standardised weights give each township's neighbours a comparable total influence.
+
+```{r}
+#| label: queen-weights
+township_weights <- township_totals %>%
+  mutate(
+    nb = st_contiguity(geometry),
+    wt = st_weights(nb, style = "W", allow_zero = TRUE),
+    .before = 1
+  )
+
+neighbour_summary <- tibble(
+  township = township_weights$TS,
+  neighbours = lengths(township_weights$nb)
+) %>%
+  summarise(
+    minimum_neighbours = min(neighbours),
+    median_neighbours = median(neighbours),
+    maximum_neighbours = max(neighbours),
+    zero_neighbour_units = sum(neighbours == 0)
+  )
+
+kable(neighbour_summary)
+```
+
+::: callout-note
+## Method note
+
+Queen contiguity is the same neighbour idea used in the course local-measures workflow: shared edges or vertices. The median of 5 neighbours and no zero-neighbour townships mean that the local statistics are defined across the full township layer, although the result is still sensitive to the township boundary model.
+:::
+
+## Local Moran's I
+
+```{r}
+#| label: local-moran
+set.seed(626)
+
+lisa <- township_weights %>%
+  mutate(
+    local_moran = local_moran(
+      event_count,
+      nb,
+      wt,
+      nsim = 99,
+      sample_Ei = FALSE,
+      zero.policy = TRUE
+    ),
+    .before = 1
+  ) %>%
+  tidyr::unnest(local_moran) %>%
+  mutate(
+    LISA_cluster = case_when(
+      is.na(p_ii) ~ "Insignificant",
+      p_ii < 0.05 ~ as.character(mean),
+      TRUE ~ "Insignificant"
+    ),
+    LISA_cluster = factor(
+      LISA_cluster,
+      levels = c(
+        "Insignificant",
+        "Low-Low",
+        "Low-High",
+        "High-Low",
+        "High-High"
+      )
+    )
+  )
+
+lisa %>%
+  count(LISA_cluster, sort = TRUE) %>%
+  kable()
+```
+
+```{r}
+#| label: lisa-map
+tm_shape(lisa) +
+  tm_polygons(
+    "LISA_cluster",
+    fill.scale = tm_scale_categorical(
+      values = c(
+        "grey85",
+        "#2166AC",
+        "#67A9CF",
+        "#EF8A62",
+        "#B2182B"
+      )
+    ),
+    fill.legend = tm_legend(title = "LISA cluster")
+  ) +
+  tm_borders(col = "grey60", lwd = 0.4) +
+  tm_title("Local Moran's I clusters (p < 0.05)")
+```
+
+High-High and Low-Low are local clusters. High-Low and Low-High are spatial outliers. Insignificant townships remain visible as context and are not interpreted as clusters.
+
+::: callout-tip
+## My observation
+
+The LISA result is concentrated: 34 High-High townships and 4 Low-High outliers are significant under the permutation reference, while most units are insignificant. I read High-High as neighbouring high recorded counts, not as proof of one continuous conflict zone. The small Low-High group is useful because it flags a locally unusual township that a total-count map could hide.
+:::
+
+## Local Gi\*
+
+```{r}
+#| label: local-gistar
+set.seed(626)
+
+gistar <- township_weights %>%
+  mutate(
+    gistar = local_gstar_perm(
+      event_count,
+      nb,
+      wt,
+      nsim = 99,
+      zero.policy = TRUE
+    ),
+    .before = 1
+  ) %>%
+  tidyr::unnest(gistar) %>%
+  mutate(
+    hotspot_class = case_when(
+      p_sim < 0.05 & gi_star > 0 ~ "Hot spot",
+      p_sim < 0.05 & gi_star < 0 ~ "Cold spot",
+      TRUE ~ "Insignificant"
+    ),
+    hotspot_class = factor(
+      hotspot_class,
+      levels = c("Insignificant", "Cold spot", "Hot spot")
+    )
+  )
+
+gistar %>%
+  count(hotspot_class, sort = TRUE) %>%
+  kable()
+```
+
+```{r}
+#| label: local-gistar-map
+tm_shape(gistar) +
+  tm_polygons(
+    "hotspot_class",
+    fill.scale = tm_scale_categorical(
+      values = c("grey85", "#2166AC", "#B2182B")
+    ),
+    fill.legend = tm_legend(title = "Gi* class")
+  ) +
+  tm_borders(col = "grey60", lwd = 0.4) +
+  tm_title("Local Gi* hot and cold spots (p < 0.05)")
+```
+
+Local Moran's I identifies similarity or contrast between a township and its neighbours. Gi\* focuses on concentrations of high or low values. The two maps answer related but different questions and should not be treated as interchangeable.
+
+::: callout-tip
+## My observation
+
+Gi\* produces 24 significant hot spots and 44 significant cold spots. This differs from LISA because Gi\* asks whether a local group of high or low values is unusually concentrated, while LISA also identifies a township-neighbour contrast. The difference is a substantive result, not a contradiction: the two maps answer different local questions.
+:::
+
+# Emerging Hot Spot Analysis
+
+## Monthly Gi\* values
+
+The next step follows Chapter 11 and In-class Exercise 6. Gi\* is calculated separately for each month, so the value for a township is comparable with other townships in the same time slice.
+
+::: callout-note
+## Research link
+
+The monthly Gi\* table is the bridge between Chapter 10 and Chapter 11. The spatial weights stay tied to the township layer, while the event count changes by month. This keeps the spatial and temporal dimensions explicit, consistent with the space-time cube approach described by Kim and Lee (2023).
+:::
+
+```{r}
+#| label: monthly-gistar
+#| cache: true
+set.seed(626)
+
+conflict_nb <- conflict_st %>%
+  activate("geometry") %>%
+  mutate(
+    nb = include_self(st_contiguity(geometry)),
+    wt = st_weights(nb, style = "W", allow_zero = TRUE),
+    .before = 1
+  ) %>%
+  set_nbs("nb") %>%
+  set_wts("wt")
+
+gi_stars <- conflict_nb %>%
+  group_by(month) %>%
+  mutate(
+    gi_star = local_gstar_perm(
+      event_count,
+      nb,
+      wt,
+      nsim = 99,
+      zero.policy = TRUE
+    )
+  ) %>%
+  tidyr::unnest(gi_star)
+
+glimpse(gi_stars)
+```
+
+## A township Gi\* trend
+
+```{r}
+#| label: gistar-trend-example
+trend_example <- gi_stars %>%
+  ungroup() %>%
+  filter(TS == first(TS[!is.na(TS)])) %>%
+  select(TS, month, gi_star)
+
+ggplot(trend_example, aes(month, gi_star)) +
+  geom_line(colour = "#1B5E5A", linewidth = 0.7) +
+  geom_hline(yintercept = 0, linetype = 2, colour = "grey50") +
+  labs(
+    title = paste("Monthly Gi* trend:", first(trend_example$TS)),
+    x = NULL,
+    y = "Gi* score"
+  ) +
+  theme_minimal(base_size = 12)
+```
+
+This trend plot is a diagnostic view. EHSA uses the full sequence for every township, rather than relying on one selected example.
+
+::: callout-note
+## Reading this plot
+
+The example trend is useful for showing how a local score changes, but it is not the final hotspot decision. A township can move above and below zero without forming a persistent pattern. The EHSA classification therefore uses all township-month sequences together.
+:::
+
+## Mann-Kendall trend check
+
+```{r}
+#| label: mann-kendall-summary
+ehsa_mk <- gi_stars %>%
+  st_drop_geometry() %>%
+  group_by(TS_PCODE, TS) %>%
+  summarise(
+    mk = list(unclass(Kendall::MannKendall(gi_star))),
+    .groups = "drop"
+  ) %>%
+  tidyr::unnest_wider(mk)
+
+ehsa_mk %>%
+  arrange(sl, desc(abs(tau))) %>%
+  head(10) %>%
+  kable(digits = 4)
+```
+
+The Mann-Kendall test evaluates whether the local Gi\* sequence has a monotonic trend. A small p-value indicates evidence of change in the Gi\* series, while the sign of tau indicates the direction.
+
+::: callout-tip
+## My observation
+
+The Mann-Kendall table is a trend check, not a replacement for EHSA. A positive tau means the local Gi\* sequence tends to rise, while a negative tau means it tends to fall. The direction alone is not enough; I only treat it as supporting evidence when the trend p-value is small and the EHSA class tells a compatible story.
+:::
+
+## Emerging Hot Spot Analysis classification
+
+```{r}
+#| label: emerging-hotspot-analysis
+#| cache: true
+set.seed(626)
+
+ehsa <- emerging_hotspot_analysis(
+  x = conflict_st,
+  .var = "event_count",
+  k = 1,
+  nsim = 99
+)
+
+ehsa %>%
+  count(classification, sort = TRUE) %>%
+  kable()
+```
+
+```{r}
+#| label: ehsa-map
+ehsa_map <- townships_proj %>%
+  left_join(ehsa, by = c("TS_PCODE" = "location"))
+
+ehsa_sig <- ehsa_map %>%
+  filter(p_value < 0.05)
+
+tm_shape(ehsa_map) +
+  tm_polygons(
+    fill = "grey90",
+    fill.legend = tm_legend(title = "Not significant")
+  ) +
+  tm_borders(col = "grey70", lwd = 0.3) +
+  tm_shape(ehsa_sig) +
+  tm_polygons(
+    "classification",
+    fill.scale = tm_scale_categorical(values = "brewer.set3"),
+    fill.legend = tm_legend(title = "EHSA class")
+  ) +
+  tm_borders(col = "grey30", lwd = 0.5) +
+  tm_title("Significant emerging hot and cold spot classes (p < 0.05)")
+```
+
+The EHSA map shows only significant classifications over a full township background. A persistent or intensifying hot spot means that the local Gi\* pattern is repeatedly or increasingly positive through time under the selected model. It does not by itself explain why violence occurred there.
+
+::: callout-tip
+## My observation
+
+The current classification is dominated by sporadic rather than persistent patterns: 59 sporadic hotspots and 149 sporadic coldspots, while only 9 townships are persistent coldspots and none are persistent hotspots. This suggests that recorded conflict concentration changes across months rather than remaining fixed in one stable set of townships. It is more informative than simply saying that Myanmar is clustered.
+:::
+
+# Integrated findings
+
+The results point to three linked findings:
+
+1.  Spatial concentration is local rather than uniform: LISA identifies 34 High-High areas and Gi\* identifies 24 hot spots, with most townships not significant.
+2.  The local measures are not interchangeable: the 4 Low-High LISA outliers and the 44 Gi\* cold spots capture different spatial structures.
+3.  The temporal pattern is mostly sporadic: 59 sporadic hotspots, 149 sporadic coldspots, 9 oscillating hotspots, 9 oscillating coldspots, 9 persistent coldspots, and 97 with no pattern detected. No persistent hotspot appears in the current EHSA output.
+
+The report will use `recorded concentration` for descriptive patterns and `significant local association` for results supported by the selected permutation procedure. It will not use causal language without additional evidence.
+
+::: callout-note
+## Research reading
+
+This pattern is consistent with the purpose of EHSA in Chapter 11: it separates repeated temporal behaviour from one-period spikes. It also matches the caution in conflict point-pattern research that observed event concentration should be read as a spatio-temporal pattern, not an automatic causal explanation (Kam and Zhi, 2018).
+:::
+
+## Limitations
+
+- ACLED records documented events and may be affected by reporting access, source coverage, and later coding updates.
+- Township boundaries are an analytical unit, so the pattern may change at another spatial scale.
+- Monthly aggregation removes within-month ordering.
+- Event counts measure recorded event burden rather than population risk.
+- P-values and EHSA classes depend on the selected neighbourhood rule, time bin, simulation count, and significance treatment.
+
+# References
+
+- R4GDSA. [Chapter 10: Local Measures of Spatial Autocorrelation](https://r4gdsa.netlify.app/chap10).
+- R4GDSA. [Chapter 11: Emerging Hot Spot Analysis](https://r4gdsa.netlify.app/chap11).
+- Kim, M. and Lee, S.-D. (2023). [Identification of Emerging Roadkill Hotspots on Korean Expressways Using Space-Time Cubes](https://doi.org/10.3390/ijerph20064896).
+- Kam, T. S. and Zhi, V. (2018). [Is there space for violence? A data-driven approach to the exploration of spatial-temporal dimensions of conflict](https://doi.org/10.1145/3282933.3282935).
+- ACLED. [Codebook](https://acleddata.com/methodology/acled-codebook) and [ACLED's methodology on Myanmar](https://acleddata.com/methodology/acleds-methodology-myanmar).
+- MIMU. [Myanmar GeoNode](https://geonode.themimu.info/), township boundaries Admin 3, P-code version 9.4.

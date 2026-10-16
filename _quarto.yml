@@ -5,6 +5,7 @@ project:
     - about.qmd
     - Take-home_Ex/assignment1.qmd
     - Take-home_Ex/executive_summary.qmd
+    - Take-home_Ex/Take-home_Ex02/take-home-exercise2.qmd
     - Hands-on_Ex/Hands-on_Ex01/chap01.qmd
     - Hands-on_Ex/Hands-on_Ex01/chap02.qmd
     - Hands-on_Ex/Hands-on_Ex02/chap04.qmd
@@ -14,6 +15,7 @@ project:
     - Hands-on_Ex/Hands-on_Ex05/chap09.qmd
     - Hands-on_Ex/Hands-on_Ex05/chap10.qmd
     - Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.qmd
+    - Hands-on_Ex/Hands-on_Ex07/hands-on-exercise7.qmd
     - In-class_Ex/in-class_Ex04/in-class_Ex04.qmd
     - In-class_Ex/in-class_Ex05/in-class_Ex05.qmd
     - In-class_Ex/in-class_Ex06/In-class_Ex06.qmd
@@ -24,32 +26,36 @@ website:
   back-to-top-navigation: true
   navbar:
     left:
-      - text: "Hands-on Exercise"
+      - text: "Hands-on Exercises"
         menu:
-          - text: "Exercise 1: Geospatial Data"
+          - text: "Hands-on Exercise 1 - Part 1"
             href: "Hands-on_Ex/Hands-on_Ex01/chap01.html"
-          - text: "Exercise 1: Thematic Mapping"
+          - text: "Hands-on Exercise 1 - Part 2"
             href: "Hands-on_Ex/Hands-on_Ex01/chap02.html"
-          - text: "Exercise 2: Point Density"
+          - text: "Hands-on Exercise 2 - Part 1"
             href: "Hands-on_Ex/Hands-on_Ex02/chap04.html"
-          - text: "Exercise 2: Point Interaction"
+          - text: "Hands-on Exercise 2 - Part 2"
             href: "Hands-on_Ex/Hands-on_Ex02/chap05.html"
-          - text: "Exercise 3: Space-Time Fires"
+          - text: "Hands-on Exercise 3"
             href: "Hands-on_Ex/Hands-on_Ex03/chap06.html"
-          - text: "Exercise 4: Spatial Weights"
+          - text: "Hands-on Exercise 4"
             href: "Hands-on_Ex/Hands-on_Ex04/chap08.html"
-          - text: "Exercise 5: Global Autocorrelation"
+          - text: "Hands-on Exercise 5 - Part 1"
             href: "Hands-on_Ex/Hands-on_Ex05/chap09.html"
-          - text: "Exercise 5: Local Autocorrelation"
+          - text: "Hands-on Exercise 5 - Part 2"
             href: "Hands-on_Ex/Hands-on_Ex05/chap10.html"
           - text: "Hands-on Exercise 6"
             href: "Hands-on_Ex/Hands-on_Ex06/hands-on-exercise6.html"
-      - text: "Take-home Exercise 1"
+          - text: "Hands-on Exercise 7"
+            href: "Hands-on_Ex/Hands-on_Ex07/hands-on-exercise7.html"
+      - text: "Take-home Exercises"
         menu:
-          - text: "Executive Summary"
+          - text: "Take-home Exercise 1 - Executive Summary"
             href: "Take-home_Ex/executive_summary.html"
-          - text: "Technical Report"
+          - text: "Take-home Exercise 1 - Technical Report"
             href: "Take-home_Ex/assignment1.html"
+          - text: "Take-home Exercise 2 - Technical Report"
+            href: "Take-home_Ex/Take-home_Ex02/take-home-exercise2.html"
       - text: "In-class Exercise"
         menu:
           - text: "In-class Exercise 4"

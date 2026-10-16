@@ -1,0 +1,646 @@
+---
+title: "Modelling Geographical Accessibility"
+subtitle: "Hands-on Exercise 7"
+author: "Zhiyi Hao"
+date: "2026-10-16"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+    number-offset: 16
+    fig-width: 10
+    fig-height: 7
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: false
+---
+
+# Modelling Geographical Accessibility {.course-chapter-title}
+
+## Overview
+
+This exercise follows Chapter 17. The aim is to compare three ways of measuring access to eldercare services in Singapore: Hansen accessibility, KD2SFCA, and the Spatial Accessibility Measure (SAM).
+
+The workflow has four parts:
+
+1.  import and prepare the polygon, hexagon, service-point, and distance data;
+2.  calculate accessibility from a common demand-capacity setup;
+3.  map each accessibility surface and compare the distributions by planning region;
+4.  check whether the three methods highlight similar or different areas.
+
+::: callout-note
+## Reading the results
+
+The demand and capacity values in this teaching exercise are set to 100, following the class example. The output therefore compares the behaviour of the accessibility methods rather than estimating observed service need. The local OD matrix is reconstructed from centroid-to-service distances because the supplied local data bundle did not include the original prepared `OD_Matrix` file.
+:::
+
+## Learning outcomes
+
+By the end of this exercise, I should be able to:
+
+- import polygon and point data with `sf`;
+- check and update the CRS before using distances;
+- clean spatial attributes and derive demand and capacity fields;
+- tidy a long OD table into a distance matrix;
+- calculate Hansen, KD2SFCA, and SAM accessibility;
+- communicate accessibility patterns with maps, boxplots, and a method comparison.
+
+## Getting started
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 7,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+pacman::p_load(
+  tmap, SpatialAcc, sf, ggstatsplot, reshape2, tidyverse
+)
+
+tmap_mode("plot")
+```
+
+::: callout-tip
+## My observation
+
+Accessibility is not just a map of service locations. It combines where demand is located, how much capacity is available, and how the distance between origins and destinations is weighted. The same service points can therefore produce different surfaces under different models.
+:::
+
+# The data
+
+## Geospatial data
+
+The exercise uses three spatial layers:
+
+- `MP14_SUBZONE_NO_SEA_PL`: Singapore subzone boundaries;
+- `hexagons`: 500-metre hexagonal origin areas covering the study extent;
+- `ELDERCARE`: eldercare service locations.
+
+The boundary and service-point layers are kept as separate spatial objects. The hexagons represent demand locations, while the eldercare points represent destinations.
+
+## Aspatial data
+
+`OD_Matrix.csv` stores the origin-destination distances in long format. The fields follow the teacher's structure: origin ID, destination ID, entry cost, network cost, exit cost, and total cost. The local file was generated from the centroid of each hexagon to each eldercare point in SVY21 metres. The total cost is therefore a straight-line distance proxy rather than an observed road-network distance.
+
+# Packages
+
+```{r}
+#| label: ex07-01
+pacman::p_load(
+  tmap, SpatialAcc, sf, ggstatsplot, reshape2, tidyverse
+)
+```
+
+# Geospatial data wrangling
+
+## Importing geospatial data
+
+The code follows the Chapter 17 import pattern. The three layers are read with `st_read()` from the geospatial data folder.
+
+```{r}
+#| label: ex07-02
+mpsz <- st_read(
+  "data/geospatial/MP14_SUBZONE_NO_SEA_PL.geojson",
+  quiet = TRUE
+)
+
+hexagons <- st_read(
+  "data/geospatial/hexagons.geojson",
+  quiet = TRUE
+)
+
+eldercare <- st_read(
+  "data/geospatial/ELDERCARE.geojson",
+  quiet = TRUE
+)
+```
+
+```{r}
+#| label: ex07-03
+mpsz
+hexagons
+eldercare
+```
+
+```{r}
+#| label: ex07-04
+glimpse(mpsz)
+glimpse(hexagons)
+glimpse(eldercare)
+```
+
+::: callout-note
+## What the import gives me
+
+The three objects have different roles. `mpsz` gives the planning-region context, `hexagons` gives the origin areas, and `eldercare` gives the destination points. Keeping these roles separate makes the later distance matrix easier to check.
+:::
+
+## Updating CRS information
+
+The distance calculations must use a projected coordinate system with metre units. I transform all three spatial layers to SVY21 / Singapore TM, EPSG:3414, before using the OD distances.
+
+```{r}
+#| label: ex07-05
+mpsz <- st_transform(mpsz, 3414)
+eldercare <- st_transform(eldercare, 3414)
+hexagons <- st_transform(hexagons, 3414)
+
+st_crs(mpsz)
+st_crs(hexagons)
+st_crs(eldercare)
+```
+
+::: callout-tip
+## My observation
+
+The CRS step is part of the analysis, not just a display setting. A distance matrix calculated in longitude and latitude would not have metre units and would not be suitable for the distance-decay functions used below.
+:::
+
+## Cleaning and updating spatial attributes
+
+The teacher example keeps only the fields needed for mapping and modelling. It also adds a demand field to the hexagons and a capacity field to the service points.
+
+```{r}
+#| label: ex07-06
+eldercare <- eldercare %>%
+  mutate(
+    fid = row_number(),
+    ADDRESSPOS = coalesce(Name, "Eldercare service")
+  ) %>%
+  select(fid, ADDRESSPOS) %>%
+  mutate(capacity = 100)
+
+hexagons <- hexagons %>%
+  select(fid) %>%
+  mutate(demand = 100)
+```
+
+```{r}
+#| label: ex07-07
+spatial_counts <- tibble(
+  layer = c("Subzones", "Demand hexagons", "Eldercare points"),
+  features = c(nrow(mpsz), nrow(hexagons), nrow(eldercare))
+)
+
+knitr::kable(spatial_counts)
+```
+
+The constant value of 100 is retained to match the teaching example. In a substantive study, demand should be replaced by population or households and capacity should be replaced by service capacity.
+
+::: callout-note
+## What this means
+
+The maps below show relative accessibility under a controlled teaching setup. They should not be read as a direct measure of unmet eldercare need because the demand and capacity fields are not observed values.
+:::
+
+# Aspatial data handling and wrangling
+
+## Importing the distance matrix
+
+```{r}
+#| label: ex07-08
+ODMatrix <- read_csv(
+  "data/aspatial/OD_Matrix.csv",
+  skip = 0,
+  show_col_types = FALSE
+)
+
+glimpse(ODMatrix)
+```
+
+```{r}
+#| label: ex07-09
+ODMatrix %>%
+  summarise(
+    origins = n_distinct(origin_id),
+    destinations = n_distinct(destination_id),
+    rows = n(),
+    minimum_cost_m = min(total_cost),
+    maximum_cost_m = max(total_cost)
+  ) %>%
+  knitr::kable(digits = 2)
+```
+
+## Tidying the distance matrix
+
+The imported table is in thin form. Each row represents one origin-destination pair. The accessibility functions require a matrix in which rows are origins and columns are destinations.
+
+```{r}
+#| label: ex07-10-teacher-form
+#| eval: false
+distmat_teacher <- ODMatrix %>%
+  select(origin_id, destination_id, total_cost) %>%
+  spread(destination_id, total_cost) %>%
+  select(-origin_id)
+```
+
+```{r}
+#| label: ex07-10
+distmat <- ODMatrix %>%
+  select(origin_id, destination_id, total_cost) %>%
+  pivot_wider(
+    names_from = destination_id,
+    values_from = total_cost
+  ) %>%
+  arrange(origin_id) %>%
+  select(-origin_id)
+
+distmat <- as.matrix(distmat)
+distmat_km <- distmat / 1000
+```
+
+```{r}
+#| label: ex07-11
+dim(distmat_km)
+summary(as.vector(distmat_km))
+```
+
+The teacher page shows `spread()` for the same operation and notes that `pivot_wider()` is the current tidyr form. I use `pivot_wider()` so that the result follows the same logic without relying on the older function name.
+
+::: callout-tip
+## My observation
+
+The distance matrix is the link between the spatial data and the accessibility models. If the row order of the matrix does not match the hexagon order, the calculated accessibility values would be attached to the wrong origin areas. The origin IDs are therefore sorted before the matrix is used.
+:::
+
+# Hansen accessibility
+
+## Computing Hansen's accessibility
+
+The Hansen model applies a distance-decay function to the supply available at each destination. The first calculation follows the teacher's `SpatialAcc::ac()` example.
+
+```{r}
+#| label: ex07-12
+acc_Hansen <- data.frame(
+  ac(
+    hexagons$demand,
+    eldercare$capacity,
+    distmat_km,
+    power = 2,
+    family = "Hansen"
+  )
+)
+
+colnames(acc_Hansen) <- "accHansen"
+acc_Hansen <- as_tibble(acc_Hansen)
+hexagon_Hansen <- bind_cols(hexagons, acc_Hansen)
+```
+
+```{r}
+#| label: ex07-13
+summary(hexagon_Hansen$accHansen)
+```
+
+The teacher page also demonstrates the effect of changing the power parameter. I keep that sensitivity calculation visible as a separate code block.
+
+```{r}
+#| label: ex07-14
+acc_Hansen_power05 <- data.frame(
+  ac(
+    hexagons$demand,
+    eldercare$capacity,
+    distmat_km,
+    power = 0.5,
+    family = "Hansen"
+  )
+)
+
+colnames(acc_Hansen_power05) <- "accHansen_power05"
+acc_Hansen_power05 <- as_tibble(acc_Hansen_power05)
+hexagon_Hansen <- bind_cols(hexagon_Hansen, acc_Hansen_power05)
+```
+
+## Visualising Hansen accessibility
+
+```{r}
+#| label: ex07-15
+mapex <- st_bbox(hexagons)
+
+tm_shape(hexagon_Hansen, bbox = mapex) +
+  tm_polygons(
+    fill = "accHansen",
+    fill.scale = tm_scale_intervals(
+      style = "quantile",
+      n = 10,
+      values = "brewer.blues"
+    ),
+    fill.legend = tm_legend(title = "Hansen accessibility")
+  ) +
+  tm_shape(eldercare) +
+  tm_dots(size = 0.3, fill = "red", col = "black") +
+  tm_title("Accessibility to eldercare: Hansen method") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type = "8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
+::: callout-note
+## My observation
+
+The Hansen map gives a continuous accessibility surface. Areas close to several service points tend to receive higher values because more capacity contributes after distance decay. The red points show supply locations; they are not themselves the accessibility result.
+:::
+
+## Statistical graphic visualisation
+
+```{r}
+#| label: ex07-16
+hexagon_Hansen <- st_join(
+  hexagon_Hansen,
+  mpsz %>% select(REGION_N),
+  join = st_intersects,
+  left = TRUE
+)
+
+ggplot(
+  data = hexagon_Hansen,
+  aes(y = log1p(accHansen), x = REGION_N)
+) +
+  geom_boxplot() +
+  geom_point(stat = "summary", fun = "mean", colour = "red", size = 2) +
+  labs(
+    title = "Hansen accessibility by planning region",
+    x = "Planning region",
+    y = "log(1 + accessibility)"
+  ) +
+  theme_minimal()
+```
+
+The boxplot compares the distribution of accessibility values by planning region. The red point is the mean for each region, following the teacher's visual comparison.
+
+# KD2SFCA accessibility
+
+## Computing KD2SFCA accessibility
+
+KD2SFCA adds a distance threshold to the accessibility calculation. I use the Chapter 17 parameter values: `d0 = 5`, `power = 2`, and `family = "KD2SFCA"`.
+
+```{r}
+#| label: ex07-17
+acc_KD2SFCA <- data.frame(
+  ac(
+    hexagons$demand,
+    eldercare$capacity,
+    distmat_km,
+    d0 = 5,
+    power = 2,
+    family = "KD2SFCA"
+  )
+)
+
+colnames(acc_KD2SFCA) <- "accKD2SFCA"
+acc_KD2SFCA <- as_tibble(acc_KD2SFCA)
+hexagon_KD2SFCA <- bind_cols(hexagons, acc_KD2SFCA)
+```
+
+```{r}
+#| label: ex07-18
+summary(hexagon_KD2SFCA$accKD2SFCA)
+```
+
+## Visualising KD2SFCA accessibility
+
+```{r}
+#| label: ex07-19
+tm_shape(hexagon_KD2SFCA, bbox = mapex) +
+  tm_polygons(
+    fill = "accKD2SFCA",
+    fill.scale = tm_scale_intervals(
+      style = "quantile",
+      n = 10,
+      values = "brewer.blues"
+    ),
+    fill.legend = tm_legend(title = "KD2SFCA accessibility")
+  ) +
+  tm_shape(eldercare) +
+  tm_dots(size = 0.3, fill = "red", col = "black") +
+  tm_title("Accessibility to eldercare: KD2SFCA method") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type = "8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
+::: callout-tip
+## My observation
+
+KD2SFCA should produce a more local pattern than the basic Hansen model because destinations beyond the five-kilometre threshold receive less influence. This makes the method useful for checking whether a broad accessibility pattern is still visible at a shorter service range.
+:::
+
+## Statistical graphic visualisation
+
+```{r}
+#| label: ex07-20
+hexagon_KD2SFCA <- st_join(
+  hexagon_KD2SFCA,
+  mpsz %>% select(REGION_N),
+  join = st_intersects,
+  left = TRUE
+)
+
+ggplot(
+  data = hexagon_KD2SFCA,
+  aes(y = accKD2SFCA, x = REGION_N)
+) +
+  geom_boxplot() +
+  geom_point(stat = "summary", fun = "mean", colour = "red", size = 2) +
+  labs(
+    title = "KD2SFCA accessibility by planning region",
+    x = "Planning region",
+    y = "KD2SFCA accessibility"
+  ) +
+  theme_minimal()
+```
+
+# Spatial Accessibility Measure
+
+## Computing SAM accessibility
+
+SAM provides a third distance-weighted accessibility measure. The same demand, capacity, and distance matrix are used so that the comparison focuses on the model family rather than a change in data.
+
+```{r}
+#| label: ex07-21
+acc_SAM <- data.frame(
+  ac(
+    hexagons$demand,
+    eldercare$capacity,
+    distmat_km,
+    d0 = 5,
+    power = 2,
+    family = "SAM"
+  )
+)
+
+colnames(acc_SAM) <- "accSAM"
+acc_SAM <- as_tibble(acc_SAM)
+hexagon_SAM <- bind_cols(hexagons, acc_SAM)
+```
+
+```{r}
+#| label: ex07-22
+summary(hexagon_SAM$accSAM)
+```
+
+## Visualising SAM accessibility
+
+```{r}
+#| label: ex07-23
+tm_shape(hexagon_SAM, bbox = mapex) +
+  tm_polygons(
+    fill = "accSAM",
+    fill.scale = tm_scale_intervals(
+      style = "quantile",
+      n = 10,
+      values = "brewer.blues"
+    ),
+    fill.legend = tm_legend(title = "SAM accessibility")
+  ) +
+  tm_shape(eldercare) +
+  tm_dots(size = 0.3, fill = "red", col = "black") +
+  tm_title("Accessibility to eldercare: SAM method") +
+  tm_layout(frame = TRUE) +
+  tm_compass(type = "8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
+::: callout-note
+## My observation
+
+SAM gives another view of the same supply-demand setting. Differences between SAM and KD2SFCA are useful because they show how much the accessibility ranking depends on the model definition, not only on the location of eldercare services.
+:::
+
+## Statistical graphic visualisation
+
+```{r}
+#| label: ex07-24
+hexagon_SAM <- st_join(
+  hexagon_SAM,
+  mpsz %>% select(REGION_N),
+  join = st_intersects,
+  left = TRUE
+)
+
+ggplot(
+  data = hexagon_SAM,
+  aes(y = accSAM, x = REGION_N)
+) +
+  geom_boxplot() +
+  geom_point(stat = "summary", fun = "mean", colour = "red", size = 2) +
+  labs(
+    title = "SAM accessibility by planning region",
+    x = "Planning region",
+    y = "SAM accessibility"
+  ) +
+  theme_minimal()
+```
+
+# Comparing the three methods
+
+## Accessibility surfaces together
+
+```{r}
+#| label: ex07-25
+accessibility_compare <- hexagons %>%
+  select(fid, geometry) %>%
+  left_join(
+    hexagon_Hansen %>% st_drop_geometry() %>% select(fid, accHansen),
+    by = "fid"
+  ) %>%
+  left_join(
+    hexagon_KD2SFCA %>% st_drop_geometry() %>% select(fid, accKD2SFCA),
+    by = "fid"
+  ) %>%
+  left_join(
+    hexagon_SAM %>% st_drop_geometry() %>% select(fid, accSAM),
+    by = "fid"
+  )
+
+tmap_arrange(
+  tm_shape(accessibility_compare, bbox = mapex) +
+    tm_polygons(
+      fill = "accHansen",
+      fill.scale = tm_scale_intervals(style = "quantile", n = 10, values = "brewer.blues"),
+      fill.legend = tm_legend(title = "Hansen")
+    ) + tm_title("Hansen"),
+  tm_shape(accessibility_compare, bbox = mapex) +
+    tm_polygons(
+      fill = "accKD2SFCA",
+      fill.scale = tm_scale_intervals(style = "quantile", n = 10, values = "brewer.blues"),
+      fill.legend = tm_legend(title = "KD2SFCA")
+    ) + tm_title("KD2SFCA"),
+  tm_shape(accessibility_compare, bbox = mapex) +
+    tm_polygons(
+      fill = "accSAM",
+      fill.scale = tm_scale_intervals(style = "quantile", n = 10, values = "brewer.blues"),
+      fill.legend = tm_legend(title = "SAM")
+    ) + tm_title("SAM"),
+  ncol = 3
+)
+```
+
+## Correlation and top-area agreement
+
+```{r}
+#| label: ex07-26
+method_values <- accessibility_compare %>%
+  st_drop_geometry() %>%
+  select(accHansen, accKD2SFCA, accSAM)
+
+correlation_table <- round(
+  cor(method_values, use = "complete.obs"),
+  3
+)
+
+knitr::kable(correlation_table)
+```
+
+```{r}
+#| label: ex07-27
+top_ten_percent <- function(x) {
+  n_top <- ceiling(length(x) * 0.10)
+  order(x, decreasing = TRUE)[seq_len(n_top)]
+}
+
+top_overlap <- tibble(
+  comparison = c(
+    "Hansen vs KD2SFCA",
+    "Hansen vs SAM",
+    "KD2SFCA vs SAM"
+  ),
+  shared_top_hexagons = c(
+    length(intersect(top_ten_percent(method_values$accHansen), top_ten_percent(method_values$accKD2SFCA))),
+    length(intersect(top_ten_percent(method_values$accHansen), top_ten_percent(method_values$accSAM))),
+    length(intersect(top_ten_percent(method_values$accKD2SFCA), top_ten_percent(method_values$accSAM)))
+  )
+)
+
+knitr::kable(top_overlap)
+```
+
+::: callout-tip
+## My finding
+
+The correlation table and the top-area overlap provide a direct check of method agreement. High correlation would mean that the broad spatial ranking is stable, while a lower top-area overlap would show that the choice of distance-decay model matters for identifying the most accessible areas. This is more informative than comparing the three maps by eye alone.
+:::
+
+## Conclusion
+
+The Chapter 17 workflow shows how accessibility can be modelled from the same spatial inputs in several ways. Hansen gives a broad distance-decay measure, KD2SFCA emphasises a local threshold, and SAM provides a third comparison based on the same origin-destination structure. The maps, regional boxplots, correlation table, and top-area overlap should be read together.
+
+The main limitation is the teaching-data setup. Demand and capacity are fixed at 100, and the local OD matrix uses straight-line centroid-to-service distances because the original prepared network matrix was not available in the local data folder. A real planning analysis should replace these with observed demand, service capacity, and network travel cost.
+
+# References
+
+- R4GDSA. [Chapter 17: Modelling Geographical Accessibility](https://r4gdsa.netlify.app/chap17.html).
+- Singapore Land Authority. [Master Plan subzone boundary data](https://data.gov.sg/).
+- Singapore data.gov.sg. [Eldercare service locations](https://data.gov.sg/).
+- SpatialAcc. [R package documentation](https://cran.r-project.org/package=SpatialAcc).

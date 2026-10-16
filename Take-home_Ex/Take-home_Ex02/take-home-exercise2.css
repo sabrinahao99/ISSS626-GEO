@@ -1,0 +1,6 @@
+#quarto-document-content .cell-output-display img,
+#quarto-document-content figure img {
+  width: 100%;
+  max-width: 1500px;
+  height: auto;
+}
