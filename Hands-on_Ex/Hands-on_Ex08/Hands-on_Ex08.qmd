@@ -1,0 +1,570 @@
+---
+title: "Market Area Analysis for Retail and Service Locations using Huff model"
+subtitle: "Hands-on Exercise 8"
+author: "Zhiyi Hao"
+date: "2026-10-23"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+    number-offset: 17
+    fig-width: 10
+    fig-height: 7
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: false
+---
+
+# Market Area Analysis for Retail and Service Locations using Huff model {.course-chapter-title}
+
+## Overview
+
+Market area analysis (also known as Trade Area Analysis) is the process of defining and studying the geographical area from which a business draws its customers. It involves analysing data on consumer demographics, spending habits and competitors to understand market viability, identify opportunities, and inform decisions about location, marketing and expansion. It often combines empirical observation, such as customer spotting, with mathematical models to identify market segments and understand customer behaviour.
+
+The Huff model is a geospatial analysis method commonly used in market area analysis. It predicts the probability that a consumer from a specific area will patronise a particular store, based on the store's attractiveness and its distance relative to competitors. It calculates a store's market share from attractiveness (e.g. size or sales) and distance or travel time, and the probability decreases as distance or competition increases. This helps businesses assess potential revenue, define trade areas, and make informed decisions about site selection.
+
+::: callout-note
+## My understanding: where the Huff model sits (Lesson 8)
+
+Lesson 8 introduces the Huff model through a sequence of spatial-interaction ideas:
+
+- **Spatial interaction** needs *complementarity* (demand at the origin, supply at the destination), *transferability* (the trip must be affordable), and no *intervening opportunity* (a closer store offering the same thing would capture the customer first).
+- **Reilly's law (1931)** finds a single *breaking point* between two centres. Every customer is assigned to exactly one centre, so the trade-area boundaries are hard lines.
+- **Huff (1963)** turns this into a *probability*. A customer in village $i$ can go to any store $j$, with
+
+$$
+U_{ij} = A_j^{\alpha}\, d_{ij}^{-\lambda}, \qquad
+p_{ij} = \frac{U_{ij}}{\sum_{k} U_{ik}}
+$$
+
+  so the trade area becomes a continuous probability surface, and the trade areas of neighbouring stores overlap.
+- **Expected customers** follow as $E_{ij} = p_{ij} \times C_i$ (where $C_i$ is the market potential, here population), store totals as $T_j = \sum_i E_{ij}$, and market share as $M_j = T_j / \sum T_j$.
+- **MCI** (Nakanishi and Cooper) generalises the attractiveness term to several weighted variables and *estimates* the weights from observed shares. Huff with assumed parameters is the simpler, uncalibrated version.
+:::
+
+### Learning Outcome
+
+In this hands-on exercise, I gain hands-on experience in performing market area analysis using the Huff model of the **MCI** package. By the end of this exercise, I will be able:
+
+- to import GIS data into R and save them as simple feature data frames using appropriate functions of the **sf** package;
+- to import aspatial data into R;
+- to clean and tidy the data sets so that they are ready for the analysis;
+- to compute a distance matrix between the origins (i.e. villages) and destinations (i.e. stores);
+- to compute interaction probabilities using the Huff model; and
+- to visualise the market area using the **tmap** and **ggplot2** packages.
+
+### Setting the scene
+
+A fast-food franchise is a business model in which an individual (the franchisee) acquires the rights to operate a restaurant under an established brand owned by a franchisor. This arrangement typically involves franchise fees and adherence to standardised operational procedures. Key considerations before investing include the size of the initial capital outlay, the strength of the brand, and the strategic importance of store location.
+
+In this exercise, I take the role of a data analyst in the business development team of a fast-food franchise. The objective is to delineate the trade areas of existing stores in Taichung City and to produce spatial maps to support market analysis and strategic decision-making.
+
+### The data
+
+Four data sets are used in this hands-on exercise:
+
+**Geospatial data**
+
+- `STORES_TC`: store locations in ESRI shapefile format.
+- `TOWN_TC`: town (district) boundaries in ESRI shapefile format.
+- `VILLAGE_TC`: village boundaries in ESRI shapefile format.
+
+**Aspatial data**
+
+- `pop2019.csv`: population data of Taichung City in 2019. `H_CNT`, `P_CNT`, `M_CNT` and `F_CNT` are the number of households, total population, male population and female population respectively.
+- `Store_sales_data.csv`: store sales data.
+
+## Getting Started
+
+The R packages needed for this exercise are:
+
+- **sf** for handling geospatial data and performing geoprocessing functions such as computing a distance matrix,
+- **MCI** for performing Huff and MCI modelling,
+- **tidyverse** for performing data science tasks, including visualisation,
+- **ggstatsplot**, an extension of **ggplot2** that combines data visualisation with statistical analysis, so that plots show statistical test results directly, and
+- **tmap** for plotting cartographic-quality thematic maps.
+
+The code chunk below installs and loads these R packages into the RStudio environment.
+
+```{r}
+pacman::p_load(sf, tidyverse, MCI, tmap, ggstatsplot)
+```
+
+## Importing Data
+
+### Importing geospatial data
+
+First, `st_read()` of the **sf** package is used to import the three geospatial data sets into the R environment.
+
+```{r}
+stores <- st_read(dsn = "data/geospatial",
+                  layer = "STORES_TC")
+```
+
+```{r}
+town <- st_read(dsn = "data/geospatial",
+                layer = "TOWN_TC")
+```
+
+```{r}
+village <- st_read(dsn = "data/geospatial",
+                   layer = "VILLAGE_TC")
+```
+
+The output above shows that the three data sets are in the TWD97 / TM2 zone 121 (i.e. EPSG:3826) projected coordinate system.
+
+::: callout-important
+For any geospatial analysis, it is important to check and confirm that all the geospatial data are in the same projected coordinate system.
+:::
+
+::: callout-tip
+## My observation
+
+- All three layers are in **TWD97 / TM2 zone 121**, a projected CRS measured in **metres**. This matters a lot for the Huff model, because distance enters the formula directly as $d_{ij}^{-\lambda}$. If one layer were in longitude/latitude, `st_distance()` would mix up units and the probabilities would be wrong without any error message.
+- There are 28 stores (points), 28 towns and 622 villages (polygons). The villages will be the **origins** (where demand lives) and the stores the **destinations**.
+- Taichung City actually has 29 districts, but `TOWN_TC` has only 28. The mountainous **Heping District** is not included in the boundary data. This shows up again later, when some population records cannot be joined.
+:::
+
+```{r}
+tmap_mode("view")
+tm_shape(town) +
+  tm_polygons() +
+tm_shape(village) +
+  tm_polygons() +
+tm_shape(stores) +
+  tm_dots()
+tmap_mode("plot")
+```
+
+::: callout-tip
+## My observation
+
+Zooming around the interactive map:
+
+- The stores are **not evenly spread**. About half of them cluster in the old city core and the Xitun/Nantun area, a few are in the western coastal towns (e.g. WJ, SA), and the rest are single stores in outer districts such as TG (Dajia), OL (Houli), EH (Dongshi) and WF (Wufeng).
+- The villages are very small in the city centre and very large in the rural and hilly districts. Village size tracks population density, so the large rural polygons look important on the map but hold relatively few people.
+- I expect the outer stores to have large but thinly populated trade areas, and the core stores to have small, overlapping ones. The Huff results below test this.
+:::
+
+### Importing aspatial data
+
+Next, `read_csv()` of the **readr** package is used to import the two aspatial data sets into the R environment.
+
+```{r}
+pop2019 <- read_csv("data/aspatial/pop2019.csv")
+store_sales <- read_csv("data/aspatial/Store_sales_data.csv")
+```
+
+```{r}
+summary(store_sales)
+```
+
+::: callout-tip
+## My observation
+
+- `store_sales` has 5,499 rows. Each row is a **store × POD code** record (POD codes such as `F-03` look like delivery zones), not a single receipt. That is why `Bills` ranges from 1 to 7,764.
+- The file is not limited to Taichung. It contains about **233 different store codes**, so it looks like the franchise's national sales table, plus some rows with a missing store code. Only 28 of these codes match the stores in `STORES_TC`. The `left_join()` in the next section keeps only those 28, which is what we want.
+- `Amount` has a minimum of 0, and the maximum `Ave Bill` (24,356) is far above the median (730.5). There are a few zero or unusual records, but they are summed into store totals, so they have little effect.
+:::
+
+## Data Preparation
+
+### Aggregating store sales
+
+The code chunk below aggregates the store sales data by Store Code.
+
+```{r}
+store_sales_aggre <- store_sales %>%
+  group_by(`Store Code`) %>%
+  summarise(
+    "Total_Bill" = sum(Bills, na.rm = TRUE),
+    "Total_Sales" = sum(Amount, na.rm = TRUE))
+```
+
+### Relational join
+
+In the code chunk below, `left_join()` of **dplyr** is used to append data from the `store_sales_aggre` data.frame onto the `stores` sf data.frame. At the same time, a new field called `Store_size` is created.
+
+```{r}
+stores <- stores %>%
+  left_join(store_sales_aggre,
+            by = join_by(Store_CD == `Store Code`)) %>%
+  mutate(Store_size = 100)
+```
+
+Next, `summary()` is used to check whether there are any missing values in the data.frame.
+
+```{r}
+summary(stores)
+```
+
+::: callout-tip
+## My observation
+
+- No `NA`s appear in `Total_Bill` or `Total_Sales`, so **all 28 stores matched** a sales record.
+- Total sales range from about **1.48 million** (EH, Dongshi) to **8.23 million** (FH), roughly a 5.6× gap. Total bills range from 1,767 to 14,468, an even larger gap. So the stores differ mainly in **how many orders** they receive, not in how much each order is worth. That suits the Huff model, which predicts how many customers a store attracts.
+- `Store_size = 100` for **every** store. This is the key assumption of the teaching example (see the note below).
+:::
+
+::: callout-note
+## My understanding: what `Store_size = 100` means for the model
+
+In the Huff formula, attractiveness enters as $A_j^{\alpha}$. When every store has the same $A_j$, this term is identical in the numerator and in every term of the denominator, so it **cancels out**:
+
+$$
+p_{ij} = \frac{100 \cdot d_{ij}^{-2}}{\sum_k 100 \cdot d_{ik}^{-2}} = \frac{d_{ij}^{-2}}{\sum_k d_{ik}^{-2}}
+$$
+
+So in this exercise the model is driven **only by distance and by where the competitors are**. Any difference between stores in the results comes from location, not from size, brand or service quality. To make attractiveness matter, I would replace `Store_size` with a real variable such as floor area, seats, or a drive-through flag.
+:::
+
+### Tidying pop2019 data.frame
+
+We plan to append the data in the `pop2019` data.frame onto the `village` sf data.frame. Before doing so, it is wise to check that the values in the join field have the same format.
+
+```{r}
+glimpse(pop2019)
+```
+
+```{r}
+glimpse(village)
+```
+
+The output above shows that the village ID (i.e. `V_ID`) in the `pop2019` data.frame does not have the same structure as the village code (`VILLCODE`) in the `village` sf data.frame. The code chunk below removes the "-" sign from the values.
+
+```{r}
+pop2019 <- pop2019 %>%
+  mutate(V_ID = str_remove_all(V_ID, "-"))
+```
+
+Now we are ready to append the data in the `pop2019` data.frame onto the `village` sf data.frame using `left_join()` of **dplyr**.
+
+```{r}
+village <- village %>%
+  left_join(pop2019, by = join_by(VILLCODE == V_ID))
+```
+
+::: callout-tip
+## My observation
+
+`pop2019` has **625** records but `village` has only **622** polygons, so the two tables cannot match one-to-one even after the IDs are cleaned. A `left_join()` keeps all 622 polygons, so any population record without a polygon is dropped silently. I look at both sides of this mismatch in the next step.
+:::
+
+### Check for missing or zero values
+
+The code chunk below checks for any records with missing values.
+
+```{r}
+summary(village)
+```
+
+The output above reveals five missing values in the `H_CNT`, `P_CNT`, `M_CNT` and `F_CNT` fields. Hence, the code chunk below removes the five records with missing values from the `village` sf data.frame.
+
+```{r}
+village <- village %>%
+  filter(!is.na(P_CNT))
+```
+
+```{r}
+any(is.na(village$H_CNT))
+any(is.na(village$P_CNT))
+any(is.na(village$M_CNT))
+any(is.na(village$F_CNT))
+```
+
+::: callout-tip
+## My observation
+
+The two sides of the join mismatch have different causes:
+
+- **5 polygons with no population.** Their codes end in `S01`-`S03` (e.g. `66000120S01`) and they have no village name. They are special non-village units in Qingshui, Wuqi and Longjing, covering the coastal port and air-base area, so they have no registered residents. Removing them is correct and loses no demand. They show up as white gaps on the trade-area map later.
+- **8 population records with no polygon.** All 8 are villages in **Heping District** (about 10,900 residents), the district missing from the boundary layer. These residents are left out of the model.
+
+After filtering, **617 villages** remain as demand origins and all four count fields are complete. Leaving out Heping is a small, documented under-count. It is also reasonable for this question, since Heping is mountain terrain far from any store.
+:::
+
+## Computing Distance Matrix
+
+Instead of calculating the distance between the village polygons and the stores, we calculate a representative point for each village using the code chunk below. Then we compute the distance between these village points and the stores.
+
+```{r}
+village_center <- st_point_on_surface(village)
+distmat <- st_distance(village_center, stores)
+```
+
+::: callout-note
+## My understanding: `st_point_on_surface()` vs `st_centroid()`
+
+The lecture text calls these points "centroids", but the code uses `st_point_on_surface()`. The two are not the same:
+
+- `st_centroid()` gives the geometric centre, which can fall **outside** a concave or multi-part polygon (for example a crescent-shaped village).
+- `st_point_on_surface()` always returns a point **inside** the polygon.
+
+When I checked this data, 8 villages had a true centroid lying outside their own boundary, and the largest shift between the two points was about 1.4 km. With a $d^{-2}$ decay, moving a village's origin by a kilometre near a store can change its probability a lot, so point-on-surface is the safer choice.
+:::
+
+Next, the code chunk below converts the distance matrix into a long data.frame format.
+
+```{r}
+rownames(distmat) <- village$`VILLCODE`
+colnames(distmat) <- stores$`Store_CD`
+
+distmat_long <- distmat %>%
+  as.data.frame() %>%
+  rownames_to_column(var = "VILLCODE") %>%
+  pivot_longer(cols = -VILLCODE,
+               names_to = "Store_CD",
+               values_to = "distance") %>%
+  mutate(distance = as.numeric(distance))
+```
+
+::: callout-tip
+## My observation
+
+- `distmat` is a **617 × 28** matrix (villages × stores), so `distmat_long` has 617 × 28 = **17,276** rows, one for every village-store pair. The Huff model needs every pair because every store competes for every village.
+- `st_distance()` returns values with a `units` attribute (m). The final `mutate(distance = as.numeric(distance))` drops the unit, because **MCI** needs plain numbers.
+- These are **straight-line** distances. Real customers travel on roads, so a road-network distance or travel time would be more realistic, especially across rivers and hills.
+:::
+
+## Preparing Interaction Matrix
+
+The code chunk below builds the interaction matrix required by the **MCI** package.
+
+```{r}
+interaction_matrix <- distmat_long %>%
+  left_join(stores %>%
+              st_drop_geometry() %>%
+              select(Store_CD, Store_size),
+            by = "Store_CD") %>%
+  relocate(distance, .after = last_col())
+```
+
+```{r}
+summary(interaction_matrix)
+```
+
+::: callout-tip
+## My observation
+
+- The interaction matrix is in the **long "origin-destination" format** that `huff.shares()` expects: one row per pair, with the origin ID, destination ID, attractiveness and distance.
+- The shortest village-store distance is about **108 m** (a village with a store inside it) and the longest is about **41 km**. The median is about **12 km**. That median says little about customer behaviour, though: a resident does not travel to the median store, and under the Huff model it is the **nearest few** stores that matter.
+- `Store_size` is constant at 100, so it confirms the attractiveness term will cancel out.
+:::
+
+## Computing Huff model
+
+```{r}
+huff_share <- huff.shares(interaction_matrix,
+                          "VILLCODE",
+                          "Store_CD",
+                          "Store_size",
+                          "distance")
+```
+
+::: callout-note
+## My understanding: what `huff.shares()` does
+
+Reading the function's source code, `huff.shares()`:
+
+1.  sorts the data by origin and destination;
+2.  computes the utility $U_{ij} = A_j^{\gamma} \times d_{ij}^{\lambda}$ with the default **`gamma = 1`** and **`lambda = -2`**. MCI writes the negative sign inside $\lambda$, while the lecture slide writes $d^{-\lambda}$ with $\lambda = 2$. They are the same model;
+3.  sums $U_{ij}$ for each origin to get `sum_U_ij`; and
+4.  returns `p_ij = U_ij / sum_U_ij`.
+
+So, for every village, the 28 probabilities add up to exactly 1. This is the "logical consistency" requirement in the slides ($0 < p_{ij} < 1$ and $\sum_j p_{ij} = 1$).
+
+Two consequences I noticed:
+
+- Because the distance decay is a **power** function, the distance unit does not matter. Changing metres to kilometres multiplies all of a village's distances by the same constant, which cancels in $p_{ij}$. With an exponential decay (`dtype = "exp"`), the unit *would* matter.
+- `huff.shares()` checks its input with `exists(...)`, so the first argument must be a **named object** such as `interaction_matrix`. It does not work if a pipe result is passed into it directly.
+:::
+
+### Trade area analysis for a single store
+
+First, we select the market share data of one store using the `Store_CD` field (i.e. BT).
+
+```{r}
+market_share <- huff_share %>%
+  filter(Store_CD == "BT")
+```
+
+Next, the trade area of the selected store is derived using the code chunk below.
+
+```{r}
+Trade_area <- village %>%
+  left_join(market_share)
+```
+
+Before plotting the trade area map, the code chunk below extracts the selected store from the `stores` sf data.frame.
+
+```{r}
+selected_store <- stores %>%
+  filter(Store_CD == "BT")
+```
+
+Now, the code chunk below plots the trade area of the selected store.
+
+```{r}
+#| fig-width: 10
+#| fig-height: 9
+tm_shape(Trade_area) +
+  tm_polygons(fill = "p_ij",
+              fill.scale = tm_scale_intervals(
+                style = "quantile",
+                n = 10,
+                values = "brewer.blues"),
+              fill.legend = tm_legend(
+                title = "Patronage Probability")) +
+  tm_shape(selected_store) +
+  tm_dots(size = 0.3,
+          fill = "red",
+          col = "black") +
+  tm_title("Distribution of Patronage Probability of Store BT by village") +
+  tm_layout(frame = TRUE) +
+  tm_borders(fill_alpha = 0.5) +
+  tm_compass(type = "8star", size = 2) +
+  tm_scalebar() +
+  tm_grid(alpha = 0.2)
+```
+
+::: callout-tip
+## My observation
+
+- **BT's trade area is a probability surface, not a boundary.** The darkest class forms a compact core around the store in Beitun and fades outward. No village has a probability of exactly 0. Even villages 30+ km away keep a small share, which is what "probabilistic" means in Huff's definition of a trade area.
+- **The surface is not circular. It is shaped by the competitors.** The **white holes** are not simply the villages furthest from BT. They are the villages right next to *other* stores: the coastal stores in the west, TG in the north, and the stores south of the city centre. There, the nearby competitor takes almost all the demand and BT drops to about 0. BT's core extends much further **east** into the Beitun, Taiping and Xinshe foothills, because there are few other stores in that direction.
+- **Far-away villages are not the lowest.** Villages at the northern and southern edges sit in the middle classes (about 0.02-0.03), close to the 1/28 ≈ 0.036 that BT would get if all stores were equally far away. When every store is far, the distances become similar and the probabilities spread out evenly. A village next to a competitor gives BT much less than a remote village does.
+- **Read the quantile legend carefully.** With `style = "quantile"` and `n = 10`, each colour class holds about 62 villages regardless of the values. Nine classes are squeezed between 0 and 0.067, while the top class spans **0.068-0.944**. The map is good for ranking villages, but it makes BT's influence look much larger than it is. Only about 10% of villages give BT more than 0.07. With fixed breaks (e.g. 0.05, 0.1, 0.2, 0.4), only a handful of villages around the store would look dark.
+- **Comparing stores.** BT has close competitors: DT about 1.5 km away, and TY and DK both within about 2.3 km. When I changed `"BT"` to `"TG"` (the Dajia store in the northwest), the picture was very different. TG has no nearby competitor, so villages up to about 5 km away still give it more than 0.4. BT has a *contested* trade area, while TG has a *captive* one. A simple buffer of the same radius around each store would hide this difference.
+:::
+
+### Store sales analysis
+
+One use of the Huff model is to estimate store sales from village population. First, we append the `P_CNT` field from the `village` sf data.frame to the `huff_share` data.frame using the code chunk below.
+
+```{r}
+huff_share_pp <- huff_share %>%
+  left_join(village %>%
+              st_drop_geometry() %>%
+              select(VILLCODE, P_CNT),
+            by = "VILLCODE") %>%
+  relocate(distance, .after = last_col())
+```
+
+Next, `shares.total()` of the **MCI** package is used to calculate the total sales, using the code chunk below.
+
+```{r}
+huff_total <- shares.total(huff_share_pp,
+                           "VILLCODE",
+                           "Store_CD",
+                           "p_ij",
+                           "P_CNT")
+```
+
+::: callout-note
+## My understanding: what `shares.total()` returns
+
+`shares.total()` implements the slide formulas $E_{ij} = p_{ij} \times C_i$ and $T_j = \sum_i E_{ij}$, with $C_i$ = `P_CNT`. The output has one row per store:
+
+- `sum_E_j`: the **expected number of customers** $T_j$ allocated to that store;
+- `share_j`: its **market share** $M_j = T_j / \sum T_j$.
+
+Every resident of the 617 villages is allocated to some store, so `sum(sum_E_j)` equals the total modelled population (about 2.80 million). Strictly speaking, these are expected *customers*, not sales in dollars. Comparing them with `Total_Sales` therefore assumes that each resident spends roughly the same amount.
+:::
+
+The code chunk below appends the estimated store sales ($E_j$) onto the `stores` sf data.frame.
+
+```{r}
+store_sales_est <- stores %>%
+  left_join(huff_total,
+            by = join_by("Store_CD" == "suppliers_single"))
+```
+
+Now, we can visualise how well the estimated sales compare with the actual sales using the code chunk below.
+
+```{r}
+store_sales_nongeom <- store_sales_est %>%
+  st_drop_geometry()
+```
+
+```{r}
+#| fig-width: 9
+#| fig-height: 7
+ggscatterstats(store_sales_nongeom,
+               x = sum_E_j,
+               y = Total_Sales)
+```
+
+::: callout-tip
+## My observation
+
+- **The relationship is positive and significant:** $\hat r_{Pearson} \approx 0.58$, 95% CI \[0.26, 0.78\], *p* ≈ 0.001, with 28 stores. Stores that the model allocates more residents to do tend to sell more.
+- **But location explains only about a third of the variation** ($r^2 \approx 0.33$). This is expected, because the model only knows distance and competition. Attractiveness is fixed at 100, and $\lambda$ is not calibrated.
+- **The points below the line are mostly the outer stores.** TG (Dajia), SQ (Shengang), ZS (Taiping) and EH (Dongshi) sell much less than their modelled customer totals. The Huff model is a **closed system**: every resident *must* choose one of the 28 stores. A lone store in a large rural area is therefore credited with everyone there, even though many of those people will not travel 5-10 km for fast food or will choose another brand. This is the main structural weakness I see in the model.
+- **The points above the line are mostly in the western and central city**, e.g. DD (Longjing, toward the industrial park and Tunghai University) and ZK (the *Zhong Ke* store in Xitun, named after the Central Taiwan Science Park). These areas attract many **daytime** workers and students, who are not counted in residential `P_CNT`.
+- QH is a central store that also sits well below the line, and it has the lowest average bill. This points to a format or operational issue rather than location.
+
+**Business takeaway:** the gap between observed and modelled sales is more useful than the correlation itself. It separates *"poor location"* from *"good location, weak performance"*, and it suggests that **daytime population** would be a better demand measure than residential population for some stores.
+:::
+
+The code chunk below reshapes the Huff probabilities into a wide village-by-store table.
+
+```{r}
+huff_share_wider <- huff_share %>%
+  select(VILLCODE, Store_CD, p_ij) %>%
+  pivot_wider(names_from = Store_CD,
+              values_from = p_ij)
+```
+
+::: callout-tip
+## My observation
+
+`huff_share_wider` is a 617 × 29 table: `VILLCODE` plus one column per store. Each row adds up to 1. This format is easy to share with a business team, because each row shows how one village's demand is split across all 28 stores. It also makes it easy to find each village's **dominant store** (the column with the highest probability). With equal attractiveness, the dominant store is always the **nearest store**, so the dominant-store map is effectively a Voronoi diagram of the stores.
+:::
+
+## Additional observations based on Lesson 8
+
+::: callout-note
+## Where competition is strongest
+
+From `huff_share_wider`, I calculated how evenly each village's probability is spread across stores, using the effective number of competitors $1/\sum_j p_{ij}^2$. The result surprised me:
+
+- Villages **right next to a store**, even in the dense city core, are close to 1. A store a few hundred metres away gets almost all of that village's demand under $d^{-2}$.
+- The **most split** villages are in the gaps *between* stores and across the rural periphery. When every store is far away, the distances are similar, so no single store dominates.
+
+For expansion, these peripheral villages are **unclaimed demand**: a new store there would become the nearest store and capture most of it. A new store in the core would mostly take customers from other stores in the same franchise.
+:::
+
+::: callout-note
+## Is λ = 2 the right distance decay?
+
+The lecture uses MCI's default `lambda = -2`, but Lesson 8 stresses that the Huff model should be **calibrated**. Re-running `huff.shares()` with different `lambda` values and comparing modelled shares (`share_j`) with observed sales shares:
+
+- The share error (RMSE) is **lowest at about λ = 1**, with the default λ = 2 slightly worse.
+- Larger λ (stronger decay) makes the fit clearly worse, because it gives the isolated outer stores even more of their surrounding villages.
+
+This suggests fast-food customers in Taichung are *less* distance-sensitive than λ = 2 assumes. One reason could be that people buy near work, school or on the way home, not only near where they live.
+
+This is only a rough check (28 stores, revenue standing in for customers). A proper **MCI** calibration would regress observed *village-level* shares on distance and attractiveness after the log-centering transformation. The `POD code` field in the sales data is a delivery zone, not a village code, so village-level shares cannot be rebuilt from this data.
+:::
+
+## Key takeaways
+
+| Question | What I learned |
+|---|---|
+| What is a Huff trade area? | A continuous probability surface. Trade areas of neighbouring stores overlap, unlike the hard boundaries of Reilly's law. |
+| What drives the result here? | Only distance and competition. `Store_size = 100` cancels out of $p_{ij}$. |
+| Why check the joins? | The sales file is national. The 5 dropped polygons are non-residential special units, and the 8 unmatched population records are Heping District, which is missing from the boundary layer. |
+| How good is the model? | r ≈ 0.58 with observed sales. It over-credits isolated outer stores and under-credits stores near campuses and workplaces. |
+| What would improve it? | Real attractiveness variables, road travel time instead of straight-line distance, daytime population, and a λ calibrated with MCI on observed shares. |
+
+## References
+
+- Kam, T. S. *R for Geospatial Data Science and Analytics*, [Chapter 18: Market Area Analysis for Retail and Service Locations using Huff model](https://r4gdsa.netlify.app/chap18).
+- ISSS626 [Lesson 8: Market Area Analysis for Retail and Service Locations: Huff and MCI Models](https://isss626-ay2026-27aug.netlify.app/outline/lesson08_outline).
+- Huff, D. L. (1963). A Probabilistic Analysis of Shopping Center Trade Areas. *Land Economics*, 39(1), 81-90.
+- Nakanishi, M. and Cooper, L. G. (1982). Simplified Estimation Procedures for MCI Models. *Marketing Science*, 1(3), 314-322.
+- Wieland, T. (2017). Market Area Analysis for Retail and Service Locations with MCI. *The R Journal*, 9(1), 298-323.

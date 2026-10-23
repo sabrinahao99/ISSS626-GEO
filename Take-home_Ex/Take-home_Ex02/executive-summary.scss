@@ -1,0 +1,390 @@
+/*-- scss:defaults --*/
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap');
+
+$font-family-sans-serif: "Inter", "Helvetica Neue", Arial, sans-serif;
+$presentation-heading-font: "Source Serif 4", Georgia, serif;
+$presentation-heading-color: #16232b;
+$presentation-heading-font-weight: 700;
+$presentation-font-size-root: 32px;
+$presentation-h2-font-size: 1.55em;
+$presentation-h3-font-size: 0.95em;
+$presentation-line-height: 1.35;
+$body-bg: #fbfaf7;
+$body-color: #24323a;
+$link-color: #a3271b;
+$code-color: #a3271b;
+
+/*-- scss:rules --*/
+
+// ---------- palette ----------
+:root {
+  --ink: #16232b;
+  --text: #24323a;
+  --muted: #66747b;
+  --accent: #a3271b;
+  --accent-soft: #f6e6e2;
+  --line: #e3e1da;
+  --card: #ffffff;
+  --sand: #f3f0e8;
+  --teal: #2f6f73;
+}
+
+.reveal .slides { text-align: left; }
+
+// card title
+.reveal .ct {
+  display: block;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.86em;
+  margin: 0 0 0.25em 0;
+}
+.reveal .card li, .reveal .card p { font-size: 0.72em; }
+.reveal .card ul { padding-left: 0.2em; }
+.reveal .card p:has(> .ct) { font-size: 1em; margin: 0; }
+.reveal .card.stat p { font-size: 1em; }
+
+// leave room for the footer so text never runs under it
+.reveal .slides section:not(#title-slide) {
+  padding: 8px 6px 70px 6px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.reveal h2 {
+  margin: 0 0 0.45em 0;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+}
+
+.reveal h3 {
+  font-family: $font-family-sans-serif;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 0 0 0.3em 0;
+  letter-spacing: 0;
+}
+
+.reveal p, .reveal li { color: var(--text); }
+.reveal ul { margin-left: 1em; }
+.reveal li { margin-bottom: 0.25em; }
+.reveal li::marker { color: var(--accent); }
+.reveal strong, .reveal b { color: var(--ink); font-weight: 700; }
+.reveal .hl { color: var(--accent); font-weight: 700; }
+
+// small label above the slide title
+.reveal .kicker {
+  display: block;
+  font-family: $font-family-sans-serif;
+  font-size: 0.5em;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 0.35em 0;
+}
+
+.reveal .lead {
+  font-size: 0.82em;
+  color: var(--muted);
+  margin: -0.2em 0 0.8em 0;
+  max-width: 1350px;
+}
+
+.reveal .small { font-size: 0.76em; }
+.reveal .xsmall { font-size: 0.64em; }
+.reveal .muted { color: var(--muted); }
+
+// ---------- layout helpers ----------
+.reveal .grid {
+  display: grid;
+  gap: 22px;
+  align-items: start;
+}
+.reveal .g-2 { grid-template-columns: 1fr 1fr; }
+.reveal .g-3 { grid-template-columns: repeat(3, 1fr); }
+.reveal .g-4 { grid-template-columns: repeat(4, 1fr); }
+.reveal .center-v { align-items: center; }
+
+.reveal .card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 22px;
+  box-shadow: 0 1px 2px rgba(22, 35, 43, 0.04);
+}
+.reveal .card p { margin: 0.25em 0; }
+.reveal .card ul { margin-top: 0.2em; margin-bottom: 0; }
+.reveal .card.accent { border-top: 5px solid var(--accent); }
+.reveal .card.teal { border-top: 5px solid var(--teal); }
+.reveal .card.soft { background: var(--sand); border-color: transparent; }
+
+.reveal .figure {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+}
+.reveal .figure img {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+.reveal .cap {
+  font-size: 0.58em;
+  color: var(--muted);
+  margin-top: 6px;
+  text-align: center;
+}
+
+// ---------- big numbers ----------
+.reveal .stat .num {
+  display: block;
+  font-family: $presentation-heading-font;
+  font-size: 2.1em;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+}
+.reveal .stat .lbl {
+  display: block;
+  margin-top: 0.35em;
+  font-size: 0.72em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+// ---------- research question ----------
+.reveal .question {
+  font-family: $presentation-heading-font;
+  font-size: 1.12em;
+  line-height: 1.35;
+  color: var(--ink);
+  border-left: 6px solid var(--accent);
+  padding: 0.2em 0 0.2em 0.9em;
+  margin: 0.2em 0 0.9em 0;
+}
+
+// ---------- contents ----------
+.reveal .toc { counter-reset: toc; }
+.reveal .toc { gap: 26px; margin-top: 30px; }
+.reveal .toc .card { padding: 30px 30px; min-height: 250px; border-top: 5px solid var(--accent); }
+.reveal .toc .n {
+  font-family: $presentation-heading-font;
+  font-size: 2.1em;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.reveal .toc .t {
+  display: block;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 0.5em;
+  font-size: 1.05em;
+}
+.reveal .toc .d {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78em;
+  margin-top: 0.35em;
+  line-height: 1.35;
+}
+
+// ---------- pipeline ----------
+.reveal .pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+}
+.reveal .step {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px 16px 14px;
+  min-height: 270px;
+}
+.reveal .step .no {
+  display: inline-block;
+  width: 1.7em; height: 1.7em;
+  line-height: 1.7em;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.6em;
+}
+.reveal .step .tt {
+  display: block;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 0.8em;
+  margin: 0.45em 0 0.3em;
+  line-height: 1.2;
+}
+.reveal .step .dd {
+  display: block;
+  font-size: 0.66em;
+  color: var(--text);
+  line-height: 1.38;
+}
+.reveal .step .out {
+  display: block;
+  margin-top: 0.6em;
+  font-size: 0.6em;
+  color: var(--accent);
+  font-weight: 600;
+}
+.reveal .step:not(:last-child)::after {
+  content: "›";
+  position: absolute;
+  right: -13px; top: 42%;
+  font-size: 1.1em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+// ---------- chips / tags ----------
+.reveal .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 0.6em; }
+.reveal .chip {
+  font-size: 0.62em;
+  background: var(--sand);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: var(--ink);
+}
+.reveal .chip b { color: var(--accent); }
+
+// ---------- class rows (EHSA / composition) ----------
+.reveal .rows { display: flex; flex-direction: column; gap: 12px; }
+.reveal .row {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 14px;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 16px;
+}
+.reveal .row .big {
+  font-family: $presentation-heading-font;
+  font-weight: 700;
+  font-size: 1.45em;
+  line-height: 1;
+  text-align: center;
+}
+.reveal .row .name { font-weight: 700; color: var(--ink); font-size: 0.8em; display: block; }
+.reveal .row .desc { font-size: 0.66em; color: var(--text); display: block; line-height: 1.35; margin-top: 2px; }
+.reveal .sw { display: inline-block; width: 0.8em; height: 0.8em; border-radius: 3px; margin-right: 6px; vertical-align: -0.05em; border: 1px solid rgba(0,0,0,.25); }
+
+// ---------- implication table ----------
+.reveal table.impl {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.72em;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.reveal table.impl th {
+  background: var(--ink);
+  color: #fff;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border: none;
+}
+.reveal table.impl td {
+  padding: 13px 16px;
+  border-top: 1px solid var(--line);
+  vertical-align: top;
+  line-height: 1.35;
+}
+.reveal table.impl td:first-child { font-weight: 700; color: var(--ink); width: 24%; }
+.reveal table.impl td:nth-child(2) { color: var(--accent); font-weight: 600; width: 28%; }
+
+// ---------- callout band ----------
+.reveal .band {
+  margin-top: 18px;
+  background: var(--accent-soft);
+  border-left: 5px solid var(--accent);
+  border-radius: 6px;
+  padding: 12px 18px;
+  font-size: 0.74em;
+  color: var(--ink);
+  line-height: 1.4;
+}
+
+// ---------- title slide ----------
+#title-slide {
+  text-align: left;
+  padding: 0 90px !important;
+}
+#title-slide .title {
+  font-family: $presentation-heading-font;
+  color: #ffffff;
+  font-size: 3em;
+  line-height: 1.05;
+  margin-bottom: 0.25em;
+  max-width: 1420px;
+}
+#title-slide .subtitle {
+  max-width: 1150px;
+  line-height: 1.35;
+  color: #f0c9c2;
+  font-family: $font-family-sans-serif;
+  font-weight: 500;
+  font-size: 1.05em;
+  margin-bottom: 1.6em;
+}
+#title-slide .quarto-title-authors { justify-content: flex-start; }
+#title-slide .quarto-title-author-name,
+#title-slide .date {
+  color: #c9d2d6;
+  font-size: 0.72em;
+}
+#title-slide::before {
+  content: "ISSS626 · Geospatial Analytics and Applications · Take-home Exercise 2 · Executive Summary";
+  display: block;
+  font-size: 0.48em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e08a7e;
+  margin-bottom: 1.4em;
+  font-weight: 600;
+}
+
+// ---------- footer & numbers ----------
+.reveal .footer {
+  font-size: 15px !important;
+  color: var(--muted) !important;
+  bottom: 18px !important;
+}
+.reveal .slide-number {
+  font-size: 15px !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  bottom: 14px !important;
+  right: 22px !important;
+}
+.reveal .progress { color: var(--accent); height: 4px; }
+
+.reveal.has-dark-background .footer,
+.reveal.has-dark-background .slide-number { opacity: 0; }
+#title-slide .quarto-title-author-name::before {
+  content: "";
+  display: block;
+  width: 90px; height: 4px;
+  background: #a3271b;
+  margin-bottom: 26px;
+}
+#title-slide .quarto-title-authors .quarto-title-author { padding-left: 0 !important; margin-left: 0 !important; }

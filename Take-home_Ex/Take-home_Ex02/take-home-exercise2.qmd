@@ -8,7 +8,8 @@ format:
   html:
     toc: true
     toc-depth: 3
-    code-fold: false
+    code-fold: true
+    code-summary: "Show code"
     number-sections: true
     css: take-home-exercise2.css
     fig-width: 12
@@ -21,16 +22,34 @@ execute:
   freeze: false
 ---
 
-# Overview
+# Introduction
+
+## Study context
 
 This report studies recorded armed conflict events in Myanmar from 1 January 2021 to 30 September 2025. The spatial unit is the township and the main time unit is the month.
+
+Myanmar's post-2021 conflict involves geographically uneven interactions among the military, resistance organisations, ethnic armed organisations, and civilian communities. Township-level analysis cannot explain these relationships by itself, but it can identify where recorded violence forms unusual local concentrations and where those concentrations change through time.
+
+## Research questions and objectives
 
 The analysis asks:
 
 1.  Where do recorded conflict events form significant local clusters or spatial outliers?
-2.  Which township-level hot and cold spot patterns persist, emerge, intensify, or weaken through time?
+2.  Which township-level hot spot patterns persist, emerge, intensify, or weaken through time?
 
-The workflow follows the course sequence. I first clean and aggregate the event data, then build a complete space-time cube, apply Local Measures of Spatial Autocorrelation, and finally run Emerging Hot Spot Analysis.
+The objectives are to prepare an analysis-ready township-month dataset, identify significant local clusters and spatial outliers, trace monthly hot spot movement, classify changing hot spots, and translate the findings into cautious peace-building priorities.
+
+## Analytical workflow
+
+| Stage | Purpose | Main output |
+|----|----|----|
+| Data preparation | Link ACLED events to stable MIMU township P-codes and audit data quality | Township-level event table |
+| Space-time construction | Retain every township-month combination, including observed zero-event months | Complete monthly space-time cube |
+| Descriptive analysis | Establish the spatial and temporal distribution of recorded events | Choropleth maps and monthly trend |
+| Local spatial analysis | Detect clusters and compare hotspot composition across conflict dimensions | Local Moran's I, local Gi\*, and hotspot-agreement maps |
+| Emerging Hot Spot Analysis | Evaluate temporal trends in monthly local Gi\* values | Mann-Kendall results and EHSA classes |
+
+The workflow follows the course sequence in Chapters 10 and 11, with the Chapter 6 small-multiple design adapted for monthly comparison. Each analytical section states the neighbourhood definition, statistical decision rule, interpretation, and limitation.
 
 ::: callout-note
 ## Reading the results
@@ -38,11 +57,30 @@ The workflow follows the course sequence. I first clean and aggregate the event 
 The results describe the geography of recorded events. They do not measure all violence, population risk, or causal effects. A significant result is interpreted under the selected township boundaries, monthly time bins, neighbourhood rule, and permutation model.
 :::
 
+# Analytical framework
+
+## Local spatial association
+
+Local Moran's I distinguishes clusters of similar values from spatial outliers, while Getis-Ord Gi\* identifies local concentrations of high values. Stankov et al. (2017), Arif and Purnomo (2017), and Fergen and Bergstrom (2021) demonstrate how these measures reveal local geographical inequality that a global summary can conceal. Khan et al. (2017) also show how local statistics can locate significant geographical concentrations.
+
+## Space-time analysis
+
+EHSA combines a sequence of local Gi\* statistics with the Mann-Kendall trend test. Putrenko, Pashynska, and Nazarenko (2018) motivate the use of space-time cubes for event data. Boschan and Roman (2024) and Kim and Lee (2023) show how EHSA separates new, consecutive, persistent, sporadic, and oscillating hot spots, allowing interventions to respond to temporal behaviour rather than a single-period concentration.
+
+## Conflict interpretation
+
+Mack and Kam (2018) frame political violence as a spatio-temporal knowledge-discovery problem and give particular attention to violence against civilians. Tan and Kam (2019) demonstrate the value of comparing related variables and geographical profiles rather than relying on one aggregate map. These studies support interpreting the results as recorded spatial patterns while avoiding unsupported causal claims.
+
 # Data and study design
 
 ## Data sources
 
 The aspatial data are the ACLED Myanmar event export supplied for this exercise. The spatial data are Myanmar township boundaries from the MIMU GeoNode, Admin 3, P-code version 9.4.
+
+| Dataset | Role | Spatial or temporal detail | Source |
+|----|----|----|----|
+| ACLED Myanmar events | Event dates, types, coordinates, fatalities, and source fields | Event points, 1 January 2021 to 30 September 2025 | Exercise data supplied through eLearn |
+| MIMU township boundaries v9.4 | Stable township geometry and P-code key | 330 Admin-3 township polygons | MIMU GeoNode |
 
 The raw files are kept separately:
 
@@ -51,7 +89,33 @@ The raw files are kept separately:
 
 The MIMU township boundary layer has 330 polygon features. ACLED records are event-level observations, so the final analytical table is created by linking events to the township polygons and then aggregating by township and month.
 
+The preparation stage derives four township-month variables. `event_count` is the primary variable in the current LMSA and EHSA workflow; the remaining measures preserve substantively different dimensions for comparison and sensitivity analysis.
+
+| Derived variable | Definition | Analytical meaning |
+|----|----|----|
+| `event_count` | Number of recorded ACLED events | Overall recorded conflict activity |
+| `fatality_count` | Sum of reported fatalities | Reported lethal burden, subject to missingness and reporting uncertainty |
+| `battle_count` | Number of events classified as Battles | Armed confrontation activity |
+| `civilian_count` | Number of events classified as Violence against civilians | Directly recorded civilian-targeting activity |
+
 ## Packages and setup
+
+The packages are limited to the tasks required by the workflow. Listing their roles makes the computational dependencies and the reason for each dependency visible.
+
+| Package | Purpose in this exercise |
+|----|----|
+| `pacman` | Load all required packages through one reproducible setup call |
+| `sf` | Import, validate, transform, join, and map event points and township polygons |
+| `sfdep` | Construct neighbours and weights; compute Local Moran's I, local Gi\*, space-time objects, and EHSA |
+| `spdep` | Diagnose connected components in the spatial neighbour graph |
+| `tmap` | Produce the thematic maps used to communicate spatial results |
+| `tidyverse` | Import, clean, aggregate, join, reshape, and visualise tabular data |
+| `lubridate` | Parse event dates and create regular monthly time bins |
+| `Kendall` | Perform the Mann-Kendall trend test on township Gi\* sequences |
+| `scales` | Format axes and numerical labels |
+| `knitr` | Present compact analytical tables in the Quarto report |
+
+`set.seed(626)` is used before permutation-based procedures so that simulated results can be reproduced.
 
 ```{r}
 #| label: setup
@@ -98,8 +162,28 @@ The ACLED export contains the event identifier, event date, event type, administ
 
 ```{r}
 #| label: import-townships
-townships_wgs84 <- st_read(township_path, quiet = TRUE) %>%
-  st_make_valid()
+townships_raw <- st_read(township_path, quiet = TRUE)
+
+township_geometry_audit <- tibble(
+  check = c(
+    "Township features",
+    "Duplicate township P-codes",
+    "Missing township P-codes",
+    "Invalid geometries before repair",
+    "Empty geometries"
+  ),
+  value = c(
+    nrow(townships_raw),
+    sum(duplicated(townships_raw$TS_PCODE)),
+    sum(is.na(townships_raw$TS_PCODE)),
+    sum(!st_is_valid(townships_raw), na.rm = TRUE),
+    sum(st_is_empty(townships_raw))
+  )
+)
+
+kable(township_geometry_audit)
+
+townships_wgs84 <- st_make_valid(townships_raw)
 
 townships_wgs84
 ```
@@ -111,6 +195,10 @@ townships <- townships_wgs84 %>%
 
 townships_proj <- townships %>%
   st_transform(6933)
+
+states_proj <- townships_proj %>%
+  group_by(ST) %>%
+  summarise(.groups = "drop")
 
 st_crs(townships)
 st_crs(townships_proj)
@@ -190,9 +278,21 @@ data_quality <- tibble(
 )
 
 kable(data_quality)
+
+precision_audit <- bind_rows(
+  acled %>%
+    count(precision_field = "Time precision", value = time_precision),
+  acled %>%
+    count(precision_field = "Geographic precision", value = geo_precision)
+) %>%
+  group_by(precision_field) %>%
+  mutate(share_percent = n / sum(n) * 100) %>%
+  ungroup()
+
+kable(precision_audit, digits = 2)
 ```
 
-The event count is the main measure because it is available for every event. Fatalities are retained as a secondary measure, but missing fatality values are not silently changed into a claim of zero deaths.
+The event count is the main measure because it is available for every event. Fatalities are retained as a secondary measure, but missing fatality values are not silently changed into a claim of zero deaths. The precision table makes ACLED's temporal and geographic coding uncertainty visible before aggregation.
 
 ::: callout-tip
 ## My observation
@@ -387,10 +487,14 @@ The cube has one regular monthly series for every township. This structure is re
 
 # Descriptive distribution
 
-## Total recorded events by township
+## Conflict dimensions by township
 
 ```{r}
 #| label: township-total-map
+#| fig-width: 16
+#| fig-height: 8
+#| out-width: "100%"
+#| column: screen-inset
 township_totals <- townships_proj %>%
   left_join(
     township_month %>%
@@ -398,37 +502,79 @@ township_totals <- townships_proj %>%
       summarise(
         event_count = sum(event_count),
         fatality_count = sum(fatality_count),
+        battle_count = sum(battle_count),
+        civilian_count = sum(civilian_count),
         .groups = "drop"
       ),
     by = "TS_PCODE"
   )
 
-tm_shape(township_totals) +
-  tm_polygons(
-    "event_count",
-    fill.scale = tm_scale_intervals(
-      style = "quantile",
-      n = 6,
-      values = "brewer.yl_or_rd"
-    ),
-    fill.legend = tm_legend(title = "Recorded events")
-  ) +
-  tm_borders(col = "grey60", lwd = 0.4) +
-  tm_title("Recorded conflict events by township")
+conflict_dimensions <- c(
+  "All recorded events" = "event_count",
+  "Battles" = "battle_count",
+  "Violence against civilians" = "civilian_count"
+)
+
+conflict_dimension_maps <- map2(
+  conflict_dimensions,
+  names(conflict_dimensions),
+  function(variable, title) {
+    tm_shape(township_totals) +
+      tm_polygons(
+        variable,
+        fill.scale = tm_scale_intervals(
+          style = "quantile",
+          n = 6,
+          values = "brewer.yl_or_rd"
+        ),
+        fill.legend = tm_legend(title = title)
+      ) +
+      tm_borders(col = "grey65", lwd = 0.25) +
+      tm_shape(states_proj) +
+      tm_borders(col = "grey25", lwd = 0.8) +
+      tm_title(title)
+  }
+)
+
+do.call(tmap_arrange, c(conflict_dimension_maps, list(ncol = 3)))
 ```
 
-This map shows recorded event burden over the whole study period. It is a descriptive baseline for the local and emerging hotspot analyses.
+```{r}
+#| label: conflict-dimension-leaders
+conflict_dimension_leaders <- imap_dfr(
+  conflict_dimensions,
+  function(variable, dimension) {
+    township_totals %>%
+      st_drop_geometry() %>%
+      slice_max(.data[[variable]], n = 5, with_ties = FALSE) %>%
+      transmute(
+        Dimension = dimension,
+        Township = TS,
+        State = ST,
+        Count = .data[[variable]]
+      )
+  }
+)
+
+kable(conflict_dimension_leaders)
+```
+
+The three maps separate overall recorded activity from armed confrontations and direct violence against civilians. Quantile classes are calculated within each map, so colour rank supports spatial comparison inside a conflict dimension rather than numerical comparison between dimensions.
 
 ::: callout-tip
 ## My observation
 
-The total-count map is a burden map, not a significance map. It helps locate where recorded events accumulate over the whole period, but it cannot separate a persistent hotspot from a short intense episode. That is why the next steps use local statistics and monthly cube values.
+The leading townships differ across the three dimensions, showing that one aggregate count cannot represent every conflict process. The all-event map establishes the common baseline for LMSA and EHSA, while the battles and violence-against-civilians maps retain substantive context for interpreting that aggregate. These are burden maps rather than significance maps, so the next step asks whether high values are surrounded by other high values.
 :::
 
 ## Monthly pattern
 
 ```{r}
 #| label: monthly-event-trend
+#| fig-width: 12
+#| fig-height: 6
+#| out-width: "100%"
+#| column: screen-inset
 monthly_totals <- township_month %>%
   group_by(month) %>%
   summarise(
@@ -480,7 +626,8 @@ neighbour_summary <- tibble(
     minimum_neighbours = min(neighbours),
     median_neighbours = median(neighbours),
     maximum_neighbours = max(neighbours),
-    zero_neighbour_units = sum(neighbours == 0)
+    zero_neighbour_units = sum(neighbours == 0),
+    connected_components = spdep::n.comp.nb(township_weights$nb)$nc
   )
 
 kable(neighbour_summary)
@@ -489,7 +636,7 @@ kable(neighbour_summary)
 ::: callout-note
 ## Method note
 
-Queen contiguity is the same neighbour idea used in the course local-measures workflow: shared edges or vertices. The median of 5 neighbours and no zero-neighbour townships mean that the local statistics are defined across the full township layer, although the result is still sensitive to the township boundary model.
+Queen contiguity is the same neighbour idea used in the course local-measures workflow: shared edges or vertices. The network has `r neighbour_summary$connected_components` connected components and `r neighbour_summary$zero_neighbour_units` zero-neighbour township(s). The disconnected components arise from Myanmar's separated coastal and island geometries. Local statistics operate within these components, so no neighbourhood influence is assumed across the gaps.
 :::
 
 ## Local Moran's I
@@ -512,6 +659,7 @@ lisa <- township_weights %>%
   ) %>%
   tidyr::unnest(local_moran) %>%
   mutate(
+    p_ii_sim_fdr = p.adjust(p_ii_sim, method = "BH"),
     LISA_cluster = case_when(
       is.na(p_ii) ~ "Insignificant",
       p_ii < 0.05 ~ as.character(mean),
@@ -532,10 +680,35 @@ lisa <- township_weights %>%
 lisa %>%
   count(LISA_cluster, sort = TRUE) %>%
   kable()
+
+lisa_significance <- tibble(
+  significance_rule = c(
+    "Analytical p-value (course baseline)",
+    "Permutation p-value",
+    "BH-adjusted permutation p-value"
+  ),
+  significant_townships = c(
+    sum(lisa$p_ii < 0.05, na.rm = TRUE),
+    sum(lisa$p_ii_sim < 0.05, na.rm = TRUE),
+    sum(lisa$p_ii_sim_fdr < 0.05, na.rm = TRUE)
+  )
+)
+
+kable(lisa_significance)
 ```
+
+::: callout-warning
+## Multiple-testing resolution
+
+With 99 permutations, the smallest attainable simulated p-value is approximately `1 / (99 + 1) = 0.01`. A Benjamini-Hochberg adjustment across 330 townships starts from a threshold of `0.05 / 330`, which is smaller than the permutation resolution. The zero BH-adjusted count therefore reflects both multiple-testing control and limited simulation resolution. The course-required nominal `p < 0.05` map is retained, and its clusters are treated as screening evidence rather than definitive discoveries.
+:::
 
 ```{r}
 #| label: lisa-map
+#| fig-width: 11
+#| fig-height: 10
+#| out-width: "100%"
+#| column: screen-inset
 tm_shape(lisa) +
   tm_polygons(
     "LISA_cluster",
@@ -551,6 +724,8 @@ tm_shape(lisa) +
     fill.legend = tm_legend(title = "LISA cluster")
   ) +
   tm_borders(col = "grey60", lwd = 0.4) +
+  tm_shape(states_proj) +
+  tm_borders(col = "grey25", lwd = 0.9) +
   tm_title("Local Moran's I clusters (p < 0.05)")
 ```
 
@@ -559,16 +734,29 @@ High-High and Low-Low are local clusters. High-Low and Low-High are spatial outl
 ::: callout-tip
 ## My observation
 
-The LISA result is concentrated: 34 High-High townships and 4 Low-High outliers are significant under the permutation reference, while most units are insignificant. I read High-High as neighbouring high recorded counts, not as proof of one continuous conflict zone. The small Low-High group is useful because it flags a locally unusual township that a total-count map could hide.
+The course-baseline LISA result contains `r sum(lisa$LISA_cluster == "High-High", na.rm = TRUE)` High-High townships and `r sum(lisa$LISA_cluster == "Low-High", na.rm = TRUE)` Low-High outliers under the analytical p-value. The permutation and BH-adjusted counts are reported separately because they answer the same question under stricter reference distributions. High-High indicates neighbouring high recorded counts; it does not establish one continuous conflict process.
 :::
 
 ## Local Gi\*
+
+Chapter 10 defines Gi\* neighbours with a critical fixed-distance band and explicitly includes each township itself. The critical threshold is the largest first-nearest-neighbour distance, ensuring that every township has at least one neighbour. This construction differs from the Queen weights retained for Local Moran's I.
 
 ```{r}
 #| label: local-gistar
 set.seed(626)
 
-gistar <- township_weights %>%
+critical_distance <- critical_threshold(st_geometry(township_totals))
+
+gistar_weights <- township_totals %>%
+  mutate(
+    nb = include_self(
+      st_dist_band(geometry, upper = critical_distance)
+    ),
+    wt = st_weights(nb, style = "W", allow_zero = TRUE),
+    .before = 1
+  )
+
+gistar <- gistar_weights %>%
   mutate(
     gistar = local_gstar_perm(
       event_count,
@@ -581,55 +769,274 @@ gistar <- township_weights %>%
   ) %>%
   tidyr::unnest(gistar) %>%
   mutate(
+    p_sim_fdr = p.adjust(p_sim, method = "BH"),
     hotspot_class = case_when(
       p_sim < 0.05 & gi_star > 0 ~ "Hot spot",
       p_sim < 0.05 & gi_star < 0 ~ "Cold spot",
-      TRUE ~ "Insignificant"
+      TRUE ~ "Not significant"
     ),
     hotspot_class = factor(
       hotspot_class,
-      levels = c("Insignificant", "Cold spot", "Hot spot")
+      levels = c("Not significant", "Cold spot", "Hot spot")
     )
   )
 
 gistar %>%
+  st_drop_geometry() %>%
   count(hotspot_class, sort = TRUE) %>%
+  kable()
+
+gistar_diagnostics <- tibble(
+  critical_distance_km = critical_distance / 1000,
+  minimum_neighbours = min(lengths(gistar_weights$nb)),
+  median_neighbours = median(lengths(gistar_weights$nb)),
+  maximum_neighbours = max(lengths(gistar_weights$nb))
+)
+
+kable(gistar_diagnostics, digits = 1)
+
+tibble(
+  significance_rule = c("Nominal permutation p < 0.05", "BH-adjusted permutation p < 0.05"),
+  hot_spots = c(
+    sum(gistar$p_sim < 0.05 & gistar$gi_star > 0, na.rm = TRUE),
+    sum(gistar$p_sim_fdr < 0.05 & gistar$gi_star > 0, na.rm = TRUE)
+  ),
+  cold_spots = c(
+    sum(gistar$p_sim < 0.05 & gistar$gi_star < 0, na.rm = TRUE),
+    sum(gistar$p_sim_fdr < 0.05 & gistar$gi_star < 0, na.rm = TRUE)
+  )
+) %>%
   kable()
 ```
 
 ```{r}
 #| label: local-gistar-map
+#| fig-width: 11
+#| fig-height: 10
+#| out-width: "100%"
+#| column: screen-inset
 tm_shape(gistar) +
   tm_polygons(
     "hotspot_class",
     fill.scale = tm_scale_categorical(
-      values = c("grey85", "#2166AC", "#B2182B")
+      values = c("grey88", "#2166AC", "#B2182B")
     ),
     fill.legend = tm_legend(title = "Gi* class")
   ) +
   tm_borders(col = "grey60", lwd = 0.4) +
-  tm_title("Local Gi* hot and cold spots (p < 0.05)")
+  tm_shape(states_proj) +
+  tm_borders(col = "grey25", lwd = 0.9) +
+  tm_title(
+    paste0(
+      "Local Gi* hot and cold spots (fixed distance = ",
+      round(critical_distance / 1000, 1),
+      " km; p < 0.05)"
+    )
+  )
 ```
 
-Local Moran's I identifies similarity or contrast between a township and its neighbours. Gi\* focuses on concentrations of high or low values. The two maps answer related but different questions and should not be treated as interchangeable.
+Local Moran's I identifies similarity or contrast between a township and its neighbours. Gi\* focuses here on statistically significant concentrations of high values. The two maps answer related but different questions and should not be treated as interchangeable.
 
 ::: callout-tip
 ## My observation
 
-Gi\* produces 24 significant hot spots and 44 significant cold spots. This differs from LISA because Gi\* asks whether a local group of high or low values is unusually concentrated, while LISA also identifies a township-neighbour contrast. The difference is a substantive result, not a contradiction: the two maps answer different local questions.
+The fixed-distance Gi\* result contains `r sum(gistar$hotspot_class == "Hot spot", na.rm = TRUE)` hot spots and `r sum(gistar$hotspot_class == "Cold spot", na.rm = TRUE)` cold spots at nominal `p < 0.05`. The critical distance is `r round(critical_distance / 1000, 1)` km and the median township has `r median(lengths(gistar_weights$nb))` neighbours including itself. Cold spots satisfy the assignment's overall spatial screening objective. The remaining analysis concentrates on high-value clusters because they are the direct conflict-priority question. The broad fixed-distance support can smooth local differences, while the monthly Queen model reveals change among immediately adjacent townships.
 :::
 
-# Emerging Hot Spot Analysis
+## Do conflict dimensions point to the same places?
 
-## Monthly Gi\* values
+The aggregate count can hide whether a hotspot reflects armed confrontation, direct violence against civilians, or both. The next comparison holds the Queen neighbourhood, permutation count, and significance threshold constant, changing only the conflict variable. This makes differences across the three maps substantively interpretable.
 
-The next step follows Chapter 11 and In-class Exercise 6. Gi\* is calculated separately for each month, so the value for a township is comparable with other townships in the same time slice.
+```{r}
+#| label: conflict-dimension-gistar
+#| cache: true
+set.seed(626)
 
-::: callout-note
-## Research link
+dimension_variables <- tibble(
+  dimension = c("All events", "Battles", "Violence against civilians"),
+  variable = c("event_count", "battle_count", "civilian_count"),
+  key = c("all_events", "battles", "civilian_violence")
+)
 
-The monthly Gi\* table is the bridge between Chapter 10 and Chapter 11. The spatial weights stay tied to the township layer, while the event count changes by month. This keeps the spatial and temporal dimensions explicit, consistent with the space-time cube approach described by Kim and Lee (2023).
+dimension_nb <- include_self(
+  st_contiguity(st_geometry(township_totals))
+)
+dimension_wt <- st_weights(
+  dimension_nb,
+  style = "W",
+  allow_zero = TRUE
+)
+
+dimension_gistar <- pmap_dfr(
+  dimension_variables,
+  function(dimension, variable, key) {
+    local_gstar_perm(
+      township_totals[[variable]],
+      dimension_nb,
+      dimension_wt,
+      nsim = 99,
+      zero.policy = TRUE
+    ) %>%
+      transmute(
+        TS_PCODE = township_totals$TS_PCODE,
+        dimension,
+        key,
+        gi_star,
+        p_sim,
+        is_hotspot = p_sim < 0.05 & gi_star > 0,
+        hotspot_status = factor(
+          if_else(is_hotspot, "Hot spot", "Not a hot spot"),
+          levels = c("Not a hot spot", "Hot spot")
+        )
+      )
+  }
+)
+
+dimension_gistar %>%
+  count(dimension, hotspot_status) %>%
+  pivot_wider(
+    names_from = hotspot_status,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  kable()
+```
+
+```{r}
+#| label: conflict-gistar-small-multiples
+#| fig-width: 16
+#| fig-height: 7
+#| out-width: "100%"
+#| column: screen-inset
+dimension_hotspot_maps <- map2(
+  dimension_variables$dimension,
+  seq_len(nrow(dimension_variables)),
+  function(current_dimension, map_index) {
+    dimension_map <- townships_proj %>%
+      left_join(
+        dimension_gistar %>%
+          filter(dimension == current_dimension) %>%
+          select(TS_PCODE, hotspot_status),
+        by = "TS_PCODE"
+      )
+
+    tm_shape(dimension_map) +
+      tm_polygons(
+        "hotspot_status",
+        fill.scale = tm_scale_categorical(
+          values = c("grey90", "#B2182B")
+        ),
+        fill.legend = tm_legend(
+          title = "Gi* status",
+          show = map_index == 1,
+          position = tm_pos_in("left", "bottom")
+        )
+      ) +
+      tm_borders(col = "grey65", lwd = 0.25) +
+      tm_shape(states_proj) +
+      tm_borders(col = "grey25", lwd = 0.65) +
+      tm_title(current_dimension)
+  }
+)
+
+do.call(
+  tmap_arrange,
+  c(dimension_hotspot_maps, list(ncol = 3, nrow = 1))
+)
+```
+
+The same red symbol now has one meaning in every panel: a significant positive local Gi\* under Queen contiguity. The comparison therefore reveals conflict composition rather than a change in mapping rules.
+
+```{r}
+#| label: conflict-hotspot-agreement
+conflict_hotspot_agreement <- dimension_gistar %>%
+  select(TS_PCODE, key, is_hotspot) %>%
+  pivot_wider(
+    names_from = key,
+    values_from = is_hotspot
+  ) %>%
+  mutate(
+    agreement_class = case_when(
+      all_events & battles & civilian_violence ~ "Shared hotspot",
+      battles & civilian_violence ~ "Battle-civilian overlap",
+      battles & !civilian_violence ~ "Battle-led hotspot",
+      civilian_violence & !battles ~ "Civilian-harm hotspot",
+      all_events ~ "Aggregate-only hotspot",
+      TRUE ~ "No significant hotspot"
+    ),
+    agreement_class = factor(
+      agreement_class,
+      levels = c(
+        "No significant hotspot",
+        "Aggregate-only hotspot",
+        "Battle-led hotspot",
+        "Civilian-harm hotspot",
+        "Battle-civilian overlap",
+        "Shared hotspot"
+      )
+    )
+  )
+
+conflict_hotspot_map <- township_totals %>%
+  left_join(conflict_hotspot_agreement, by = "TS_PCODE")
+
+conflict_hotspot_summary <- conflict_hotspot_map %>%
+  st_drop_geometry() %>%
+  filter(agreement_class != "No significant hotspot") %>%
+  group_by(agreement_class) %>%
+  summarise(
+    townships = n(),
+    leading_states = paste(
+      names(head(sort(table(ST), decreasing = TRUE), 3)),
+      collapse = ", "
+    ),
+    .groups = "drop"
+  )
+
+shared_hotspot_names <- conflict_hotspot_map %>%
+  filter(agreement_class == "Shared hotspot") %>%
+  slice_max(event_count, n = 6, with_ties = FALSE) %>%
+  pull(TS)
+
+kable(conflict_hotspot_summary)
+```
+
+```{r}
+#| label: conflict-hotspot-agreement-map
+#| fig-width: 11
+#| fig-height: 10
+#| out-width: "100%"
+#| column: screen-inset
+tm_shape(conflict_hotspot_map) +
+  tm_polygons(
+    "agreement_class",
+    fill.scale = tm_scale_categorical(
+      values = c(
+        "grey90",
+        "#FDD49E",
+        "#D7301F",
+        "#8073AC",
+        "#E08214",
+        "#7F0000"
+      )
+    ),
+    fill.legend = tm_legend(title = "Hotspot composition")
+  ) +
+  tm_borders(col = "grey65", lwd = 0.3) +
+  tm_shape(states_proj) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_title("Agreement across conflict dimensions")
+```
+
+::: callout-tip
+## My observation
+
+`r sum(conflict_hotspot_agreement$agreement_class == "Shared hotspot")` townships are hotspots for all events, battles, and violence against civilians. The highest-burden shared locations include `r paste(shared_hotspot_names, collapse = ", ")`. Battle-led and civilian-harm hotspots separate places that would look similar on the aggregate map but imply different forms of recorded violence. The agreement map therefore sharpens the next question: whether these local concentrations remain in place or move through time.
 :::
+
+## Monthly hot spot progression
+
+The overall map compresses 57 months into one total. To reveal movement hidden by that aggregation, the next analysis computes Local Gi\* separately for every month. It combines the [Chapter 10 HCSA map workflow](https://r4gdsa.netlify.app/chap10#plotting-and-visualising-hcsa-map) with the [Chapter 6 monthly small-multiple layout](https://r4gdsa.netlify.app/chap06#plotting-the-spatio-temporal-kde-object). Queen contiguity preserves immediate township adjacency and avoids the broad smoothing created by Myanmar's large critical distance.
 
 ```{r}
 #| label: monthly-gistar
@@ -657,37 +1064,156 @@ gi_stars <- conflict_nb %>%
       zero.policy = TRUE
     )
   ) %>%
-  tidyr::unnest(gi_star)
+  tidyr::unnest(gi_star) %>%
+  mutate(
+    p_sim_fdr = p.adjust(p_sim, method = "BH"),
+    monthly_hotspot = factor(
+      if_else(p_sim < 0.05 & gi_star > 0, "Hot spot", "Not a hot spot"),
+      levels = c("Not a hot spot", "Hot spot")
+    )
+  ) %>%
+  ungroup()
 
-glimpse(gi_stars)
+gi_stars %>%
+  st_drop_geometry() %>%
+  summarise(
+    township_months = n(),
+    nominal_hotspot_months = sum(monthly_hotspot == "Hot spot"),
+    fdr_significant_months = sum(p_sim_fdr < 0.05 & gi_star > 0, na.rm = TRUE)
+  ) %>%
+  kable()
 ```
 
-## A township Gi\* trend
+The same permutation-resolution constraint applies within each monthly slice. The nominal monthly classes support the course EHSA workflow; the zero monthly BH count is not interpreted as proof that spatial concentration is absent.
+
+### Latest 12-month HCSA comparison (value-added analysis)
+
+The panels cover the final complete 12-month window, October 2024 to September 2025. Every panel uses the same decision rule and colour scale, so changes in red areas represent changes in significant high-value clustering rather than changes in classification or legend.
 
 ```{r}
-#| label: gistar-trend-example
-trend_example <- gi_stars %>%
-  ungroup() %>%
-  filter(TS == first(TS[!is.na(TS)])) %>%
-  select(TS, month, gi_star)
+#| label: monthly-hotspot-small-multiples
+#| fig-width: 16
+#| fig-height: 20
+#| out-width: "100%"
+#| column: screen-inset
+latest_12_months <- gi_stars %>%
+  st_drop_geometry() %>%
+  filter(month >= as.Date("2024-10-01")) %>%
+  mutate(
+    month_label = factor(
+      format(month, "%b %Y"),
+      levels = format(sort(unique(month)), "%b %Y")
+    )
+  )
 
-ggplot(trend_example, aes(month, gi_star)) +
-  geom_line(colour = "#1B5E5A", linewidth = 0.7) +
-  geom_hline(yintercept = 0, linetype = 2, colour = "grey50") +
-  labs(
-    title = paste("Monthly Gi* trend:", first(trend_example$TS)),
-    x = NULL,
-    y = "Gi* score"
-  ) +
-  theme_minimal(base_size = 12)
+latest_hotspot_persistence <- latest_12_months %>%
+  group_by(TS_PCODE, TS, ST) %>%
+  summarise(
+    hotspot_months = sum(monthly_hotspot == "Hot spot"),
+    events = sum(event_count),
+    .groups = "drop"
+  ) %>%
+  filter(hotspot_months > 0) %>%
+  arrange(desc(hotspot_months), desc(events))
+
+latest_months <- sort(unique(latest_12_months$month))
+
+monthly_hotspot_maps <- map2(
+  latest_months,
+  seq_along(latest_months),
+  function(current_month, map_index) {
+    month_map <- townships_proj %>%
+      left_join(
+        latest_12_months %>%
+          filter(month == current_month) %>%
+          select(TS_PCODE, monthly_hotspot),
+        by = "TS_PCODE"
+      )
+
+    tm_shape(month_map) +
+      tm_polygons(
+        "monthly_hotspot",
+        fill.scale = tm_scale_categorical(
+          values = c("grey90", "#D7301F")
+        ),
+        fill.legend = tm_legend(
+          title = "Hot spot status",
+          show = map_index == 1,
+          position = tm_pos_in("left", "bottom")
+        )
+      ) +
+      tm_borders(col = "grey65", lwd = 0.25) +
+      tm_shape(states_proj) +
+      tm_borders(col = "grey35", lwd = 0.55) +
+      tm_title(format(current_month, "%b %Y"))
+  }
+)
+
+do.call(
+  tmap_arrange,
+  c(monthly_hotspot_maps, list(ncol = 3, nrow = 4))
+)
 ```
 
-This trend plot is a diagnostic view. EHSA uses the full sequence for every township, rather than relying on one selected example.
+```{r}
+#| label: latest-hotspot-persistence
+latest_hotspot_persistence %>%
+  slice_head(n = 10) %>%
+  transmute(
+    Township = TS,
+    State = ST,
+    `Hot-spot months` = hotspot_months,
+    `Recorded events` = events
+  ) %>%
+  kable()
+```
+
+### Hot spot frequency through time
+
+```{r}
+#| label: monthly-hotspot-count-trend
+#| fig-width: 12
+#| fig-height: 6
+#| out-width: "100%"
+#| column: screen-inset
+monthly_hotspot_counts <- gi_stars %>%
+  st_drop_geometry() %>%
+  group_by(month) %>%
+  summarise(
+    hotspot_townships = sum(monthly_hotspot == "Hot spot"),
+    .groups = "drop"
+  )
+
+ggplot(monthly_hotspot_counts, aes(month, hotspot_townships)) +
+  geom_area(fill = "#FCAE91", alpha = 0.65) +
+  geom_line(colour = "#B2182B", linewidth = 0.8) +
+  geom_point(colour = "#B2182B", size = 1.2) +
+  scale_x_date(date_breaks = "6 months", date_labels = "%b\n%Y") +
+  scale_y_continuous(breaks = pretty_breaks()) +
+  labs(
+    title = "Number of significant conflict hot-spot townships by month",
+    x = NULL,
+    y = "Hot-spot townships"
+  ) +
+  theme_minimal(base_size = 13)
+```
+
+::: callout-tip
+## My observation
+
+Across the latest 12 months, `r nrow(latest_hotspot_persistence)` townships appear as a significant hot spot at least once and `r sum(latest_hotspot_persistence$hotspot_months >= 6)` appear in at least half of the panels. The most frequently repeated locations are `r paste(head(latest_hotspot_persistence$TS, 5), collapse = ", ")`. From October 2024 to March 2025, the main concentration stays in the Sagaing-Magway dry-zone corridor: Sagaing leads in October-November and February-March, while Magway is strongest in December-January. The focus shifts southeast to Kayin in April-May, moves toward Mandalay in June-July, and partly returns to Sagaing-Magway in August. September ends with a smaller, fragmented pattern across Kayin, Mandalay, and Magway. Across the full study period, the widest spread occurs in `r format(monthly_hotspot_counts$month[which.max(monthly_hotspot_counts$hotspot_townships)], "%B %Y")`, with `r max(monthly_hotspot_counts$hotspot_townships)` significant hot-spot townships. This sequence provides the transition from overall Local Gi\* to the formal EHSA classification.
+:::
+
+# Emerging Hot Spot Analysis
+
+## Monthly Gi\* values
+
+The next step follows Chapter 11 and In-class Exercise 6. EHSA evaluates the monthly Gi\* sequence already visualised above and classifies how each township's hot-spot behaviour changes through time. The same Queen neighbours and row-standardised weights are passed explicitly into EHSA, keeping the visual diagnosis and formal classification within one spatial model.
 
 ::: callout-note
-## Reading this plot
+## Research link
 
-The example trend is useful for showing how a local score changes, but it is not the final hotspot decision. A township can move above and below zero without forming a persistent pattern. The EHSA classification therefore uses all township-month sequences together.
+The monthly Gi\* table is the bridge between Chapter 10 and Chapter 11. The spatial weights stay tied to the township layer, while the event count changes by month. This keeps the spatial and temporal dimensions explicit, consistent with the space-time cube approach described by Kim and Lee (2023).
 :::
 
 ## Mann-Kendall trend check
@@ -725,24 +1251,94 @@ The Mann-Kendall table is a trend check, not a replacement for EHSA. A positive 
 set.seed(626)
 
 ehsa <- emerging_hotspot_analysis(
-  x = conflict_st,
+  x = conflict_nb,
   .var = "event_count",
   k = 1,
-  nsim = 99
-)
+  nb_col = "nb",
+  wt_col = "wt",
+  nsim = 99,
+  threshold = 0.05
+) %>%
+  mutate(
+    classification = str_replace(
+      classification,
+      "^oscilating",
+      "oscillating"
+    ),
+    p_value_fdr = p.adjust(p_value, method = "BH")
+  )
 
-ehsa %>%
+ehsa_hot <- ehsa %>%
+  filter(str_detect(classification, regex("hotspot", ignore_case = TRUE)))
+
+ehsa_hot_sig <- ehsa_hot %>%
+  filter(p_value < 0.05)
+
+ehsa_hot_summary <- ehsa_hot_sig %>%
   count(classification, sort = TRUE) %>%
+  mutate(share = n / sum(n))
+
+kable(ehsa_hot_summary, digits = 3)
+
+tibble(
+  significance_rule = c("Hot-spot classes with p < 0.05", "Hot-spot classes with BH-adjusted p < 0.05"),
+  townships = c(
+    nrow(ehsa_hot_sig),
+    sum(ehsa_hot$p_value_fdr < 0.05, na.rm = TRUE)
+  )
+) %>%
   kable()
 ```
 
 ```{r}
+#| label: ehsa-geographic-summary
+ehsa_hot_geography <- ehsa_hot_sig %>%
+  left_join(
+    townships_proj %>%
+      st_drop_geometry() %>%
+      select(TS_PCODE, TS, ST),
+    by = c("location" = "TS_PCODE")
+  ) %>%
+  group_by(classification) %>%
+  summarise(
+    townships = n(),
+    leading_states = paste(
+      names(head(sort(table(ST), decreasing = TRUE), 3)),
+      collapse = ", "
+    ),
+    examples = paste(head(TS[order(p_value)], 6), collapse = ", "),
+    .groups = "drop"
+  )
+
+kable(ehsa_hot_geography)
+```
+
+### How to read the hot-spot types
+
+| EHSA type | Temporal meaning |
+|----|----|
+| New hotspot | The final month is a significant hot spot and the earlier months do not establish a previous hot-spot pattern. |
+| Consecutive hotspot | The final months form an uninterrupted hot-spot run, while fewer than 90% of all months are hot spots. |
+| Intensifying hotspot | At least 90% of months are hot spots and the Gi\* scores show a significant upward trend. |
+| Persistent hotspot | At least 90% of months are hot spots without a significant upward or downward trend. |
+| Diminishing hotspot | At least 90% of months are hot spots and the Gi\* scores show a significant downward trend. |
+| Sporadic hotspot | Hot-spot months occur intermittently, covering fewer than 90% of the series, without an opposing significant pattern. |
+| Oscillating hotspot | The final month is a hot spot and earlier months contain an opposing significant pattern, indicating temporal reversal. |
+| Historical hotspot | Earlier months establish a sustained hot-spot pattern, while the recent period no longer does so. |
+
+These definitions turn the EHSA map into a temporal reading: location answers *where*, the class answers *how the pattern evolved*, and the monthly profile shows the evidence behind that summary.
+
+```{r}
 #| label: ehsa-map
+#| fig-width: 11
+#| fig-height: 10
+#| out-width: "100%"
+#| column: screen-inset
 ehsa_map <- townships_proj %>%
-  left_join(ehsa, by = c("TS_PCODE" = "location"))
+  left_join(ehsa_hot_sig, by = c("TS_PCODE" = "location"))
 
 ehsa_sig <- ehsa_map %>%
-  filter(p_value < 0.05)
+  filter(!is.na(classification))
 
 tm_shape(ehsa_map) +
   tm_polygons(
@@ -757,46 +1353,148 @@ tm_shape(ehsa_map) +
     fill.legend = tm_legend(title = "EHSA class")
   ) +
   tm_borders(col = "grey30", lwd = 0.5) +
-  tm_title("Significant emerging hot and cold spot classes (p < 0.05)")
+  tm_shape(states_proj) +
+  tm_borders(col = "grey20", lwd = 0.9) +
+  tm_title("Significant emerging hot spot classes (p < 0.05)")
 ```
 
-The EHSA map shows only significant classifications over a full township background. A persistent or intensifying hot spot means that the local Gi\* pattern is repeatedly or increasingly positive through time under the selected model. It does not by itself explain why violence occurred there.
+The EHSA map shows only significant hot-spot classifications over a full township background. The four observed significant classes have different spatial and temporal meanings.
+
+### Intensifying hotspots
+
+Seven intensifying hotspots form the clearest upward-priority group. Muse, Namhkan, and Namhsan place three of them in northern Shan, while Kyethi and Mongpan extend the pattern into southern Shan. Kawthoung represents a separate far-southern concentration and Dagon Myothit (North) an urban Yangon case. Their positive Mann-Kendall tau values indicate that local Gi\* scores have tended to rise through the 57-month sequence. The geographical separation shows that intensification is not one continuous national corridor; it appears in several conflict theatres.
+
+### Oscillating hotspots
+
+Thirteen oscillating hotspots are distributed across Kachin, Mandalay, Rakhine, Bago, Magway, Shan, Ayeyarwady, and Nay Pyi Taw. Kachin contributes Hpakant, Injangyang, and Shwegu; Mandalay contributes Sintgaing and Tada-U; Rakhine contributes Rathedaung and Mrauk-U. Their sequences alternate between hotspot and opposing or non-hotspot conditions. They indicate recurring spatial reversals rather than a stable escalation path, so current field verification matters more than a single long-run ranking.
+
+### Sporadic hotspots
+
+Eleven sporadic hotspots are geographically dispersed. Bago contributes Phyu, Taungoo, Padaung, and Minhla; Mandalay contributes Madaya and Amarapura; southern Shan contributes Laihka and Nansang. Khaunglanhpu, Mese, and Launglon form isolated cases in Kachin, Kayah, and Tanintharyi. Their separated significant months support flexible monitoring because the concentration reappears without forming one continuous temporal run.
+
+### Diminishing hotspots
+
+Chipwi and Myitkyina in Kachin and Pyay in Bago (West) are significant diminishing hotspots. Their negative Mann-Kendall tau values show a downward trend in local Gi\* intensity after substantial earlier hotspot presence. Diminishing describes the direction of the spatial statistic; it does not establish conflict resolution or the absence of present-day risk.
+
+## Representative temporal profiles
+
+The class map summarises 57 monthly values into one label per township. The following profiles restore that temporal detail. One high-event township is selected from each observed hot-spot class, allowing the class definitions to be compared with the underlying Gi\* paths.
+
+```{r}
+#| label: representative-hotspot-trends
+#| fig-width: 14
+#| fig-height: 10
+#| out-width: "100%"
+#| column: screen-inset
+representative_hotspots <- ehsa_hot_sig %>%
+  left_join(
+    township_totals %>%
+      st_drop_geometry() %>%
+      select(TS_PCODE, TS, event_count),
+    by = c("location" = "TS_PCODE")
+  ) %>%
+  group_by(classification) %>%
+  slice_max(event_count, n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+hotspot_profiles <- gi_stars %>%
+  st_drop_geometry() %>%
+  inner_join(
+    representative_hotspots %>%
+      select(location, classification),
+    by = c("TS_PCODE" = "location")
+  ) %>%
+  mutate(
+    profile = paste(TS, classification, sep = ": "),
+    significant_hotspot = p_sim < 0.05 & gi_star > 0
+  )
+
+ggplot(hotspot_profiles, aes(month, gi_star)) +
+  geom_hline(yintercept = 0, linetype = 2, colour = "grey55") +
+  geom_line(colour = "grey35", linewidth = 0.65) +
+  geom_point(
+    aes(colour = significant_hotspot),
+    size = 1.5
+  ) +
+  scale_colour_manual(
+    values = c(`FALSE` = "grey70", `TRUE` = "#B2182B"),
+    labels = c(`FALSE` = "Other month", `TRUE` = "Significant hot spot"),
+    name = NULL
+  ) +
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  facet_wrap(vars(profile), ncol = 2) +
+  labs(
+    title = "Monthly Gi* profiles for representative emerging hot spots",
+    x = NULL,
+    y = "Local Gi* score"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(legend.position = "bottom")
+```
+
+Red points identify months with statistically significant positive Gi\*. Consecutive red points indicate sustained episodes, separated red points indicate intermittent concentration, and a late run of red points provides the visual signature expected for a recent or intensifying pattern. The Mann-Kendall result adds the formal monotonic-trend evidence used by EHSA.
 
 ::: callout-tip
 ## My observation
 
-The current classification is dominated by sporadic rather than persistent patterns: 59 sporadic hotspots and 149 sporadic coldspots, while only 9 townships are persistent coldspots and none are persistent hotspots. This suggests that recorded conflict concentration changes across months rather than remaining fixed in one stable set of townships. It is more informative than simply saying that Myanmar is clustered.
+The class table establishes whether the significant result is dominated by repeated, intermittent, or changing high-value concentration. The 12-month maps show the latest geographical sequence, while the representative profiles expose the full monthly trajectories behind selected class labels. The BH-adjusted count is retained as a multiple-testing sensitivity check. The map follows the assignment's required nominal `p < 0.05` threshold, while the stricter count shows how much evidence remains after controlling the false discovery rate.
 :::
 
 # Integrated findings
 
-The results point to three linked findings:
+| Evidence layer | Core finding | What it adds |
+|----|----|----|
+| Conflict dimensions | `r sum(conflict_hotspot_agreement$agreement_class == "Shared hotspot")` townships are hotspots across all three variables; battle-led and civilian-harm hotspots reveal different conflict compositions. | The aggregate map is a shared baseline, not a substitute for conflict-specific inference. |
+| Local association | LISA identifies `r sum(lisa$LISA_cluster == "High-High", na.rm = TRUE)` High-High clusters and `r sum(lisa$LISA_cluster == "Low-High", na.rm = TRUE)` Low-High outliers; fixed-distance Gi\* identifies `r sum(gistar$hotspot_class == "Hot spot", na.rm = TRUE)` hotspots. | Clusters, outliers, and high-value concentrations answer distinct spatial questions. |
+| Monthly movement | The widest spread occurs in `r format(monthly_hotspot_counts$month[which.max(monthly_hotspot_counts$hotspot_townships)], "%B %Y")`, with `r max(monthly_hotspot_counts$hotspot_townships)` hotspot townships. | Concentration moves from the dry zone toward Kayin and Mandalay before partially returning. |
+| Emerging patterns | Significant EHSA results comprise `r paste(paste(ehsa_hot_summary$n, ehsa_hot_summary$classification), collapse = ", ")`. | The same red hotspot symbol can represent escalation, recurrence, intermittence, or decline. |
 
-1.  Spatial concentration is local rather than uniform: LISA identifies 34 High-High areas and Gi\* identifies 24 hot spots, with most townships not significant.
-2.  The local measures are not interchangeable: the 4 Low-High LISA outliers and the 44 Gi\* cold spots capture different spatial structures.
-3.  The temporal pattern is mostly sporadic: 59 sporadic hotspots, 149 sporadic coldspots, 9 oscillating hotspots, 9 oscillating coldspots, 9 persistent coldspots, and 97 with no pattern detected. No persistent hotspot appears in the current EHSA output.
-
-The report will use `recorded concentration` for descriptive patterns and `significant local association` for results supported by the selected permutation procedure. It will not use causal language without additional evidence.
+The evidence becomes more specific at each stage: burden, local association, monthly movement, then temporal trajectory. Every result describes recorded concentration rather than the cause of violence.
 
 ::: callout-note
 ## Research reading
 
-This pattern is consistent with the purpose of EHSA in Chapter 11: it separates repeated temporal behaviour from one-period spikes. It also matches the caution in conflict point-pattern research that observed event concentration should be read as a spatio-temporal pattern, not an automatic causal explanation (Kam and Zhi, 2018).
+This pattern is consistent with the purpose of EHSA in Chapter 11: it separates repeated temporal behaviour from one-period spikes. The monthly small multiples apply the comparative display logic in Chapter 6 to the HCSA classes derived in Chapter 10. It also matches the caution in conflict point-pattern research that observed event concentration should be read as a spatio-temporal pattern, not an automatic causal explanation (Mack and Kam, 2018).
 :::
+
+# Peace-building implications
+
+| Hotspot signal | Planning response | Reason |
+|----|----|----|
+| Repeated in recent monthly panels | Sustained township-level review | Concentration recurs rather than appearing in one isolated month. |
+| Intensifying | Current field verification and closer monitoring | Local Gi\* strength is rising through the study period. |
+| Sporadic or oscillating | Flexible, event-triggered monitoring | Significant concentration disappears and returns or reverses. |
+| Diminishing | Follow-up before de-prioritisation | Declining relative concentration does not demonstrate low present-day harm. |
+
+These maps are a prioritisation screen. Decisions still require current access conditions, displacement and population exposure, and consultation with affected communities.
 
 ## Limitations
 
-- ACLED records documented events and may be affected by reporting access, source coverage, and later coding updates.
-- Township boundaries are an analytical unit, so the pattern may change at another spatial scale.
-- Monthly aggregation removes within-month ordering.
-- Event counts measure recorded event burden rather than population risk.
-- P-values and EHSA classes depend on the selected neighbourhood rule, time bin, simulation count, and significance treatment.
+| Constraint | Consequence | Treatment in this report |
+|----|----|----|
+| ACLED reporting coverage | Recorded events may vary with access and source availability. | Results are described as recorded concentration. |
+| Township and monthly aggregation | Boundaries and time bins shape the clusters; within-month order disappears. | Claims stay at township-month scale. |
+| Event counts | High burden is not the same as high population risk. | Implications require exposure and displacement evidence. |
+| 99 permutations | Simulated p-values cannot fall below about 0.01, limiting BH resolution across 330 tests. | Nominal results follow the course workflow; BH counts are shown as a stricter check. |
+| Spatial support | The 185.8 km fixed band smooths broadly; Queen weights follow immediate adjacency and contain disconnected components. | Each weight is tied to its stated analytical question. |
+| Twelve-panel display | The visual window covers October 2024 to September 2025. | EHSA classification still uses the complete 57-month sequence. |
 
 # References
 
 - R4GDSA. [Chapter 10: Local Measures of Spatial Autocorrelation](https://r4gdsa.netlify.app/chap10).
 - R4GDSA. [Chapter 11: Emerging Hot Spot Analysis](https://r4gdsa.netlify.app/chap11).
-- Kim, M. and Lee, S.-D. (2023). [Identification of Emerging Roadkill Hotspots on Korean Expressways Using Space-Time Cubes](https://doi.org/10.3390/ijerph20064896).
-- Kam, T. S. and Zhi, V. (2018). [Is there space for violence? A data-driven approach to the exploration of spatial-temporal dimensions of conflict](https://doi.org/10.1145/3282933.3282935).
+- R4GDSA. [Chapter 6: Spatio-Temporal Point Patterns Analysis](https://r4gdsa.netlify.app/chap06).
+- Stankov, U. et al. (2017). Spatial autocorrelation analysis of tourist arrivals using municipal data: A Serbian example. *Geographica Pannonica*, 21(2), 106-114.
+- Khan, D. et al. (2017). [Hot spots, cluster detection and spatial outlier analysis of teen birth rates in the U.S., 2003-2012](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5618106/). *Spatial and Spatio-temporal Epidemiology*, 21, 67-75.
+- Arif, M. and Purnomo, D. (2017). [Measuring Spatial Cluster for Leading Industries in Surakarta with Exploratory Spatial Data Analysis](https://journals.ums.ac.id/index.php/JEP/article/view/4178/0). *Jurnal Ekonomi Pembangunan*, 18(1), 64-81.
+- Fergen, J. T. and Bergstrom, R. D. (2021). [Social Vulnerability across the Great Lakes Basin](https://www.mdpi.com/2071-1050/13/13/7274). *Sustainability*, 13(13), 7274.
+- Putrenko, V., Pashynska, N., and Nazarenko, S. (2018). Data Mining of Network Events with Space-Time Cube Application. *Proceedings of the 1st Workshop on Platial Analysis*, 75-82.
+- Boschan, J. A. and Roman, C. G. (2024). [Hot Spots of Gun Violence in the Era of Focused Deterrence](https://www.mdpi.com/2076-0760/13/2/119). *Social Sciences*, 13(2), 119.
+- Kim, M. and Lee, S.-D. (2023). [Identification of Emerging Roadkill Hotspots on Korean Expressways Using Space-Time Cubes](https://doi.org/10.3390/ijerph20064896). *International Journal of Environmental Research and Public Health*, 20(6), 4896.
+- Tan, Y. Y. and Kam, T. S. (2019). [Exploring and visualizing household electricity consumption patterns in Singapore](https://doi.org/10.1007/978-3-030-15742-5_74). *Information in Contemporary Society*, 785-796.
+- Mack, V. Z. W. and Kam, T. S. (2018). [Is there space for violence? A data-driven approach to the exploration of spatial-temporal dimensions of conflict](https://doi.org/10.1145/3282933.3282935). *Proceedings of the 2nd ACM SIGSPATIAL Workshop on Geospatial Humanities*, 1-10.
+- Wikipedia. [Myanmar conflict](https://en.wikipedia.org/wiki/Myanmar_conflict).
+- ACLED. [Between cooperation and competition: The struggle of resistance groups in Myanmar](https://acleddata.com/report/between-cooperation-and-competition-struggle-resistance-groups-myanmar).
+- Council on Foreign Relations. [Civil War in Myanmar](https://www.cfr.org/global-conflict-tracker/conflict/rohingya-crisis-myanmar).
 - ACLED. [Codebook](https://acleddata.com/methodology/acled-codebook) and [ACLED's methodology on Myanmar](https://acleddata.com/methodology/acleds-methodology-myanmar).
 - MIMU. [Myanmar GeoNode](https://geonode.themimu.info/), township boundaries Admin 3, P-code version 9.4.

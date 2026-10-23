@@ -1,6 +1,27 @@
 #quarto-document-content .cell-output-display img,
 #quarto-document-content figure img {
   width: 100%;
-  max-width: 1500px;
+  max-width: none;
   height: auto;
+}
+
+#quarto-document-content .column-screen-inset .cell-output-display,
+#quarto-document-content .column-screen-inset figure {
+  width: 100%;
+}
+
+#quarto-document-content .column-screen-inset {
+  margin-top: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+@media (min-width: 992px) {
+  #quarto-document-content img.column-screen-inset {
+    position: relative;
+    left: 50vw;
+    display: block;
+    width: min(86vw, 1700px) !important;
+    max-width: none !important;
+    transform: translateX(-50%);
+  }
 }
