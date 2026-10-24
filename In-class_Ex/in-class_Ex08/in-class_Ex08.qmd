@@ -27,21 +27,6 @@ Market area analysis (also known as Trade Area Analysis) is the process of defin
 
 The Huff model is a geospatial analysis method commonly used in market area analysis. It predicts the probability that a consumer from a specific area will patronise a particular store, based on the store's attractiveness and its distance relative to competitors. It calculates a store's market share from attractiveness (e.g. size or sales) and distance or travel time, and the probability decreases as distance or competition increases. This helps businesses assess potential revenue, define trade areas, and make informed decisions about site selection.
 
-::: callout-note
-## My understanding: where the Huff model sits (Lesson 8)
-
-Lesson 8 introduces the Huff model through a sequence of spatial-interaction ideas:
-
-- **Spatial interaction** needs *complementarity* (demand at the origin, supply at the destination), *transferability* (the trip must be affordable), and no *intervening opportunity* (a closer store offering the same thing would capture the customer first).
-- **Reilly's law (1931)** finds a single *breaking point* between two centres. Every customer is assigned to exactly one centre, so the trade-area boundaries are hard lines.
-- **Huff (1963)** turns this into a *probability*. A customer in village $i$ can go to any store $j$, with
-
-$$U_{ij} = A_j^{\alpha}\, d_{ij}^{-\lambda}, \qquad
-p_{ij} = \frac{U_{ij}}{\sum_{k} U_{ik}}$$
-
-so the trade area becomes a continuous probability surface, and the trade areas of neighbouring stores overlap. - **Expected customers** follow as $E_{ij} = p_{ij} \times C_i$ (where $C_i$ is the market potential, here population), store totals as $T_j = \sum_i E_{ij}$, and market share as $M_j = T_j / \sum T_j$. - **MCI** (Nakanishi and Cooper) generalises the attractiveness term to several weighted variables and *estimates* the weights from observed shares. Huff with assumed parameters is the simpler, uncalibrated version.
-:::
-
 ### Learning Outcome
 
 In this hands-on exercise, I gain hands-on experience in performing market area analysis using the Huff model of the **MCI** package. By the end of this exercise, I will be able:
