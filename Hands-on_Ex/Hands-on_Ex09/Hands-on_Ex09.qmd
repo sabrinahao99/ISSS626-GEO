@@ -215,7 +215,14 @@ tm_shape(zones_svy21) +
   tm_polygons() +
   tm_shape(transaction_map_data) +
   tm_dots(fill = "SELLING_PRICE", fill_alpha = 0.6, size = 0.5,
-          fill.scale = tm_scale_intervals(style = "quantile")) +
+          fill.scale = tm_scale_intervals(style = "quantile"),
+          fill.legend = tm_legend(
+            title = "Selling price",
+            title.size = 0.65,
+            text.size = 0.55,
+            item.height = 0.35,
+            item.width = 0.35,
+            item.space = 0.2)) +
   tm_view(set_zoom_limits = c(11, 14))
 
 tmap_mode("plot")
