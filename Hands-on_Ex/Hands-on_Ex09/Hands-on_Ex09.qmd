@@ -1,0 +1,523 @@
+---
+title: "Localising the Hedonic Price Model with GWR"
+subtitle: "Hands-on Exercise 9"
+author: "Zhiyi Hao"
+date: "2026-10-28"
+format:
+  html:
+    toc: true
+    toc-depth: 4
+    code-fold: false
+    number-offset: 18
+    fig-width: 10
+    fig-height: 6
+    fig-align: center
+execute:
+  echo: true
+  warning: false
+  message: false
+  freeze: false
+---
+
+# Geographically Weighted Regression for condominium prices {.course-chapter-title}
+
+## Overview
+
+This exercise studies whether the drivers of condominium resale prices are spatially stationary. A global hedonic model estimates one coefficient for the whole of Singapore. GWR keeps the same hedonic logic but estimates a local coefficient at each transaction, allowing the value of floor area, age and accessibility to vary across space.
+
+The storyline is deliberately progressive: I first understand the data, then fit a global benchmark, diagnose its weaknesses, test the spatial pattern in the residuals, and finally compare fixed and adaptive GWR. The local model is useful only when its spatial variation is interpreted alongside the global model and the bandwidth choice.
+
+::: callout-note
+## My analytical question
+
+Do condominium attributes have the same price effect everywhere in Singapore, or does the housing market operate through different local submarkets? The answer should be based on both model fit and the geography of the estimated coefficients.
+:::
+
+## Data and packages
+
+The exercise uses the 2014 Master Plan subzone boundary and the 2015 condominium resale data from the course example. The CSV should be placed at `data/aspatial/Condo_resale_2015.csv`; it contains 1,436 transactions and 23 fields, including price, floor area, building age, accessibility measures and tenure indicators.
+
+| Package                | Role in this exercise                       |
+|------------------------|---------------------------------------------|
+| `sf`                   | projected boundaries and transaction points |
+| `tidyverse`            | import, cleaning and plotting               |
+| `tmap`                 | spatial visualisation                       |
+| `GWmodel`              | bandwidth selection and GWR                 |
+| `corrplot`             | screening correlated predictors             |
+| `ggpubr`               | small-multiple exploratory graphics         |
+| `gtsummary`            | readable regression output                  |
+| `olsrr`, `performance` | model diagnostics                           |
+| `sfdep`                | residual spatial autocorrelation            |
+
+```{r}
+#| label: setup
+#| include: false
+knitr::opts_chunk$set(
+  fig.width = 10,
+  fig.height = 6,
+  fig.align = "center",
+  warning = FALSE,
+  message = FALSE
+)
+
+pacman::p_load(
+  sf, sp, tidyverse, tmap, GWmodel, corrplot, ggpubr,
+  gtsummary, broom.helpers, olsrr, performance, see, sfdep, RColorBrewer
+)
+
+tmap_mode("plot")
+```
+
+## Geospatial data preparation
+
+The subzone layer is already in SVY21, but I still check the CRS explicitly. Projected coordinates are essential because GWR kernels use distances; longitude and latitude would make the bandwidth scale difficult to interpret.
+
+```{r}
+#| label: import-boundary
+zones <- st_read(
+  dsn = "data/geospatial",
+  layer = "MP14_SUBZONE_WEB_PL",
+  quiet = TRUE
+)
+
+zones_svy21 <- st_transform(zones, 3414)
+st_crs(zones_svy21)
+st_bbox(zones_svy21)
+```
+
+::: callout-tip
+## My observation
+
+The boundary layer is a polygon reference layer rather than the observation layer for the regression. The transactions are points, so the later map joins attach local model outputs to points or to polygons only for communication. The regression itself is estimated at the transaction locations.
+:::
+
+## Aspatial data preparation
+
+```{r}
+#| label: import-sales
+sales_raw <- read_csv(
+  "data/aspatial/Condo_resale_2015.csv",
+  show_col_types = FALSE
+)
+
+glimpse(sales_raw)
+summary(sales_raw)
+```
+
+The coordinate columns are converted to a simple-feature point layer and reprojected to SVY21. I keep the original attributes so that the same table can support EDA, OLS and GWR.
+
+```{r}
+#| label: sales-to-points
+sales_sf <- sales_raw %>%
+  st_as_sf(
+    coords = c("LONGITUDE", "LATITUDE"),
+    crs = 4326,
+    remove = FALSE
+  ) %>%
+  st_transform(3414)
+
+head(sales_sf)
+```
+
+::: callout-note
+## Data-quality check
+
+The key checks are positive selling prices, valid coordinates, no missing model fields and a projected CRS in metres. These checks matter more than simply printing the first six rows: a single invalid coordinate can distort a local kernel, while a missing predictor silently changes the model sample.
+:::
+
+```{r}
+#| label: quality-check
+model_fields <- c(
+  "SELLING_PRICE", "AREA_SQM", "AGE", "PROX_CBD",
+  "PROX_CHILDCARE", "PROX_ELDERLYCARE", "PROX_URA_GROWTH_AREA",
+  "PROX_MRT", "PROX_PARK", "PROX_PRIMARY_SCH",
+  "PROX_SHOPPING_MALL", "PROX_BUS_STOP", "NO_Of_UNITS",
+  "FAMILY_FRIENDLY", "FREEHOLD"
+)
+
+quality_summary <- tibble(
+  rows = nrow(sales_sf),
+  missing_model_values = sum(!complete.cases(st_drop_geometry(sales_sf)[model_fields])),
+  non_positive_prices = sum(sales_sf$SELLING_PRICE <= 0, na.rm = TRUE),
+  invalid_geometry = sum(!st_is_valid(sales_sf)),
+  crs_epsg = st_crs(sales_sf)$epsg
+)
+
+quality_summary
+```
+
+## Exploratory data analysis
+
+### Price distribution and transformation
+
+```{r}
+#| label: price-distribution
+ggplot(sales_sf, aes(x = SELLING_PRICE)) +
+  geom_histogram(bins = 30, fill = "#2C7FB8", colour = "white") +
+  scale_x_continuous(labels = scales::label_dollar(scale = 1e-6, suffix = "M")) +
+  labs(title = "2015 condominium resale prices", x = "Selling price", y = "Transactions") +
+  theme_minimal()
+```
+
+```{r}
+#| label: log-price
+sales_sf <- sales_sf %>% mutate(LOG_PRICE = log(SELLING_PRICE))
+
+ggplot(sales_sf, aes(x = LOG_PRICE)) +
+  geom_histogram(bins = 30, fill = "#41AE76", colour = "white") +
+  labs(title = "Log-transformed resale prices", x = "log(Selling price)", y = "Transactions") +
+  theme_minimal()
+```
+
+::: callout-tip
+## My observation
+
+The raw price distribution is right-skewed because a small number of expensive units stretch the upper tail. The log transformation compresses those extreme values and is useful for visual diagnosis. I retain raw `SELLING_PRICE` for the teacher-aligned hedonic model so that coefficients remain interpretable in the original price scale.
+:::
+
+### Small multiples for structural and locational variables
+
+```{r}
+#| label: predictor-small-multiples
+#| fig-width: 12
+#| fig-height: 10
+eda_vars <- c(
+  "AREA_SQM", "AGE", "PROX_CBD", "PROX_CHILDCARE",
+  "PROX_ELDERLYCARE", "PROX_URA_GROWTH_AREA", "PROX_HAWKER_MARKET",
+  "PROX_KINDERGARTEN", "PROX_MRT", "PROX_PARK",
+  "PROX_PRIMARY_SCH", "PROX_TOP_PRIMARY_SCH"
+)
+
+eda_long <- sales_sf %>%
+  st_drop_geometry() %>%
+  select(all_of(eda_vars)) %>%
+  pivot_longer(everything(), names_to = "variable", values_to = "value")
+
+ggplot(eda_long, aes(x = value)) +
+  geom_histogram(bins = 20, fill = "lightblue", colour = "black") +
+  facet_wrap(~ variable, scales = "free", ncol = 3) +
+  labs(title = "Distributions of structural and locational predictors",
+       x = NULL, y = "Transactions") +
+  theme_minimal()
+```
+
+### Spatial distribution of transactions
+
+```{r}
+#| label: transaction-map
+#| fig-height: 7
+tmap_mode("view")
+
+transaction_map_data <- sales_sf %>%
+  select(SELLING_PRICE, geometry)
+
+tm_shape(zones_svy21) +
+  tm_polygons() +
+  tm_shape(transaction_map_data) +
+  tm_dots(fill = "SELLING_PRICE", fill_alpha = 0.6, size = 0.5,
+          fill.scale = tm_scale_intervals(style = "quantile")) +
+  tm_view(set_zoom_limits = c(11, 14))
+
+tmap_mode("plot")
+```
+
+::: callout-tip
+## My observation
+
+Transactions are not uniformly distributed across Singapore. Dense western, central and eastern clusters provide many local neighbours, while peripheral locations have fewer observations. This matters for GWR: an adaptive bandwidth can keep a similar number of transactions in each local fit, whereas a fixed bandwidth can become unstable in sparse areas.
+:::
+
+## Global hedonic benchmark
+
+### Simple linear regression
+
+```{r}
+#| label: simple-ols
+area_model <- lm(SELLING_PRICE ~ AREA_SQM, data = sales_sf)
+summary(area_model)
+```
+
+```{r}
+#| label: simple-ols-plot
+ggplot(sales_sf, aes(AREA_SQM, SELLING_PRICE)) +
+  geom_point(alpha = 0.35, colour = "#2C7FB8") +
+  geom_smooth(method = "lm", colour = "#D95F0E", se = TRUE) +
+  labs(title = "Bigger units command higher prices on average",
+       x = "Floor area (sqm)", y = "Selling price") +
+  theme_minimal()
+```
+
+### Predictor correlation
+
+```{r}
+#| label: predictor-correlation
+cor_fields <- sales_sf %>%
+  st_drop_geometry() %>%
+  select(where(is.numeric)) %>%
+  select(-POSTCODE, -SELLING_PRICE, -LOG_PRICE)
+
+corrplot(
+  cor(cor_fields, use = "pairwise.complete.obs"),
+  method = "number",
+  type = "upper",
+  order = "AOE",
+  tl.cex = 0.55,
+  number.cex = 0.45,
+  diag = FALSE
+)
+```
+
+::: callout-note
+## Model-design decision
+
+The correlation matrix is a screening device, not a replacement for theory. I remove `LEASEHOLD_99YR` when it duplicates `FREEHOLD`, and retain variables that represent distinct mechanisms such as size, age, CBD distance and public transport access. This keeps the model interpretable before local coefficients are estimated.
+:::
+
+### Multiple linear regression
+
+```{r}
+#| label: global-model
+global_model <- lm(
+  SELLING_PRICE ~ AREA_SQM + AGE + PROX_CBD + PROX_CHILDCARE +
+    PROX_ELDERLYCARE + PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+    PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP +
+    NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD,
+  data = sales_sf
+)
+
+summary(global_model)
+```
+
+```{r}
+#| label: global-regression-table
+tbl_regression(global_model, intercept = TRUE) %>%
+  add_glance_source_note(include = c(nobs, r.squared, adj.r.squared))
+```
+
+::: callout-tip
+## My observation
+
+The global model provides a useful benchmark for direction and average effect, but its single coefficient for every location is a strong assumption. A negative age coefficient is a global average; it does not prove that every neighbourhood penalises age equally. The GWR stage tests this stationarity assumption directly.
+:::
+
+## Diagnosing the global model
+
+```{r}
+#| label: vif-check
+vif_table <- check_collinearity(global_model)
+vif_table
+```
+
+```{r}
+#| label: ols-diagnostics
+ols_plot_resid_fit(global_model)
+ols_plot_resid_hist(global_model)
+check_normality(global_model)
+```
+
+```{r}
+#| label: model-check
+check_model(global_model)
+```
+
+::: callout-note
+## What the diagnostics change
+
+If the residuals remain skewed or spatially patterned, a high global $R^2$ is not enough. The diagnostic plots tell me whether the model is missing nonlinear structure, whether the variance changes with fitted price, and whether nearby transactions still share unexplained information. GWR is motivated by the last problem: local relationships can remain after the global average is fitted.
+:::
+
+## Residual spatial autocorrelation
+
+```{r}
+#| label: residual-map
+sales_sf <- sales_sf %>% mutate(global_residual = residuals(global_model))
+
+tm_shape(zones_svy21) +
+  tm_polygons(fill = "grey96", col = "grey60") +
+  tm_shape(sales_sf) +
+  tm_dots(fill = "global_residual", col = "white", size = 0.05,
+          fill.scale = tm_scale_continuous(values = "-RdBu")) +
+  tm_title("Residuals from the global hedonic model")
+```
+
+```{r}
+#| label: residual-moran
+residual_nb <- st_dist_band(
+  st_geometry(sales_sf),
+  upper = 1500
+)
+residual_wt <- st_weights(residual_nb, style = "W")
+
+set.seed(1234)
+residual_moran <- global_moran_perm(
+  sales_sf$global_residual,
+  residual_nb,
+  residual_wt,
+  nsim = 999
+)
+
+residual_moran
+```
+
+::: callout-tip
+## My observation
+
+The residual map and Moran test are a bridge between OLS and GWR. Positive residual clusters mean the global model under-predicts nearby transactions together, while negative clusters mean it over-predicts nearby transactions together. That pattern is evidence that the average relationship is incomplete, not evidence that GWR will automatically be better.
+:::
+
+## Geographically weighted regression
+
+GWR estimates a local regression at each transaction. A kernel gives nearby observations more influence, and the bandwidth controls how quickly that influence decays. A fixed bandwidth uses the same distance everywhere; an adaptive bandwidth uses the same approximate number of neighbours and is usually more stable when transaction density varies.
+
+### Fixed-bandwidth selection and model
+
+```{r}
+#| label: fixed-bandwidth
+gwr_formula <- SELLING_PRICE ~ AREA_SQM + AGE + PROX_CBD + PROX_CHILDCARE +
+  PROX_ELDERLYCARE + PROX_URA_GROWTH_AREA + PROX_MRT + PROX_PARK +
+  PROX_PRIMARY_SCH + PROX_SHOPPING_MALL + PROX_BUS_STOP +
+  NO_Of_UNITS + FAMILY_FRIENDLY + FREEHOLD
+
+gwr_data <- as(sales_sf, "Spatial")
+
+fixed_bw <- bw.gwr(
+  gwr_formula,
+  data = gwr_data,
+  approach = "CV",
+  kernel = "gaussian",
+  adaptive = FALSE
+)
+
+gwr_fixed <- gwr.basic(
+  gwr_formula,
+  data = gwr_data,
+  bw = fixed_bw,
+  kernel = "gaussian",
+  adaptive = FALSE
+)
+
+gwr_fixed
+```
+
+### Adaptive-bandwidth selection and model
+
+```{r}
+#| label: adaptive-bandwidth
+adaptive_bw <- bw.gwr(
+  gwr_formula,
+  data = gwr_data,
+  approach = "CV",
+  kernel = "gaussian",
+  adaptive = TRUE
+)
+
+gwr_adaptive <- gwr.basic(
+  gwr_formula,
+  data = gwr_data,
+  bw = adaptive_bw,
+  kernel = "gaussian",
+  adaptive = TRUE
+)
+
+gwr_adaptive
+```
+
+::: callout-tip
+## My observation
+
+The fixed and adaptive models answer slightly different questions. Fixed bandwidth asks how a constant spatial radius performs across Singapore. Adaptive bandwidth asks how a local market behaves when each estimate is supported by a comparable number of transactions. I treat the bandwidth and kernel as analytical choices and report them alongside the maps, because changing them can change the apparent geography of an effect.
+:::
+
+## Mapping local GWR results
+
+The `SDF` output stores a fitted value, local coefficients and local diagnostics for every transaction. I convert it to an `sf` object so that the model results can be mapped and compared with the global residual geography.
+
+```{r}
+#| label: gwr-output
+local_results <- st_as_sf(gwr_adaptive$SDF) %>%
+  st_transform(3414)
+
+local_map <- local_results %>%
+  select(Local_R2, AREA_SQM_SE, AREA_SQM_TV, geometry)
+
+glimpse(local_results)
+summary(select(local_results, Local_R2, AREA_SQM_SE, AREA_SQM_TV))
+```
+
+```{r}
+#| label: local-r2-map
+tmap_mode("view")
+
+tm_shape(zones_svy21) +
+  tm_polygons(fill_alpha = 0.1) +
+  tm_shape(local_map) +
+  tm_dots(fill = "Local_R2", col = "gray60", lwd = 1) +
+  tm_view(set_zoom_limits = c(11, 14))
+
+tmap_mode("plot")
+```
+
+```{r}
+#| label: coefficient-uncertainty-maps
+tmap_mode("view")
+
+area_se_map <- tm_shape(zones_svy21) +
+  tm_polygons(fill_alpha = 0.1) +
+  tm_shape(local_map) +
+  tm_dots(fill = "AREA_SQM_SE", col = "gray60", lwd = 1) +
+  tm_view(set_zoom_limits = c(11, 14))
+
+area_t_map <- tm_shape(zones_svy21) +
+  tm_polygons(fill_alpha = 0.1) +
+  tm_shape(local_map) +
+  tm_dots(fill = "AREA_SQM_TV", col = "gray60", lwd = 1) +
+  tm_view(set_zoom_limits = c(11, 14))
+
+tmap_arrange(area_se_map, area_t_map, asp = 1, ncol = 2, sync = TRUE)
+
+tmap_mode("plot")
+```
+
+::: callout-tip
+## My observation
+
+The local $R^2$ map shows where the local model explains resale-price variation more effectively. The paired standard-error and t-value maps add a reliability check for the floor-area coefficient: a large coefficient should not be interpreted without considering its uncertainty and local significance.
+:::
+
+## Fixed versus adaptive comparison
+
+```{r}
+#| label: model-comparison
+comparison <- tibble(
+  model = c("Global OLS", "Fixed-bandwidth GWR", "Adaptive-bandwidth GWR"),
+  adjusted_r2 = c(
+    summary(global_model)$adj.r.squared,
+    unname(gwr_fixed$GW.diagnostic["gwR2"]),
+    unname(gwr_adaptive$GW.diagnostic["gwR2"])
+  ),
+  aic = c(
+    AIC(global_model),
+    unname(gwr_fixed$GW.diagnostic["AICc"]),
+    unname(gwr_adaptive$GW.diagnostic["AICc"])
+  )
+)
+
+knitr::kable(comparison, digits = 3)
+```
+
+::: callout-note
+## Overall interpretation
+
+The global model is the transparent benchmark. The GWR models add spatial detail only when the local fit improves enough to justify the extra complexity and the local coefficient surfaces tell a coherent geographic story. A lower AICc and higher local fit support the adaptive model, but they do not prove causality. The coefficients describe spatially varying associations within the 2015 transaction sample.
+:::
+
+## Reflection
+
+This exercise changes how I read a regression map. A global coefficient is a useful summary, but it can hide neighbourhood-specific market mechanisms. The most defensible conclusion combines four pieces of evidence: the data-quality checks, the global model diagnostics, the residual Moran test and the stability of the GWR surfaces across bandwidth choices. GWR is therefore an exploratory model of spatial non-stationarity, not a substitute for a carefully designed causal housing study.
+
+## References
+
+- Kam, T. S. *R for Geospatial Data Science and Analytics*, [Chapter 13: Calibrating Hedonic Pricing Model for Private Highrise Property with GWR Method](https://r4gdsa.netlify.app/chap13.html).
+- ISSS626, [Lesson 9: Geographically Weighted Regression](https://isss626-ay2026-27aug.netlify.app/outline/lesson09_outline).
+- Gollini, I. et al. (2015). GWmodel: An R Package for Exploring Spatial Heterogeneity Using Geographically Weighted Models. *Journal of Statistical Software*, 63(17).
+- Brunsdon, C., Fotheringham, A. S., and Charlton, M. (1996). Geographically weighted regression: a method for exploring spatial nonstationarity. *Geographical Analysis*, 28(4), 281–298.
