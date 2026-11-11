@@ -7,6 +7,8 @@ project:
     - Take-home_Ex/executive_summary.qmd
     - Take-home_Ex/Take-home_Ex02/take-home-exercise2.qmd
     - Take-home_Ex/Take-home_Ex02/executive-summary.qmd
+    - Take-home_Ex/Take-home_Ex03/take-home-exercise3.qmd
+    - Take-home_Ex/Take-home_Ex03/executive-summary.qmd
     - Hands-on_Ex/Hands-on_Ex01/chap01.qmd
     - Hands-on_Ex/Hands-on_Ex01/chap02.qmd
     - Hands-on_Ex/Hands-on_Ex02/chap04.qmd
@@ -67,6 +69,10 @@ website:
             href: "Take-home_Ex/Take-home_Ex02/take-home-exercise2.html"
           - text: "Take-home Exercise 2 - Executive Summary"
             href: "Take-home_Ex/Take-home_Ex02/executive-summary.html"
+          - text: "Take-home Exercise 3 - Technical Report"
+            href: "Take-home_Ex/Take-home_Ex03/take-home-exercise3.html"
+          - text: "Take-home Exercise 3 - Executive Summary"
+            href: "Take-home_Ex/Take-home_Ex03/executive-summary.html"
       - text: "In-class Exercise"
         menu:
           - text: "In-class Exercise 4"

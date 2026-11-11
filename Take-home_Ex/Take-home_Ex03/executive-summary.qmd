@@ -1,0 +1,494 @@
+---
+title: "Who Will Ride the New Lines?"
+subtitle: "Station-level ridership prediction for the Jurong Region Line and Cross Island Line Phase 1 using probabilistic spatial interaction models"
+author: "Zhiyi Hao"
+date: last-modified
+title-slide-attributes:
+  data-background-color: "#10262b"
+format:
+  revealjs:
+    theme: [default, executive-summary.scss]
+    width: 1600
+    height: 900
+    margin: 0.04
+    center: false
+    slide-number: c/t
+    show-slide-number: all
+    transition: fade
+    background-transition: fade
+    progress: true
+    hash: true
+    controls: true
+    footer: "ISSS626 · Take-home Exercise 3 · Executive Summary"
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: auto
+---
+
+```{r}
+#| label: setup
+pacman::p_load(sf, tidyverse, tmap, scales)
+tmap_mode("plot")
+r <- read_rds("data/rds/th3_results.rds")
+n <- r$numbers
+fmt <- function(x, d = 0) scales::comma(x, accuracy = 10^-d)
+pct <- function(x, d = 0) scales::percent(x, accuracy = 10^-d)
+base_map <- tm_shape(r$subzones) + tm_polygons(fill = "grey95", col = "white", lwd = 0.3)
+top_new <- r$new_pred %>% slice_max(pred_exp, n = 3)
+upg <- r$impact_sf %>% st_drop_geometry() %>% filter(upgraded)
+r2f <- function(x) sprintf("%.2f", x)
+map_layout <- tm_layout(frame = FALSE, inner.margins = c(0, 0, 0, 0), outer.margins = c(0, 0, 0, 0),
+                        legend.text.size = 0.9, legend.title.size = 1)
+```
+
+## Contents {.toc-slide}
+
+::: {.grid .g-3 .toc}
+::: card
+[01]{.n}
+[Research question]{.t}
+[Can a model forecast demand at stations that do not exist yet?]{.d}
+:::
+
+::: card
+[02]{.n}
+[Study area, data and approach]{.t}
+[164 stations, 286 subzones, five data traps, and a calibrated Huff model]{.d}
+:::
+
+::: card
+[03]{.n}
+[Key findings]{.t}
+[Model validity, new-station forecasts, the Tengah test, impacts and market areas]{.d}
+:::
+
+::: card
+[04]{.n}
+[Planning implications]{.t}
+[Phasing, feeder buses, interchange capacity and equity]{.d}
+:::
+
+::: card
+[05]{.n}
+[Limitations]{.t}
+[What the forecasts can and cannot support]{.d}
+:::
+
+::: card
+[↗]{.n}
+[Technical report]{.t}
+[Full, reproducible workflow in Quarto]{.d}
+:::
+:::
+
+## [01 · Research question]{.kicker}Will the new stations be busy, or the next Hume?
+
+::: question
+Can a probabilistic spatial interaction model, calibrated on observed tap-ins, forecast ridership at the **29 new JRL and CRL1 stations**, and show which **existing stations lose riders** to them?
+:::
+
+::: {.grid .g-4}
+::: {.card .accent .stat}
+[36]{.num}
+[JRL (24) and CRL Phase 1 (12) stations, opening 2028–2030]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[29 + 7]{.num}
+[genuinely new stations + existing stations upgraded to interchanges]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[`r fmt(sum(r$calibrated$observed_am_tapin) / 1e6, 1)`M]{.num}
+[weekday morning-peak tap-ins (May 2022) used to calibrate the model]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[164 × 286]{.num}
+[stations × resident subzones in the choice model]{.lbl}
+:::
+:::
+
+::: band
+**Why it matters.** Hume station stood finished but closed for a decade, and Buangkok and Woodleigh stayed shut when the NEL opened, because expected ridership could not cover operating costs. Planners need station-level forecasts *before* the trains run.
+:::
+
+## [02 · Study area and data]{.kicker}One network, five data traps cleared
+
+::: {.grid .center-v style="grid-template-columns: 1.45fr 1fr;"}
+::: figure
+```{r}
+#| fig-width: 6.4
+#| fig-height: 4
+#| fig-dpi: 220
+#| out-width: 100%
+base_map +
+  tm_shape(r$net_base) + tm_lines(col = "grey45", lwd = 1.1) +
+  tm_shape(r$net_new) + tm_lines(col = "#0b7a83", lwd = 2.6) +
+  tm_shape(r$stations) + tm_dots(fill = "grey25", size = 0.1) +
+  tm_shape(r$new_stations) + tm_dots(fill = "#97c616", col = "#0b7a83", size = 0.3) +
+  map_layout
+```
+
+::: cap
+May 2022 network (grey) and JRL / CRL1 extensions (teal) with the 29 new stations (green)
+:::
+:::
+
+::: {.rows}
+::: card
+[Inputs]{.ct}
+
+- LTA **OD train flows** (May 2022), **bus stops**, **station exits**
+- **Census 2020** population; **HDB** footprints; **OSM POIs**
+- URA **MP2025 stations**, **MP2019 land use**; JRL/CRL1 list
+:::
+
+::: {.card .soft .tight}
+[Data traps found and cleared]{.ct}
+
+- 5 stations **missing X/Y**; Rochor's lat/long ~480 m off its exits
+- 3 non-operational codes, incl. **Bukit Brown, a real ghost station**
+- URA layer suggests **`r n$naive_new` "new" stations**; only 29 are
+- LTA shapefiles with **no EPSG code** (custom "SVY21")
+:::
+:::
+:::
+
+## [03 · Analytical approach]{.kicker}From tap-ins to a station-choice model
+
+::: pipeline
+::: step
+[1]{.no}
+[Clean & build]{.tt}
+[Audit five data sources; build origin, destination and two spatial interaction data frames.]{.dd}
+[→ 286 origins × 164 / 193 stations]{.out}
+:::
+
+::: step
+[2]{.no}
+[Flow models (SIM)]{.tt}
+[Poisson unconstrained → doubly constrained models on station-to-station flows, network distance.]{.dd}
+[→ distance elasticity `r round(n$b_dbc, 2)`]{.out}
+:::
+
+::: step
+[3]{.no}
+[Huff calibration]{.tt}
+[Residents choose a station by attraction (lines, LRT) and access distance; tested against two benchmarks.]{.dd}
+[→ R² `r r2f(n$r2)`, CV R² `r r2f(n$cv_r2)`]{.out}
+:::
+
+::: step
+[4]{.no}
+[2030 scenario]{.tt}
+[Add 29 stations, upgrade 7 interchanges; re-run with `MCI::huff.shares()`; Tengah build-out test.]{.dd}
+[→ forecasts & market areas]{.out}
+:::
+
+::: step
+[5]{.no}
+[Value-added]{.tt}
+[**MCI destination-choice model** (alternative probabilistic SIM) for alightings; LISA on residuals; KD2SFCA access.]{.dd}
+[→ destination demand, bias, equity]{.out}
+:::
+:::
+
+::: chips
+[**Demand** · weekday 06:00–09:59 tap-ins]{.chip}
+[**Attraction** · lines served γ = `r round(n$gamma, 2)`, LRT δ = `r round(n$delta, 2)`]{.chip}
+[**Decay** · exponential λ = `r round(n$lambda, 2)` per km]{.chip}
+[**Calibration** · optim() on RMSE, 5-fold CV]{.chip}
+[**Software** · R: sf, MCI, igraph, spdep, SpatialAcc, tmap]{.chip}
+:::
+
+::: band
+**Key modelling choice.** Exponential decay beat the course-default power function (R² `r r2f(n$r2)` vs `r r2f(n$r2_power)`). The power curve's long tail let stations 5 km away compete for residents, which spread scenario impacts unrealistically across the whole island.
+:::
+
+## [04 · Key findings]{.kicker}Finding 1: The model reproduces where Singapore boards
+
+::: {.grid .center-v style="grid-template-columns: 1.1fr 1fr;"}
+::: figure
+```{r}
+#| fig-width: 7.5
+#| fig-height: 5.6
+#| out-height: 600px
+ggplot(r$calibrated, aes(pred_base / n$weekdays, observed_am_tapin / n$weekdays)) +
+  geom_abline(linetype = 2, colour = "grey50") +
+  geom_point(aes(colour = lrt), size = 2.4, alpha = 0.8) +
+  scale_colour_manual(values = c(`FALSE` = "#0b7a83", `TRUE` = "#97c616"),
+                      labels = c("MRT", "LRT only"), name = NULL) +
+  scale_x_continuous(labels = label_comma()) + scale_y_continuous(labels = label_comma()) +
+  labs(x = "Predicted AM-peak tap-ins per weekday", y = "Observed") +
+  theme_minimal(base_size = 15) + theme(legend.position = c(0.15, 0.88))
+```
+:::
+
+::: rows
+::: {.card .accent .stat}
+[`r r2f(n$r2)`]{.num}
+[**R²** for 164 stations, vs `r r2f(n$r2_r0)` for nearest-station allocation and `r r2f(n$r2_r1)` for the default Huff model]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[`r r2f(n$cv_r2)`]{.num}
+[**out-of-sample R²** (5-fold cross-validation): parameters are stable, not over-fitted]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[−`r pct(1 - exp(-n$lambda / 2))`]{.num}
+[**attractiveness per extra 500 m** of access distance: residents choose the station they can walk to]{.lbl}
+:::
+:::
+:::
+
+## [04 · Key findings]{.kicker}Finding 2: Count both ends of the trip, not just boardings
+
+::: {.grid style="grid-template-columns: 1.3fr 1fr;"}
+::: figure
+```{r}
+#| fig-width: 8
+#| fig-height: 6.6
+#| out-height: 660px
+r$new_use %>%
+  mutate(stn = fct_reorder(str_to_title(stn_name), total_day)) %>%
+  select(stn, line, `Boardings (Huff)` = board_day, `Alightings (MCI)` = alight_day) %>%
+  pivot_longer(-c(stn, line), names_to = "end", values_to = "per_day") %>%
+  mutate(end = factor(end, levels = c("Alightings (MCI)", "Boardings (Huff)"))) %>%
+  ggplot(aes(per_day, stn, fill = end)) +
+  geom_col(width = 0.72) +
+  geom_vline(xintercept = n$p25_use, linetype = 2) +
+  annotate("text", x = n$p25_use + 120, y = 2.5, hjust = 0, size = 3.5,
+           label = "lower quartile of\nexisting stations") +
+  scale_fill_manual(values = c("Boardings (Huff)" = "#0b7a83", "Alightings (MCI)" = "#97c616")) +
+  scale_x_continuous(labels = label_comma()) +
+  labs(x = "Predicted AM-peak use per weekday (Census 2020 population)", y = NULL, fill = NULL) +
+  theme_minimal(base_size = 13) + theme(legend.position = c(0.78, 0.12))
+```
+:::
+
+::: rows
+::: {.card .teal}
+[Strongest new stations]{.ct}
+
+**`r str_c(str_to_title(top_new$stn_name), collapse = ", ")`**, inserted into mature HDB estates beyond walking distance of MRT today, would rank in the **top quarter** of existing stations.
+:::
+
+::: {.card .accent}
+[Value-added: MCI destination model]{.ct}
+
+On boardings alone, **`r n$n_low`** stations look like ghosts. An MCI model of where passengers *alight* (job and education floor space, network distance) finds **`r n$n_dest` destination stations** and rescues **`r str_c(str_to_title(n$rescued), collapse = ", ")`**.
+:::
+
+::: band
+**Genuine opening-day risks:** `r str_c(str_to_title(n$still_low), collapse = ", ")`: redeveloping industrial land, NTU campus and airport logistics.
+:::
+:::
+:::
+
+## [04 · Key findings]{.kicker}Finding 3: Tengah's stations depend on housing, not rails
+
+::: {.grid .center-v style="grid-template-columns: 1.2fr 1fr;"}
+::: figure
+```{r}
+#| fig-width: 8
+#| fig-height: 5.4
+#| out-height: 580px
+r$tengah %>%
+  pivot_longer(c(census_2020, tengah_buildout), names_to = "scenario", values_to = "per_day") %>%
+  mutate(scenario = recode(scenario, census_2020 = "Census 2020 population",
+                           tengah_buildout = "Tengah build-out (~130k residents)")) %>%
+  ggplot(aes(per_day, fct_reorder(str_to_title(stn_name), per_day), fill = scenario)) +
+  geom_col(position = "dodge", width = 0.75) +
+  geom_vline(xintercept = n$p25 / n$weekdays, linetype = 2) +
+  scale_fill_manual(values = c("grey70", "#0b7a83")) +
+  scale_x_continuous(labels = label_comma()) +
+  labs(x = "Predicted AM-peak tap-ins per weekday", y = NULL, fill = NULL) +
+  theme_minimal(base_size = 14) + theme(legend.position = "bottom")
+```
+:::
+
+::: rows
+```{r}
+#| include: false
+tg <- r$tengah %>% filter(stn_code == "JS3"); tp <- r$tengah %>% filter(stn_code == "JE1")
+```
+
+::: {.card .accent .stat}
+[`r fmt(tg$census_2020)` → `r fmt(tg$tengah_buildout)`]{.num}
+[**Tengah (JS3)** morning tap-ins per weekday, from 2020 population to full build-out (42,000 homes)]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[×`r round(tp$tengah_buildout / tp$census_2020, 1)`]{.num}
+[**Tengah Plantation (JE1)**, which becomes one of the JRL's busiest stations]{.lbl}
+:::
+
+::: band
+**The Hume lesson in numbers.** Whether a JRL station is a white elephant depends on **when homes are occupied relative to opening day**. The model can set a completion threshold for opening each station.
+:::
+:::
+:::
+
+## [04 · Key findings]{.kicker}Finding 4: Losses are local, and upgrades do not guarantee growth
+
+::: {.grid style="grid-template-columns: 1.35fr 1fr;"}
+::: figure
+```{r}
+#| fig-width: 6.6
+#| fig-height: 4.3
+#| fig-dpi: 220
+#| out-width: 100%
+base_map +
+  tm_shape(r$net_new) + tm_lines(col = "#0b7a83", lwd = 1.3, col_alpha = 0.6) +
+  tm_shape(r$impact_sf %>% filter(abs(change_pct) >= 0.05)) +
+  tm_symbols(fill = "change_pct", size = 0.7, col = "grey30", lwd = 0.4,
+             fill.scale = tm_scale_intervals(style = "fixed",
+                                             breaks = c(-1, -0.3, -0.15, -0.05, 0.05, 0.3, 2),
+                                             values = "brewer.rd_bu",
+                                             labels = c("< -30%", "-30 to -15%", "-15 to -5%",
+                                                        "±5%", "5 to 30%", "> 30%")),
+             fill.legend = tm_legend(title = "Change in AM tap-ins")) +
+  tm_shape(r$new_stations) + tm_dots(fill = "#97c616", size = 0.2) +
+  map_layout + tm_layout(legend.position = c("right", "bottom"))
+```
+
+::: cap
+Existing stations changing by 5% or more once JRL and CRL1 open (Census 2020 population)
+:::
+:::
+
+::: rows
+::: {.card .accent .stat}
+[`r pct(n$share_div)`]{.num}
+[of morning boardings move to the new stations; **`r n$n_loss15`** existing stations lose 15% or more, in three clusters next to the new lines]{.lbl}
+:::
+
+::: {.card .teal}
+[Hardest hit]{.ct}
+
+Western EWL: **Pioneer, Lakeside, Chinese Garden, Joo Koon** lose over half their boardings to Gek Poh, Jurong West and Tawas.
+:::
+
+::: {.card .soft}
+[The interchange paradox]{.ct}
+
+`r str_c(str_to_title(upg$stn_name[upg$change_pct > 0]), collapse = ", ")` gain; **`r str_c(str_to_title(upg$stn_name[upg$change_pct < 0]), collapse = ", ")`** lose tap-ins despite the extra line, while transfer crowding still rises.
+:::
+:::
+:::
+
+## [04 · Key findings]{.kicker}Finding 5: Market areas shift locally; access gains go to the least served
+
+::: {.grid style="grid-template-columns: 1fr 1fr 0.8fr;"}
+::: figure
+```{r}
+#| fig-width: 5.2
+#| fig-height: 3.9
+#| fig-dpi: 220
+#| out-width: 100%
+base_map +
+  tm_shape(r$market %>% filter(pop >= 100, change != "Unchanged",
+                              pop / (as.numeric(st_area(geometry)) / 1e6) >= 100)) +
+  tm_polygons(fill = "change",
+              fill.scale = tm_scale_categorical(values = c("#0b7a83", "#7570b3")),
+              fill.legend = tm_legend(title = "Most-likely station"), col = "white", lwd = 0.3) +
+  tm_shape(r$new_stations) + tm_dots(fill = "black", size = 0.1) +
+  map_layout + tm_layout(legend.position = c("left", "top"))
+```
+
+::: cap
+Subzones whose most-likely boarding station changes
+:::
+:::
+
+::: figure
+```{r}
+#| fig-width: 5.2
+#| fig-height: 3.9
+#| fig-dpi: 220
+#| out-width: 100%
+base_map +
+  tm_shape(r$access %>% mutate(g = gain * 1e5)) +
+  tm_polygons(fill = "g",
+              fill.scale = tm_scale_intervals(style = "fixed", breaks = c(0, 0.05, 0.5, 2, Inf),
+                                              labels = c("No change", "Small", "Moderate", "Large"),
+                                              values = "brewer.yl_gn"),
+              fill.legend = tm_legend(title = "Access gain"), col = "white", lwd = 0.2) +
+  map_layout + tm_layout(legend.position = c("left", "top"))
+```
+
+::: cap
+KD2SFCA rail accessibility gain (2 km catchment)
+:::
+:::
+
+::: rows
+::: {.card .accent .stat}
+[`r n$n_new_sz`]{.num}
+[subzones (`r fmt(n$pop_new_sz / 1000)`k residents) gain a **new** most-likely station; the rest of the island is unchanged]{.lbl}
+:::
+
+::: {.card .accent .stat}
+[`r pct(n$q1_gain)` vs `r pct(n$q5_gain)`]{.num}
+[of residents gaining access in the **least** vs **best** served quintile (ρ = `r round(n$rho, 2)`): the lines **narrow** the access gap]{.lbl}
+:::
+:::
+:::
+
+## [05 · Planning implications]{.kicker}Turning forecasts into decisions
+
+```{=html}
+<table class="impl" style="font-size:0.64em">
+  <thead>
+    <tr><th>Evidence</th><th>Recommended response</th><th>Why</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Tengah stations below the ghost-risk line on 2020 population<br><span style="font-weight:400;color:#66747b">JS3 Tengah, JE1 Tengah Plantation</span></td><td>Tie opening to housing completion thresholds</td><td>Forecast boardings rise several-fold at build-out; opening day matters more than the line itself.</td></tr>
+    <tr><td>Western EWL and Kovan–Serangoon belt lose 15%+<br><span style="font-weight:400;color:#66747b">Pioneer, Lakeside, Chinese Garden, Kovan</span></td><td>Re-draw feeder-bus routes around new market areas</td><td>Avoid bus kilometres that duplicate the new rail catchments.</td></tr>
+    <tr><td>Seven upgraded interchanges<br><span style="font-weight:400;color:#66747b">Jurong East, Boon Lay, Hougang, Ang Mo Kio …</span></td><td>Plan platform and transfer-corridor capacity</td><td>Transfers are invisible in tap-ins but rise at every interchange.</td></tr>
+    <tr><td>Destination stations with low home-based boardings<br><span style="font-weight:400;color:#66747b">Tukang, Enterprise, Nanyang Gateway, Tengah</span></td><td>Appraise on boardings + alightings, not boardings alone</td><td>The MCI model shows workers and students arriving keep most of them above the ghost-risk line.</td></tr>
+    <tr><td>Model over-predicts in the east (LISA)<br><span style="font-weight:400;color:#66747b">Pasir Ris East, Tampines North, Loyang</span></td><td>Treat eastern forecasts as upper bounds</td><td>Residuals cluster significantly (Moran's I = `r round(n$moran, 2)`, p = `r signif(n$moran_p, 1)`).</td></tr>
+  </tbody>
+</table>
+```
+
+::: {.band style="margin-top:12px"}
+Forecasts are a **comparative screening tool**: they rank stations and locate impacts reliably, while absolute numbers should be refreshed with current population and opening-day service plans.
+:::
+
+## [06 · Limitations]{.kicker}What the forecasts can and cannot support
+
+::: {.grid .g-3}
+::: {.card .accent}
+[Data]{.ct}
+
+- OD flows (May 2022) and population (Census 2020) pre-date the 2028–2030 network.
+- Tap-ins miss **transfers** and **non-resident** demand (e.g. cross-border commuters); land use is a proxy for jobs.
+- New-station locations are indicative Master Plan footprints.
+:::
+
+::: {.card .accent}
+[Method]{.ct}
+
+- Fixed trip rate: no **induced demand**; new boardings are diverted from existing stations.
+- Attraction uses only lines and LRT status; feeder buses and frequency are missing.
+- Straight-line access distance, not walking-network distance.
+:::
+
+::: {.card .accent}
+[Interpretation]{.ct}
+
+- Forecasts are **home-end morning boardings**, not total station use.
+- Residuals cluster regionally, so eastern forecasts are likely optimistic.
+- Rankings are robust to parameter uncertainty; absolute values are indicative.
+:::
+:::
+
+::: {.card .soft style="margin-top:22px;"}
+**Reproducible workflow.** The Quarto technical report runs end-to-end with a fixed seed (626) and documents every data trap, parameter and modelling decision.<br>
+**Technical report:** [Who Will Ride the New Lines?](take-home-exercise3.html) · **Code:** [github.com/sabrinahao99/ISSS626-GEO](https://github.com/sabrinahao99/ISSS626-GEO)
+:::

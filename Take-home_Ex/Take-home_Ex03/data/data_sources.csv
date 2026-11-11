@@ -1,0 +1,9 @@
+file,source,description,accessed
+geospatial/HDBExistingBuilding.geojson,data.gov.sg,HDB existing building footprints,2026-11-08
+geospatial/MP19_SUBZONE_NO_SEA_PL.geojson,data.gov.sg,URA Master Plan 2019 subzone boundaries without sea,2026-11-08
+geospatial/rail_station_layer_2025.geojson,data.gov.sg,URA Master Plan 2025 indicative rail station layer,2026-11-08
+geospatial/rail_station_names_2025.geojson,data.gov.sg,URA Master Plan 2025 rail station name annotations,2026-11-08
+aspatial/mrt_od_202205.csv,Calamin3/mrt_clustering,Public LTA DataMall ODTrain mirror for May 2022,2026-11-08
+aspatial/mrt_station_points.csv,Calamin3/mrt_clustering,Public LTA station coordinate mirror,2026-11-08
+aspatial/public_transport_ridership_1995_2024.csv,data.gov.sg / LTA,Official annual average daily MRT LRT and bus ridership series,2026-11-08
+aspatial/resident_population_subzone_2020.csv,data.gov.sg / SingStat,Resident population by Master Plan 2019 subzone from Census 2020,2026-11-08
