@@ -33,24 +33,24 @@ Singapore builds MRT stations years before the surrounding towns fill up. Hume s
 
 | # | Objective (handout) | Where it is addressed |
 |---|---|---|
-| O1 | Calibrate a probabilistic spatial interaction model for station-level ridership | @sec-sim (flow model) and @sec-huff (Huff model) |
+| O1 | Calibrate a probabilistic spatial interaction model for station-level ridership | @sec-huff (Huff model) and @sec-va-mci (MCI model) |
 | O2 | Predict ridership of the proposed JRL and CRL1 stations | @sec-scenario |
 | O3 | Evaluate the impact of the new stations on existing stations | @sec-impact and @sec-market |
 
-The eight handout tasks map onto the report as follows: the two spatial interaction data frames, the origin data frame and the destination data frame (Tasks 1–3) are built in @sec-sidf; calibration and estimation (Tasks 4–6) are in @sec-sim and @sec-huff; prediction and impact (Tasks 7–8) are in @sec-scenario to @sec-market.
+The eight handout tasks map onto the report as follows: the two spatial interaction data frames, the origin data frame and the destination data frame (Tasks 1–3) are built in @sec-sidf; calibration and estimation (Tasks 4–6) are in @sec-huff, with an MCI destination-choice model in @sec-va-mci; prediction and impact (Tasks 7–8) are in @sec-scenario to @sec-market.
 
 ## Analytical framework
 
-The study uses two complementary probabilistic spatial interaction models from the course.
+The study uses the two probabilistic models of the `MCI` package.
 
-1. **Station-to-station spatial interaction models (SIM, Chapter 16).** Poisson gravity models (unconstrained, origin-, destination- and doubly-constrained) are calibrated on observed MRT/LRT origin–destination flows. They reveal how strongly trip volumes decay with distance and which constraint structure fits the data.
-2. **Huff model (Chapter 18, `MCI` package).** Each resident subzone is treated as a market and each station as a competing "store". The probability that residents of subzone *i* board at station *j* is
+1. **Huff model (Chapter 18).** Each resident subzone is treated as a market and each station as a competing "store". The probability that residents of subzone *i* board at station *j* is
 
-$$P_{ij} = \frac{A_j \, f(d_{ij})}{\sum_{k} A_k \, f(d_{ik})}, \qquad A_j = n^{\gamma}_{j}\,e^{\delta \cdot LRT_j}$$
+$$P_{ij} = \frac{A_j \, f(d_{ij})}{\sum_{k} A_k \, f(d_{ik})}, \qquad A_j = n^{\gamma}_{j}\,e^{\delta \cdot LRT_j}\,\left(\frac{HDB_j}{10}\right)^{\theta}$$
 
-where $f(d_{ij})$ is a distance-decay function (power or exponential; @sec-huff selects between them), $n_j$ is the number of rail lines serving the station and $LRT_j$ flags LRT-only stations. Expected boardings at station *j* are $\hat{B}_j = k\sum_i P_{ij}\,Pop_i$, where $k$ is a system trip rate. Parameters $\gamma$, $\delta$ and $\lambda$ are calibrated against observed **weekday morning-peak tap-ins**, and the fitted model is then re-run with the new stations added.
+where $f(d_{ij})$ is a distance-decay function (power or exponential; @sec-huff selects between them), $n_j$ is the number of rail lines serving the station, $LRT_j$ flags LRT-only stations and $HDB_j$ is the HDB footprint (ha) within 800 m of the station. Expected boardings at station *j* are $\hat{B}_j = k\sum_i P_{ij}\,Pop_i$, where $k$ is a system trip rate. Parameters $\gamma$, $\delta$, $\theta$ and $\lambda$ are calibrated against observed **weekday morning-peak tap-ins**, and the fitted model is then re-run with the new stations added.
+2. **MCI destination-choice model** (@sec-va-mci). Estimated from observed station-to-station flows, it predicts where morning passengers *alight*, the destination end that a residential Huff model cannot see.
 
-The Huff model is the main prediction engine because it can price in a station that has no ridership history yet: all it needs is the station's location and attributes. The SIM explains the flow structure that the Huff model abstracts away.
+The Huff model is the main prediction engine because it can price in a station that has no ridership history yet: all it needs is the station's location and attributes. Generic station-to-station spatial interaction models (Chapter 16) were also explored; they cannot forecast a new station, so they are reported at the end as further exploration (@sec-sim).
 
 ## Key assumptions and methodological decisions
 
@@ -61,7 +61,7 @@ The Huff model is the main prediction engine because it can price in a station t
 | Station coordinates | SVY21 `X`/`Y`, falling back to lat/long | Lat/long misplaces Rochor by about 350 m; confirmed against LTA station exits (@sec-quality) | Lat/long throughout |
 | Destination attractors (MCI) | Master Plan job/education floor area | Captures *planned* development around new stations | OSM POIs, which record only what exists today |
 | Future stations | 29 new + 7 upgraded interchanges (official JRL/CRL1 list) | The URA layer mixes in 60+ non-JRL/CRL1 names | Naive name anti-join (98 "new" stations) |
-| Attraction $A_j$ | Lines served and LRT penalty | Best fit per parameter; forecastable for new stations | Closeness centrality; HDB within 800 m |
+| Attraction $A_j$ | Lines served, LRT penalty and HDB footprint within 800 m | Captures why stations in mature estates are busy and stations in new or non-residential districts are not | Lines + LRT only; closeness centrality; bus stops within 400 m (with and without HDB) |
 | Distance decay | Exponential, calibrated $\lambda$ | Better fit; no unrealistic long tail | Power function (Chapter 18 default) |
 | Calibration | RMSE minimised by `optim()`, 5-fold cross-validation | Unbounded search; out-of-sample check | Coarse fixed grid |
 | Total demand | Fixed trip rate $k$ | Isolates the spatial reallocation effect | Tengah build-out sensitivity adds residents |
@@ -79,14 +79,13 @@ The packages are loaded with `pacman::p_load()`, which installs any that are mis
 | `MCI` | Huff market shares (`huff.shares()`) and station totals (`shares.total()`) |
 | `performance` | Model comparison for the Poisson SIMs (`compare_performance()`) |
 | `spdep` | Spatial weights, global and local Moran's I on model residuals |
-| `SpatialAcc` | KD2SFCA accessibility (value-added analysis) |
 | `tmap` | Cartographic-quality thematic maps |
 | `ggpubr`, `ggstatsplot` | Multi-panel diagnostics and observed-vs-predicted plots |
 | `knitr` | Report tables |
 
 ```{r}
 #| label: setup
-pacman::p_load(sf, tidyverse, igraph, MCI, SpatialAcc, spdep,
+pacman::p_load(sf, tidyverse, igraph, MCI, spdep, leaflet,
                tmap, performance, ggpubr, ggstatsplot, ggrepel, knitr, scales)
 
 sf_use_s2(FALSE)           # planar geometry: all analysis is in SVY21 (EPSG:3414)
@@ -95,18 +94,43 @@ set.seed(626)
 
 fmt <- function(x, d = 0) scales::comma(x, accuracy = 10^-d)
 
-# Interactive maps: render a tmap object as a Leaflet widget with real basemaps
-# Esri tiles (as used in the course notes) need no API key; CARTO tiles now do.
-basemaps <- tm_basemap(c("Esri.WorldGrayCanvas", "OpenStreetMap", "Esri.WorldImagery"))
-# Notes from testing: tm_symbols() draws oversized legend glyphs in view mode, so tm_dots()
-# is used; set_view opens every map on Singapore instead of the whole Johor-Riau region.
-as_leaflet <- function(m) {
-  widget <- tmap_leaflet(basemaps + m + tm_view(set_view = c(103.82, 1.355, 11)),
-                         mode = "view")   # returned invisibly by tmap
-  widget
+# Interactive maps are drawn with leaflet on real basemaps. Esri tiles (as used in the
+# course notes) need no API key; CARTO tiles now do. leaflet is used directly instead of
+# tmap's view mode, whose legends draw oversized symbols and cannot show bubble sizes.
+base_leaflet <- function(view = c(103.82, 1.355, 11)) {
+  leaflet() %>%
+    addProviderTiles("Esri.WorldGrayCanvas", group = "Grey canvas") %>%
+    addProviderTiles("OpenStreetMap", group = "OpenStreetMap") %>%
+    addProviderTiles("Esri.WorldImagery", group = "Satellite") %>%
+    setView(lng = view[1], lat = view[2], zoom = view[3])
 }
-# Context layer shared by the interactive maps: the full May 2022 network in light grey
-network_context <- function() tm_shape(net_base_sf) + tm_lines(col = "grey55", lwd = 1.2, col_alpha = 0.8)
+layer_control <- function(m, overlays) {
+  addLayersControl(m, baseGroups = c("Grey canvas", "OpenStreetMap", "Satellite"),
+                   overlayGroups = overlays, options = layersControlOptions(collapsed = TRUE))
+}
+# Context layer shared by the interactive maps: the May 2022 network in grey
+add_network <- function(m, new_links = FALSE) {
+  m <- addPolylines(m, data = st_transform(net_base_sf, 4326), color = "grey", weight = 1.5,
+                    opacity = 0.7, group = "Rail network")
+  if (new_links) m <- addPolylines(m, data = st_transform(net_new_sf, 4326), color = "#d95f02",
+                                   weight = 3, opacity = 0.8, group = "Rail network")
+  m
+}
+# Graduated-bubble legend: circles drawn at the same radius as on the map
+radius_of <- function(v, max_v, max_r = 18) 3 + (max_r - 3) * sqrt(pmax(v, 0) / max_v)
+add_size_legend <- function(m, breaks, max_v, title, max_r = 18, position = "bottomleft") {
+  r <- radius_of(breaks, max_v, max_r)
+  cx <- cumsum(c(0, head(2 * r, -1) + 18)) + r + 6       # circles side by side
+  base <- 2 * max(r) + 4
+  svg <- str_c(sprintf(paste0('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#bbb" fill-opacity="0.5" ',
+                              'stroke="#444"/><text x="%.1f" y="%.1f" font-size="11" ',
+                              'text-anchor="middle" fill="#333">%s</text>'),
+                       cx, base - r, r, cx, base + 14, comma(breaks)), collapse = "")
+  addControl(m, position = position, html = str_c(
+    '<div style="background:white;padding:6px 8px;border-radius:4px;font:12px sans-serif">',
+    '<b>', title, '</b><br><svg width="', round(max(cx + r) + 12), '" height="', round(base + 18), '">',
+    svg, '</svg></div>'))
+}
 
 # Display rule for subzone maps: hide subzones that are essentially unpopulated
 # (< 100 residents or < 100 residents per km2, e.g. Murai military training area,
@@ -671,7 +695,7 @@ pop_density <- subzones %>%
   left_join(pop, by = "SUBZONE_N") %>%
   mutate(density = replace_na(pop, 0) / (as.numeric(st_area(.)) / 1e6))
 
-obs_map <- stations %>% left_join(demand, by = "stn_code")
+obs_map <- stations %>% left_join(demand, by = "stn_code") %>% mutate(am_day = am_tapin / weekdays_may22)
 
 tm_shape(pop_density) +
   tm_polygons(fill = "density",
@@ -681,9 +705,9 @@ tm_shape(pop_density) +
               fill.legend = tm_legend(title = "Residents per km²"),
               col = "white", lwd = 0.2) +
   tm_shape(obs_map) +
-  tm_symbols(size = "am_tapin", fill = "#176b87", col = "white", fill_alpha = 0.8,
+  tm_symbols(size = "am_day", fill = "#176b87", col = "white", fill_alpha = 0.8,
              size.scale = tm_scale_continuous(values.scale = 1.2),
-             size.legend = tm_legend(title = "AM-peak tap-ins (month)")) +
+             size.legend = tm_legend(title = "AM-peak tap-ins per weekday")) +
   tm_title("Where Singapore boards the train in the morning") +
   tm_compass(position = c("right", "top"), size = 1.5) +
   tm_scalebar(position = c("left", "bottom")) +
@@ -778,14 +802,7 @@ tibble(data_frame = c("origin_df", "destination_df", "si_existing", "si_expanded
 
 `si_existing` has 286 origins × 164 stations = `r fmt(nrow(si_existing))` rows, and `si_expanded` has 286 × 193 = `r fmt(nrow(si_expanded))` rows. Distances are straight-line distances from population-weighted centroids, with a 100 m floor so that the power function $d^{-\lambda}$ stays finite.
 
-# Station-to-station spatial interaction models {#sec-sim}
-
-## Flow data and distance measure
-
-Following Chapter 16, intra-station pairs (tap-in and tap-out at the same station) are excluded, and every remaining origin–destination pair is kept, including zero-flow pairs, so that the model also has to explain *absent* links. Two distance measures are compared:
-
-- straight-line distance;
-- **network distance**: the shortest path along the rail graph, which is closer to what passengers actually travel. Two stations either side of a river may be close in a straight line but far apart by rail.
+**A fifth data frame: station-to-station flows.** The MCI destination-choice model (@sec-va-mci) and the exploratory flow models (@sec-sim) work with station-to-station morning-peak trips rather than subzone-to-station shares. Following Chapter 16, intra-station pairs (tap-in and tap-out at the same station) are excluded and zero-flow pairs are kept. Both straight-line and **network distance** (the shortest path along the rail graph) are attached.
 
 ```{r}
 #| label: sim-data
@@ -808,84 +825,6 @@ tibble(pairs = nrow(sim_data), zero_pairs = pct(mean(sim_data$trips == 0)),
        total_trips = fmt(sum(sim_data$trips)),
        corr_euclid_network = round(cor(sim_data$euc_km, sim_data$net_km), 3))
 ```
-
-```{r}
-#| label: sim-distance-choice
-dbc_euc <- glm(trips ~ orig + dest + log(euc_km), family = poisson(link = "log"), data = sim_data)
-dbc_net <- glm(trips ~ orig + dest + log(net_km), family = poisson(link = "log"), data = sim_data)
-
-CalcRSquared <- function(observed, estimated) cor(observed, estimated)^2
-
-tibble(distance = c("Euclidean", "Network"),
-       beta_distance = c(coef(dbc_euc)["log(euc_km)"], coef(dbc_net)["log(net_km)"]),
-       AIC = c(AIC(dbc_euc), AIC(dbc_net)),
-       R2 = c(CalcRSquared(sim_data$trips, fitted(dbc_euc)),
-              CalcRSquared(sim_data$trips, fitted(dbc_net))))
-```
-
-Network distance gives the lower AIC and the higher R², so it is used for the SIM family below.
-
-## Calibrating the four SIMs
-
-The origin attribute is residential intensity (HDB footprint within 800 m, a proxy for the people who can walk to the station). The destination attributes are service level (`d_lines`) and LRT status. These are the station-level analogues of the age-band population variables used in Chapter 16.
-
-```{r}
-#| label: sim-models
-sim_models <- list(
-  unconstrained = glm(trips ~ log(o_hdb) + log(d_lines) + d_lrt + log(net_km),
-                      family = poisson(link = "log"), data = sim_data),
-  origin_constrained = glm(trips ~ orig + log(d_lines) + d_lrt + log(net_km),
-                           family = poisson(link = "log"), data = sim_data),
-  destination_constrained = glm(trips ~ dest + log(o_hdb) + log(net_km),
-                                family = poisson(link = "log"), data = sim_data),
-  doubly_constrained = glm(trips ~ orig + dest + log(net_km),
-                           family = poisson(link = "log"), data = sim_data))
-
-sim_summary <- imap_dfr(sim_models, \(m, nm) tibble(
-  model = nm,
-  beta_distance = coef(m)["log(net_km)"],
-  beta_origin_hdb = coef(m)["log(o_hdb)"],
-  beta_dest_lines = coef(m)["log(d_lines)"],
-  beta_dest_lrt = coef(m)["d_lrt"],
-  R2 = CalcRSquared(sim_data$trips, fitted(m)),
-  RMSE = sqrt(mean((sim_data$trips - fitted(m))^2))))
-
-sim_summary %>% mutate(across(where(is.numeric), \(x) round(x, 3)))
-compare_performance(sim_models, metrics = "RMSE")
-```
-
-```{r}
-#| label: fig-sim-fit
-#| fig-cap: "Observed versus fitted station-to-station flows for the four SIMs (log scales; the dashed line is perfect fit)."
-#| fig-height: 7
-sim_fit <- imap(sim_models, \(m, nm) {
-  tibble(obs = sim_data$trips, fit = fitted(m)) %>%
-    ggplot(aes(fit + 1, obs + 1)) +
-    geom_point(alpha = 0.08, size = 0.5, colour = "#176b87") +
-    geom_abline(linetype = 2, colour = "grey30") +
-    scale_x_log10(labels = label_comma()) + scale_y_log10(labels = label_comma()) +
-    labs(title = str_replace(nm, "_", " "),
-         subtitle = str_c("R² = ", round(CalcRSquared(sim_data$trips, fitted(m)), 3)),
-         x = "Fitted trips + 1", y = "Observed trips + 1") +
-    theme_minimal(base_size = 10)
-})
-ggarrange(plotlist = sim_fit, ncol = 2, nrow = 2)
-```
-
-## Interpretation
-
-```{r}
-#| label: sim-numbers
-#| include: false
-b_dbc <- sim_summary$beta_distance[sim_summary$model == "doubly_constrained"]
-r2_dbc <- sim_summary$R2[sim_summary$model == "doubly_constrained"]
-r2_unc <- sim_summary$R2[sim_summary$model == "unconstrained"]
-```
-
-- **Constraints matter most.** Fit rises from R² = `r round(r2_unc, 2)` (unconstrained) to `r round(r2_dbc, 2)` (doubly constrained). Station-specific origin and destination effects therefore explain far more of the flow pattern than the few attributes we can measure. Unmeasured destination pull from employment, schools and malls is the main omitted factor, which the destination fixed effects absorb.
-- **Distance decay is modest.** In the doubly constrained model, a 1% increase in network distance reduces expected flow by about `r round(abs(b_dbc), 2)`%. Rail is used for long, cross-island trips; this elasticity is far weaker than the access-distance decay in the Huff model below, because people choose a *station* within walking or feeder range but will ride that station's line across the island.
-- **LRT destinations attract fewer trips** (negative `d_lrt`), and **more lines attract more trips** (positive `d_lines`). Both signs agree with the Huff calibration in @sec-huff, which is reassuring.
-- **Limitations.** The doubly constrained model cannot predict flows for a station with no history, because it needs a fixed effect for every origin and destination. This is why it serves as the *explanatory* benchmark, and the Huff model is used for the *predictive* step. The Poisson models also assume equidispersion. With 15% zero pairs and heavy-tailed counts the flows are overdispersed, so standard errors are too small and coefficients should be read as effect sizes, not tested for significance.
 
 # Huff model of station choice {#sec-huff}
 
@@ -925,13 +864,17 @@ huff_general <- function(par, X, D, pop, decay = "exp", k = k_rate) {
   as.numeric(k * colSums(U / rowSums(U) * pop))
 }
 
-huff_predict <- function(gamma, delta, lambda, n_lines, lrt, D, pop, decay = "exp", k = k_rate) {
-  huff_general(c(gamma, delta, lambda), cbind(log(n_lines), as.numeric(lrt)), D, pop, decay, k)
+# Attraction design matrix of the final specification (Model 4: lines + LRT + HDB within 800 m)
+X_attr <- function(n_lines, lrt, hdb_ha) {
+  cbind(log(n_lines), as.numeric(lrt), log(pmax(hdb_ha, 0.5) / 10))
 }
 
 fit_stats <- function(obs, pred) tibble(
   RMSE = sqrt(mean((obs - pred)^2)), MAE = mean(abs(obs - pred)),
   R2 = cor(obs, pred)^2)
+# Display helper: monthly errors -> per weekday
+per_day_tbl <- function(t) t %>% mutate(across(any_of(c("RMSE", "MAE")), \(x) round(x / weekdays_may22)),
+                                     across(any_of("R2"), \(x) round(x, 3)))
 
 c(trip_rate_k = round(k_rate, 3), observed_total = fmt(sum(y_obs)))
 ```
@@ -959,7 +902,7 @@ pred_r1 <- k_rate * total_r1$sum_E_j[match(stations$stn_code, total_r1$suppliers
 
 bind_rows(fit_stats(y_obs, pred_r0) %>% mutate(model = "R0 nearest station"),
           fit_stats(y_obs, pred_r1) %>% mutate(model = "R1 Huff, A = 1, power λ = 2")) %>%
-  relocate(model)
+  relocate(model) %>% per_day_tbl()
 ```
 
 The nearest-station rule explains under half of the variation. It gives every resident to one station and ignores that people regularly walk or take a feeder bus past a closer station to reach a better-served one. The default Huff model does only slightly better because it still treats an LRT halt and a three-line interchange as equally attractive.
@@ -980,6 +923,9 @@ X_specs <- list(
   "4 Lines + LRT + HDB 800m"  = cbind(log(dest_base$n_lines), dest_base$lrt,
                                       log(pmax(dest_base$hdb_ha_800m, 0.5) / 10)),
   "5 Lines + LRT + bus stops 400m" = cbind(log(dest_base$n_lines), dest_base$lrt,
+                                      log(dest_base$bus_stops_400m + 1)),
+  "6 Lines + LRT + HDB 800m + bus stops 400m" = cbind(log(dest_base$n_lines), dest_base$lrt,
+                                      log(pmax(dest_base$hdb_ha_800m, 0.5) / 10),
                                       log(dest_base$bus_stops_400m + 1)))
 
 calibrate <- function(X, decay = "exp", D = D_base, pop = pop_i, y = y_obs, idx = seq_along(y)) {
@@ -995,7 +941,7 @@ decay_table <- imap_dfr(decay_fits, \(o, nm)
                                 if (nm == "power") "pow" else "exp")) %>%
     mutate(decay = nm, gamma = o$par[1], delta = o$par[2], lambda = o$par[3])) %>%
   relocate(decay)
-decay_table %>% mutate(across(where(is.numeric), \(x) round(x, 3)))
+decay_table %>% per_day_tbl() %>% mutate(across(c(gamma, delta, lambda), \(x) round(x, 3)))
 ```
 
 ```{r}
@@ -1015,9 +961,15 @@ tibble(d = seq(0.1, 6, 0.02)) %>%
   theme_minimal()
 ```
 
-The exponential function fits clearly better, with R² `r round(decay_table$R2[2], 3)` against `r round(decay_table$R2[1], 3)` and an RMSE lower by about `r fmt(decay_table$RMSE[1] - decay_table$RMSE[2])` boardings. @fig-decay shows why. The power function keeps a long tail, so a station 5 km away still receives a small but non-trivial share of every subzone's residents. That is unrealistic for station *access*, which is made on foot or by short feeder bus. The exponential function drops off quickly beyond walking range. This choice also matters for the scenario: with a long-tailed power function, every new station would draw small amounts of demand from stations across the island, and impacts would be spread unrealistically thin.
+The exponential function fits clearly better, with R² `r round(decay_table$R2[2], 3)` against `r round(decay_table$R2[1], 3)` and an RMSE lower by about `r fmt((decay_table$RMSE[1] - decay_table$RMSE[2]) / weekdays_may22)` boardings per weekday. @fig-decay shows why. The power function keeps a long tail, so a station 5 km away still receives a small but non-trivial share of every subzone's residents. That is unrealistic for station *access*, which is made on foot or by short feeder bus. The exponential function drops off quickly beyond walking range. This choice also matters for the scenario: with a long-tailed power function, every new station would draw small amounts of demand from stations across the island, and impacts would be spread unrealistically thin.
 
-**Step 2: the attraction specification**, under exponential decay. Five candidates add one driver of station attractiveness at a time: lines served, the LRT-only penalty, network closeness centrality, residential intensity (HDB footprint within 800 m), and feeder-bus access (bus stops within 400 m).
+**Step 2: the attraction specification**, under exponential decay. Five candidates add one driver of station attractiveness at a time: lines served, the LRT-only penalty, network closeness centrality, residential intensity (HDB footprint within 800 m), and feeder-bus access (bus stops within 400 m). A sixth combines residential intensity and feeder-bus access.
+
+In multiplicative form, the attractiveness of station *j* in the richest specification is
+
+$$A_j = n_j^{\gamma} \, e^{\delta \, LRT_j} \, \left(\frac{HDB_j}{10}\right)^{\theta} \, (Bus_j + 1)^{\beta}$$
+
+where $n_j$ is the number of lines served, $LRT_j$ flags LRT-only stations, $HDB_j$ is the HDB footprint (ha) within 800 m and $Bus_j$ is the number of bus stops within 400 m.
 
 ```{r}
 #| label: huff-calibration
@@ -1029,39 +981,50 @@ spec_table <- imap_dfr(calib, \(o, nm) {
     mutate(spec = nm, parameters = length(o$par),
            estimates = str_c(round(o$par, 2), collapse = " / "))
 }) %>% relocate(spec, parameters, estimates)
-spec_table
+spec_table %>% per_day_tbl() %>% rename(`RMSE (per weekday)` = RMSE, `MAE (per weekday)` = MAE)
 ```
 
 ```{r}
 #| label: huff-choose
 #| include: false
-par_final <- calib[["2 Lines + LRT"]]$par
-gamma_hat <- par_final[1]; delta_hat <- par_final[2]; lambda_hat <- par_final[3]
-r2_final <- spec_table$R2[2]; r2_r0 <- fit_stats(y_obs, pred_r0)$R2; r2_r1 <- fit_stats(y_obs, pred_r1)$R2
-r2_gain_clo <- spec_table$R2[3] - spec_table$R2[2]
-r2_gain_hdb <- spec_table$R2[4] - spec_table$R2[2]
-r2_gain_bus <- spec_table$R2[5] - spec_table$R2[2]
+final_spec <- "4 Lines + LRT + HDB 800m"
+par_final <- calib[[final_spec]]$par
+gamma_hat <- par_final[1]; delta_hat <- par_final[2]; theta_hat <- par_final[3]; lambda_hat <- par_final[4]
+r2_of <- function(i) spec_table$R2[i]
+r2_final <- r2_of(4); r2_r0 <- fit_stats(y_obs, pred_r0)$R2; r2_r1 <- fit_stats(y_obs, pred_r1)$R2
+r2_gain_clo <- r2_of(3) - r2_of(2)
+r2_gain_hdb <- r2_of(4) - r2_of(2)
+r2_gain_bus <- r2_of(5) - r2_of(2)
+r2_gain_m6  <- r2_of(6) - r2_of(4)
+beta_bus_m6 <- calib[[6]]$par[4]
 ```
 
-Specification 2 (**Lines + LRT, exponential decay**) is selected:
+Specification 4 (**Lines + LRT + HDB within 800 m, exponential decay**) is selected as the final model.
 
-- It raises R² from `r round(r2_r1, 2)` (default Huff) and `r round(r2_r0, 2)` (nearest station) to `r round(r2_final, 3)`.
-- **Closeness centrality** adds `r sprintf("%+.3f", r2_gain_clo)` to R². That is negligible, so it is dropped.
-- **HDB floor area within 800 m** adds `r sprintf("%+.3f", r2_gain_hdb)` to R². It is still not adopted, for two reasons. It counts the same residents twice, since they are already in the origin populations. And it would systematically penalise new stations whose surrounding housing is not yet built, such as Tengah, which is exactly where the forecast matters most.
-- **Bus stops within 400 m** add only `r sprintf("%+.3f", r2_gain_bus)`. This is an informative negative result. Almost every station in Singapore is surrounded by bus stops, so the *number* of nearby stops does not separate stations whose feeder services pull residents from far away (Woodlands, Boon Lay) from the rest. What matters is *where* those buses come from, which a stop count cannot capture.
-- All three parameters are plausible and stable across specifications:
-  - $\hat\gamma =$ `r round(gamma_hat, 2)`: a two-line interchange is about $2^{\hat\gamma} \approx$ `r round(2^gamma_hat, 1)` times as attractive as a single-line station.
-  - $\hat\delta =$ `r round(delta_hat, 2)`: an LRT-only station is about $e^{\hat\delta} \approx$ `r round(exp(delta_hat), 2)` times as attractive as an MRT station, so most LRT-area residents are drawn to the town's MRT hub.
-  - $\hat\lambda =$ `r round(lambda_hat, 2)` per km: every additional 500 m to a station cuts its attractiveness by about `r pct(1 - exp(-lambda_hat / 2), 0)`. This is a steep access decay, consistent with walking and short feeder trips.
+**Why residential intensity belongs in the model.** Its gain in R² over specification 2 is modest (`r sprintf("%+.3f", r2_gain_hdb)`), but it captures the mechanism this study is about. Singapore's earlier MRT lines were threaded through HDB towns and estates that already existed, so their stations opened into large ready-made populations within walking distance. Many recent stations have been placed in new HDB towns and estates whose homes are still being built and occupied; their surroundings hold little housing, and their ridership is low. The HDB-footprint term makes a station's attractiveness depend on how much housing lies within a 10-minute walk, so the model reproduces this contrast instead of treating a station in an empty new town like one in a mature estate.
+
+The residents counted by the HDB term are also part of the subzone populations, so the two terms overlap. They play different roles, however. The origin population says *how many* residents a subzone has; the HDB term says whether a *station* sits in the middle of housing or at its edge, which a single point per subzone cannot resolve. A station surrounded by blocks collects walk-in riders that a model using subzone points alone would share out with its neighbours.
+
+The other candidates add little:
+
+- **Closeness centrality** adds `r sprintf("%+.3f", r2_gain_clo)` to R² over specification 2, so a station's position in the network graph does not draw residents once lines served are known.
+- **Bus stops within 400 m** add only `r sprintf("%+.3f", r2_gain_bus)` on their own, and specification 6 (HDB plus bus stops) adds `r sprintf("%+.3f", r2_gain_m6)` over specification 4, with a bus-stop coefficient of `r round(beta_bus_m6, 2)`. Almost every station in Singapore is surrounded by bus stops, so the *number* of nearby stops does not separate stations whose feeder services pull residents from far away (Woodlands, Boon Lay) from the rest. What matters is *where* those buses come from, which a stop count cannot capture.
+
+All four parameters of the final model are plausible:
+
+- $\hat\gamma =$ `r round(gamma_hat, 2)`: a two-line interchange is about $2^{\hat\gamma} \approx$ `r round(2^gamma_hat, 1)` times as attractive as a single-line station.
+- $\hat\delta =$ `r round(delta_hat, 2)`: an LRT-only station is about $e^{\hat\delta} \approx$ `r round(exp(delta_hat), 2)` times as attractive as an MRT station, so most LRT-area residents are drawn to the town's MRT hub.
+- $\hat\theta =$ `r round(theta_hat, 2)`: doubling the HDB footprint within 800 m raises a station's attractiveness by about `r pct(2^theta_hat - 1, 0)`.
+- $\hat\lambda =$ `r round(lambda_hat, 2)` per km: every additional 500 m to a station cuts its attractiveness by about `r pct(1 - exp(-lambda_hat / 2), 0)`, a steep access decay consistent with walking and short feeder trips.
 
 ```{r}
 #| label: fig-surface
-#| fig-cap: "Calibration surface: RMSE over the attraction exponent γ and the exponential distance-decay rate λ, holding the LRT penalty δ at its optimum. The cross marks the calibrated solution."
+#| fig-cap: "Calibration surface of the final model: RMSE over the attraction exponent γ and the exponential distance-decay rate λ, holding the LRT penalty δ and the HDB elasticity θ at their optima. The cross marks the calibrated solution."
 #| fig-height: 5
+X_final_base <- X_attr(dest_base$n_lines, dest_base$lrt, dest_base$hdb_ha_800m)
 surface <- expand_grid(gamma = seq(0, 2.5, 0.1), lambda = seq(0.5, 4, 0.1)) %>%
   mutate(rmse = map2_dbl(gamma, lambda, \(g, l)
-    sqrt(mean((y_obs - huff_predict(g, delta_hat, l, dest_base$n_lines, dest_base$lrt,
-                                    D_base, pop_i))^2))))
+    sqrt(mean((y_obs - huff_general(c(g, delta_hat, theta_hat, l), X_final_base, D_base, pop_i))^2))))
 
 ggplot(surface, aes(gamma, lambda, fill = rmse / 1000)) +
   geom_raster() +
@@ -1078,10 +1041,11 @@ The surface has a single, well-defined minimum, so the optimiser has found the g
 
 ```{r}
 #| label: huff-final
-attraction <- function(n_lines, lrt) exp(gamma_hat * log(n_lines) + delta_hat * as.numeric(lrt))
+attraction <- function(n_lines, lrt, hdb_ha) exp(as.numeric(X_attr(n_lines, lrt, hdb_ha) %*% par_final[1:3]))
 
 im_existing <- si_existing %>%
-  mutate(A = attraction(n_lines, lrt)) %>%
+  left_join(destination_df %>% select(stn_code, hdb_ha_800m), by = "stn_code") %>%
+  mutate(A = attraction(n_lines, lrt, hdb_ha_800m)) %>%
   select(SUBZONE_N, stn_code, A, dist_km) %>% as.data.frame()
 
 shares_base <- huff.shares(im_existing, "SUBZONE_N", "stn_code", "A", "dist_km",
@@ -1100,17 +1064,18 @@ calibrated <- dest_base %>%
          pct_error = residual / observed_am_tapin)
 
 c(max_abs_diff_vs_matrix = max(abs(calibrated$pred_base -
-    huff_predict(gamma_hat, delta_hat, lambda_hat, dest_base$n_lines, dest_base$lrt,
-                 D_base, pop_i)[match(calibrated$stn_code, stations$stn_code)])))
+    huff_general(par_final, X_final_base, D_base, pop_i)[match(calibrated$stn_code, stations$stn_code)])))
 ```
 
 ```{r}
 #| label: fig-obs-pred
 #| fig-cap: "Observed versus calibrated morning-peak tap-ins for the 164 existing stations."
 #| fig-height: 5.5
-ggscatterstats(calibrated, x = pred_base, y = observed_am_tapin,
-               xlab = "Predicted AM-peak tap-ins (month)",
-               ylab = "Observed AM-peak tap-ins (month)",
+ggscatterstats(calibrated %>% mutate(pred_day = pred_base / weekdays_may22,
+                                    obs_day = observed_am_tapin / weekdays_may22),
+               x = pred_day, y = obs_day,
+               xlab = "Predicted AM-peak tap-ins per weekday",
+               ylab = "Observed AM-peak tap-ins per weekday",
                marginal = FALSE, bf.message = FALSE,
                point.args = list(alpha = 0.6, colour = "#176b87", size = 2)) +
   geom_abline(linetype = 2, colour = "grey40")
@@ -1125,40 +1090,101 @@ Calibrating and judging fit on the same 164 stations flatters any model. Five-fo
 ```{r}
 #| label: huff-cv
 folds <- sample(rep(1:5, length.out = length(y_obs)))
-X2 <- X_specs[["2 Lines + LRT"]]   # exponential decay (default)
+X4 <- X_specs[[final_spec]]   # exponential decay (default)
 
 cv <- map_dfr(1:5, \(f) {
-  o <- calibrate(X2, idx = which(folds != f))
-  pred <- huff_general(o$par, X2, D_base, pop_i)
-  tibble(fold = f, gamma = o$par[1], delta = o$par[2], lambda = o$par[3],
+  o <- calibrate(X4, idx = which(folds != f))
+  pred <- huff_general(o$par, X4, D_base, pop_i)
+  tibble(fold = f, gamma = o$par[1], delta = o$par[2], theta = o$par[3], lambda = o$par[4],
          test_R2 = cor(y_obs[folds == f], pred[folds == f])^2,
-         test_RMSE = sqrt(mean((y_obs[folds == f] - pred[folds == f])^2)))
+         test_RMSE_per_weekday = sqrt(mean((y_obs[folds == f] - pred[folds == f])^2)) / weekdays_may22)
 })
 
 cv %>% mutate(across(-fold, \(x) round(x, 3)))
-cv %>% summarise(across(c(gamma, delta, lambda, test_R2), list(mean = mean, sd = sd))) %>%
+cv %>% summarise(across(c(gamma, delta, theta, lambda, test_R2), list(mean = mean, sd = sd))) %>%
   mutate(across(everything(), \(x) round(x, 3)))
 ```
 
 Out-of-sample R² averages `r round(mean(cv$test_R2), 2)`, close to the in-sample `r round(r2_final, 2)`, so the model is not over-fitted. The parameter estimates barely move between folds ($\lambda$ ranges from `r round(min(cv$lambda), 2)` to `r round(max(cv$lambda), 2)`). The fold-to-fold range of $\lambda$ is later used as an uncertainty band for the new-station predictions.
 
+## Model 4 or Model 6? Out-of-sample comparison and new-station sensitivity {#sec-m4-m6}
+
+Specification 6 adds bus stops within 400 m to the final model. Its in-sample gain is tiny (@sec-huff), but in-sample fit always rises when a parameter is added. Two further tests decide between the models: how well each predicts stations it has not seen, and whether the choice changes the forecasts for the 29 new stations.
+
+```{r}
+#| label: m4-m6-cv
+X6 <- X_specs[["6 Lines + LRT + HDB 800m + bus stops 400m"]]
+cv_pred <- function(X) {
+  pred <- numeric(length(y_obs))
+  for (f in 1:5) {
+    o <- calibrate(X, idx = which(folds != f))
+    pred[folds == f] <- huff_general(o$par, X, D_base, pop_i)[folds == f]
+  }
+  pred
+}
+cv4 <- cv_pred(X4); cv6 <- cv_pred(X6)
+
+tibble(model = c("Model 4: Lines + LRT + HDB 800m", "Model 6: + bus stops 400m"),
+       parameters = c(ncol(X4), ncol(X6)) + 1) %>%
+  bind_cols(bind_rows(fit_stats(y_obs, cv4), fit_stats(y_obs, cv6))) %>%
+  mutate(RMSE = fmt(RMSE / weekdays_may22), MAE = fmt(MAE / weekdays_may22), R2 = round(R2, 3)) %>%
+  rename(`CV RMSE (per weekday)` = RMSE, `CV MAE (per weekday)` = MAE, `CV R²` = R2)
+```
+
+```{r}
+#| label: m4-m6-new
+par6 <- calib[[6]]$par
+D_exp_m <- dmat(origins_pt, stations_exp)
+attr_exp <- destination_df[match(stations_exp$stn_code, destination_df$stn_code), ]
+X4_exp <- X_attr(stations_exp$n_lines, stations_exp$lrt, attr_exp$hdb_ha_800m)
+X6_exp <- cbind(X4_exp, log(attr_exp$bus_stops_400m + 1))
+
+m46 <- tibble(stn_code = stations_exp$stn_code, status = stations_exp$status,
+              m4 = huff_general(par_final, X4_exp, D_exp_m, pop_i) / weekdays_may22,
+              m6 = huff_general(par6, X6_exp, D_exp_m, pop_i) / weekdays_may22) %>%
+  filter(status != "Existing") %>%
+  left_join(destination_df %>% select(stn_code, stn_name, bus_stops_400m), by = "stn_code") %>%
+  mutate(diff = m6 - m4, diff_pct = diff / m4)
+
+rho_46 <- cor(m46$m4, m46$m6, method = "spearman")
+p25_day <- quantile(y_obs, 0.25) / weekdays_may22
+flip <- m46 %>% filter((m4 < p25_day) != (m6 < p25_day))
+
+m46 %>% slice_max(abs(diff_pct), n = 6) %>%
+  transmute(station = str_to_title(stn_name), bus_stops_400m,
+            `Model 4` = fmt(m4), `Model 6` = fmt(m6), difference = pct(diff_pct, 0))
+```
+
+```{r}
+#| label: m4-m6-numbers
+#| include: false
+cv_r2_4 <- fit_stats(y_obs, cv4)$R2; cv_r2_6 <- fit_stats(y_obs, cv6)$R2
+cv_rmse_4 <- fit_stats(y_obs, cv4)$RMSE; cv_rmse_6 <- fit_stats(y_obs, cv6)$RMSE
+```
+
+**Result.** Out of sample, Model 6 is `r if (cv_rmse_6 < cv_rmse_4) "marginally better" else "no better"` than Model 4 (cross-validated R² `r round(cv_r2_6, 3)` against `r round(cv_r2_4, 3)`; RMSE `r fmt(cv_rmse_6 / weekdays_may22)` against `r fmt(cv_rmse_4 / weekdays_may22)` boardings per weekday). The two models rank the 29 new stations almost identically (Spearman ρ = `r round(rho_46, 3)`). The largest differences, shown above, are at stations with unusually many or few bus stops nearby, and `r if (nrow(flip) == 0) "no new station" else str_c(nrow(flip), " station(s)")` crosses the lower-quartile line when Model 6 replaces Model 4.
+
+**Decision.** Model 4 is kept. The bus-stop term does not improve out-of-sample accuracy in any meaningful way, its coefficient has an implausible negative sign (more bus stops, less attraction), and it leaves the conclusions about the new stations unchanged. Model 6 is reported as a robustness check: the findings below hold under either model.
+
 ## Where the model errs
 
 ```{r}
 #| label: fig-residual-map
-#| fig-cap: "Residuals of the calibrated Huff model (observed minus predicted AM-peak tap-ins). Blue = model under-predicts; red = model over-predicts."
+#| fig-cap: "Residuals of the calibrated Huff model (observed minus predicted AM-peak tap-ins per weekday). Bubble size is the size of the error; blue = model under-predicts, red = over-predicts."
 #| fig-height: 6.5
 res_map <- stations %>% left_join(calibrated %>% select(stn_code, residual), by = "stn_code") %>%
-  mutate(abs_res = abs(residual))
+  mutate(res_day = residual / weekdays_may22, abs_res = abs(res_day))
 
 tm_shape(subzones) + tm_polygons(fill = "grey97", col = "grey85", lwd = 0.3) +
   tm_shape(res_map) +
-  tm_symbols(size = "abs_res", fill = "residual",
+  tm_symbols(size = "abs_res", fill = "res_day",
              fill.scale = tm_scale_intervals(style = "fixed",
-                                             breaks = c(-2e5, -5e4, -2e4, 2e4, 5e4, 2e5),
-                                             values = "brewer.rd_bu"),
-             fill.legend = tm_legend(title = "Residual"),
-             size.legend = tm_legend(show = FALSE), col = "grey30", lwd = 0.4) +
+                                             breaks = c(-12000, -2500, -1000, 1000, 2500, 12000),
+                                             values = "brewer.rd_bu",
+                                             labels = c("< -2,500", "-2,500 to -1,000", "-1,000 to 1,000",
+                                                        "1,000 to 2,500", "> 2,500")),
+             fill.legend = tm_legend(title = "Residual per weekday"),
+             size.legend = tm_legend(title = "|Residual| per weekday"), col = "grey30", lwd = 0.4) +
   tm_shape(res_map %>% slice_max(abs_res, n = 8)) +
   tm_text("stn_code", size = 0.55, ymod = 0.8) +
   tm_title("Huff model residuals by station") +
@@ -1171,8 +1197,9 @@ tm_shape(subzones) + tm_polygons(fill = "grey97", col = "grey85", lwd = 0.3) +
 #| label: residual-table
 calibrated %>%
   slice_max(abs(residual), n = 10) %>%
-  transmute(stn_code, stn_name, observed = fmt(observed_am_tapin),
-            predicted = fmt(pred_base), residual = fmt(residual))
+  transmute(stn_code, stn_name, observed_per_weekday = fmt(observed_am_tapin / weekdays_may22),
+            predicted_per_weekday = fmt(pred_base / weekdays_may22),
+            residual_per_weekday = fmt(residual / weekdays_may22))
 ```
 
 The largest residuals form three geographically coherent groups.
@@ -1192,7 +1219,8 @@ The calibrated parameters are applied to the expanded network. New stations are 
 ```{r}
 #| label: scenario-expanded
 im_expanded <- si_expanded %>%
-  mutate(A = attraction(n_lines, lrt)) %>%
+  left_join(destination_df %>% select(stn_code, hdb_ha_800m), by = "stn_code") %>%
+  mutate(A = attraction(n_lines, lrt, hdb_ha_800m)) %>%
   select(SUBZONE_N, stn_code, A, dist_km) %>% as.data.frame()
 
 shares_exp <- huff.shares(im_expanded, "SUBZONE_N", "stn_code", "A", "dist_km",
@@ -1204,8 +1232,9 @@ total_exp <- shares_exp %>%
 
 D_exp <- dmat(origins_pt, stations_exp)
 lambda_band <- range(cv$lambda)
-band <- map(lambda_band, \(l) huff_predict(gamma_hat, delta_hat, l, stations_exp$n_lines,
-                                           stations_exp$lrt, D_exp, pop_i))
+hdb_exp <- destination_df$hdb_ha_800m[match(stations_exp$stn_code, destination_df$stn_code)]
+X_final_exp <- X_attr(stations_exp$n_lines, stations_exp$lrt, hdb_exp)
+band <- map(lambda_band, \(l) huff_general(c(par_final[1:3], l), X_final_exp, D_exp, pop_i))
 
 scenario <- stations_exp %>% st_drop_geometry() %>%
   select(stn_code, stn_name, status, n_lines) %>%
@@ -1258,14 +1287,71 @@ top3 <- new_pred %>% slice_max(pred_exp, n = 3) %>% pull(stn_name)
 Two clear messages emerge from @fig-new-stations.
 
 - **Stations inserted into mature HDB estates lead.** `r str_to_title(top3[1])`, `r str_to_title(top3[2])` and `r str_to_title(top3[3])` top the ranking. Each is placed in an established estate that is currently beyond comfortable walking distance of an MRT line, and each would rank in the upper quarter of today's stations from day one. On average a CRL1 station attracts about `r fmt(crl_mean)` morning tap-ins per weekday, almost twice the JRL average of `r fmt(jrl_mean)`.
-- **Several JRL stations would be "ghost-risk" stations on today's population.** `r n_low` of the 29 new stations fall below the lower quartile of existing stations: `r str_c(str_to_title(low_names), collapse = ", ")`. They are of three kinds:
-  - stations in employment areas with few residents, namely the Jurong industrial estate (Tukang, Jurong Hill, Jurong Pier) and the Changi aviation cluster (Aviation Park);
+- **Several new stations would be "ghost-risk" stations on today's population.** `r n_low` of the 29 new stations fall below the lower quartile of existing stations: `r str_c(str_to_title(low_names), collapse = ", ")`. They are of three kinds:
+  - stations in employment areas with few residents, namely the Jurong industrial estate (Tukang, Jurong Hill, Jurong Pier) and the Changi and Loyang employment areas (Aviation Park, Loyang);
   - the NTU campus stations, whose student and staff trips are not home-based morning boardings;
   - Tengah, a new town that had essentially no residents at the 2020 Census.
 
 The cross-validated uncertainty bands are narrow relative to the differences between stations, so the *ranking* of new stations is robust to parameter uncertainty, even though the absolute numbers should be treated as indicative. For the employment and campus stations, a low morning *boarding* forecast does not mean low use: these stations may be busy as morning *destinations*, which this residential model does not measure. @sec-va-mci tests this directly with an MCI destination-choice model. For Tengah, the case rests on future residents, the subject of the next section.
 
-## Sensitivity: Tengah at build-out
+## Why some new stations will be quiet: housing within walking distance {#sec-hdb-reveal}
+
+The final model ties a station's pull to the housing around it. @fig-hdb-reveal shows why this matters for the new lines: it plots morning boardings against the HDB footprint within 800 m for every existing station (observed, May 2022) and every new station (predicted).
+
+```{r}
+#| label: fig-hdb-reveal
+#| fig-cap: "AM-peak tap-ins per weekday against HDB footprint within 800 m. Grey: existing stations (observed, May 2022). Coloured: new JRL/CRL1 stations (predicted). New stations with fewer than 15 ha of HDB footprint within 800 m are labelled."
+#| fig-height: 5.5
+hdb_cmp <- bind_rows(
+  calibrated %>% transmute(stn_code, stn_name, hdb_ha_800m, per_day = observed_am_tapin / weekdays_may22,
+                           group = "Existing (observed)"),
+  new_pred %>% left_join(destination_df %>% select(stn_code, hdb_ha_800m), by = "stn_code") %>%
+    transmute(stn_code, stn_name, hdb_ha_800m, per_day, group = str_c("New ", line, " (predicted)")))
+
+ggplot(hdb_cmp, aes(hdb_ha_800m + 1, per_day, colour = group)) +
+  geom_point(data = filter(hdb_cmp, group == "Existing (observed)"), size = 1.8, alpha = 0.6) +
+  geom_point(data = filter(hdb_cmp, group != "Existing (observed)"), size = 2.8) +
+  ggrepel::geom_text_repel(data = filter(hdb_cmp, group != "Existing (observed)", hdb_ha_800m < 15),
+                           aes(label = str_to_title(stn_name)), size = 3, show.legend = FALSE,
+                           seed = 626, max.overlaps = 20) +
+  geom_hline(yintercept = p25_existing / weekdays_may22, linetype = 2, colour = "grey40") +
+  scale_x_log10() + scale_y_log10(labels = label_comma()) +
+  scale_colour_manual(values = c("Existing (observed)" = "grey60", "New CRL (predicted)" = "#97c616",
+                                 "New JRL (predicted)" = "#0099aa")) +
+  labs(x = "HDB footprint within 800 m (ha + 1, log)", y = "AM-peak tap-ins per weekday (log)", colour = NULL) +
+  theme_minimal() + theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: hdb-reveal-table
+hdb_cmp %>%
+  mutate(group = if_else(group == "Existing (observed)", group, "New (predicted)"),
+         housing = cut(hdb_ha_800m, c(-Inf, 5, 15, 30, Inf),
+                       labels = c("< 5 ha", "5–15 ha", "15–30 ha", "> 30 ha"))) %>%
+  group_by(group, housing) %>%
+  summarise(stations = n(), median_tapins_per_weekday = fmt(median(per_day)), .groups = "drop") %>%
+  pivot_wider(names_from = group, values_from = c(stations, median_tapins_per_weekday))
+```
+
+```{r}
+#| label: hdb-reveal-numbers
+#| include: false
+hdb_med_exist <- median(hdb_cmp$hdb_ha_800m[hdb_cmp$group == "Existing (observed)"])
+hdb_med_new <- median(hdb_cmp$hdb_ha_800m[hdb_cmp$group != "Existing (observed)"])
+rho_hdb <- cor(hdb_cmp$hdb_ha_800m[hdb_cmp$group == "Existing (observed)"],
+               hdb_cmp$per_day[hdb_cmp$group == "Existing (observed)"], method = "spearman")
+low_hdb_new <- hdb_cmp %>% filter(group != "Existing (observed)", hdb_ha_800m < 5)
+```
+
+This is the issue that the ghost-station debate is about, and the data reveal it clearly:
+
+- **Among existing stations, housing within walking distance and morning boardings go together** (Spearman ρ = `r round(rho_hdb, 2)`). Existing stations with less than 5 ha of HDB footprint within 800 m board a median of only `r fmt(median(hdb_cmp$per_day[hdb_cmp$group == "Existing (observed)" & hdb_cmp$hdb_ha_800m < 5]))` people per weekday morning, against `r fmt(median(hdb_cmp$per_day[hdb_cmp$group == "Existing (observed)" & hdb_cmp$hdb_ha_800m >= 5]))` for the rest. Most older stations were threaded through HDB towns that already existed, so they opened into ready-made demand.
+- **`r nrow(low_hdb_new)` of the 29 new stations have less than 5 ha of HDB footprint within 800 m**: `r str_c(str_to_title(low_hdb_new$stn_name), collapse = ", ")`. They sit in industrial estates, the NTU campus and the airport and Loyang employment areas.
+- **These stations are predicted to have extremely low ridership**, at the bottom left of the chart and mostly far below the lower quartile of existing stations. Tengah is the other case: its HDB blocks are being completed and occupied, but at the 2020 Census its subzones had almost no residents (@sec-tengah).
+
+A model without the HDB term (specification 2) would rate an MRT station in an empty district as highly as one in a mature estate at the same distance from residents. It would therefore overstate exactly the stations at risk.
+
+## Sensitivity: Tengah at build-out {#sec-tengah}
 
 A model driven by today's population cannot see tomorrow's residents, which is exactly the trap of the ghost-station debate. Tengah is planned for about **42,000 homes** across five districts. At roughly 3.1 residents per home (close to the Census 2020 average household size), build-out adds about 130,000 residents. These are allocated equally to Tengah's five residential subzones (Plantation, Park, Garden, Brickland and Forest Hill), and the expanded-network model is re-run.
 
@@ -1283,8 +1369,7 @@ origins_tengah <- subzones %>%
   st_as_sf(coords = c("ox", "oy"), crs = 3414)
 
 D_tengah <- dmat(origins_tengah, stations_exp)
-pred_tengah <- huff_predict(gamma_hat, delta_hat, lambda_hat, stations_exp$n_lines,
-                            stations_exp$lrt, D_tengah, origins_tengah$pop)
+pred_tengah <- huff_general(par_final, X_final_exp, D_tengah, origins_tengah$pop)
 
 tengah_cmp <- scenario %>%
   mutate(pred_tengah = pred_tengah) %>%
@@ -1343,31 +1428,33 @@ bind_rows(impact %>% slice_min(change, n = 8), impact %>% slice_max(change, n = 
 
 ```{r}
 #| label: fig-impact
-#| fig-cap: "Interactive map: predicted change in AM-peak tap-ins at existing stations after JRL and CRL1 open. Red = losing riders to new stations; blue = gaining (mainly upgraded interchanges); grey = change under 1%. Orange lines and dots are the new JRL/CRL1 links and stations. Click a station for its figures."
+#| fig-cap: "Interactive map: predicted change in AM-peak tap-ins at existing stations after JRL and CRL1 open. Bubble size is the absolute change per weekday; colour is the percentage change (red = losing riders, blue = gaining, grey = under 1%). Orange lines and white dots are the new JRL/CRL1 links and stations. Click a station for its figures."
 impact_view <- impact_sf %>%
-  mutate(Station = str_to_title(stn_name),
-         `Change %` = round(change_pct * 100, 1),
-         `Change per weekday` = round(change / weekdays_may22),
-         `Upgraded interchange` = upgraded)
+  mutate(day_change = change / weekdays_may22,
+         cls = cut(change_pct, c(-Inf, -0.3, -0.15, -0.05, -0.01, 0.01, 0.05, 0.3, Inf),
+                   labels = c("< -30%", "-30 to -15%", "-15 to -5%", "-5 to -1%", "-1 to 1%",
+                              "1 to 5%", "5 to 30%", "> 30%"))) %>%
+  st_transform(4326)
+pal_imp <- colorFactor(c("#b2182b", "#d6604d", "#f4a582", "#fddbc7", "#d9d9d9",
+                         "#d1e5f0", "#92c5de", "#2166ac"), levels = levels(impact_view$cls))
+max_ch <- max(abs(impact_view$day_change))
 
-as_leaflet(
-  network_context() +
-  tm_shape(net_new_sf) + tm_lines(col = "#d95f02", lwd = 3, col_alpha = 0.8) +
-  tm_shape(impact_view %>% filter(abs(change_pct) < 0.01)) +
-  tm_dots(fill = "grey70", size = 0.35, id = "Station",
-          popup.vars = c("Change %", "Change per weekday")) +
-  tm_shape(impact_view %>% filter(abs(change_pct) >= 0.01)) +
-  tm_dots(fill = "change_pct", size = 0.6,
-             fill.scale = tm_scale_intervals(style = "fixed",
-                                             breaks = c(-1, -0.3, -0.15, -0.05, 0, 0.05, 0.3, 2),
-                                             values = "brewer.rd_bu", midpoint = 0,
-                                             labels = c("< -30%", "-30 to -15%", "-15 to -5%",
-                                                        "-5 to 0%", "0 to 5%", "5 to 30%", "> 30%")),
-             fill.legend = tm_legend(title = "Change in AM tap-ins"),
-             id = "Station",
-             popup.vars = c("Change %", "Change per weekday", "Upgraded interchange")) +
-  tm_shape(new_stations %>% mutate(Station = str_to_title(stn_name))) +
-  tm_dots(fill = "#d95f02", size = 0.35, id = "Station"))
+base_leaflet() %>%
+  add_network(new_links = TRUE) %>%
+  addCircleMarkers(data = impact_view, group = "Existing stations",
+                   radius = ~radius_of(abs(day_change), max_ch), color = "#555", weight = 0.6,
+                   fillColor = ~pal_imp(cls), fillOpacity = 0.85,
+                   label = ~str_to_title(stn_name),
+                   popup = ~sprintf("<b>%s</b><br>Change: %s tap-ins / weekday (%s)%s",
+                                    str_to_title(stn_name), comma(round(day_change)),
+                                    pct(change_pct), if_else(upgraded, "<br>Upgraded interchange", ""))) %>%
+  addCircleMarkers(data = st_transform(new_stations, 4326), group = "New stations",
+                   radius = 3, color = "#d95f02", weight = 1, fillColor = "white", fillOpacity = 1,
+                   label = ~str_to_title(stn_name)) %>%
+  addLegend("bottomright", pal = pal_imp, values = impact_view$cls, opacity = 0.9,
+            title = "Change in AM tap-ins") %>%
+  add_size_legend(c(500, 2000, 8000), max_ch, "Change per weekday (±)") %>%
+  layer_control(c("Existing stations", "New stations", "Rail network"))
 ```
 
 ```{r}
@@ -1423,23 +1510,37 @@ station_names <- bind_rows(st_drop_geometry(stations), st_drop_geometry(new_stat
 market_view <- market_change %>%
   populated_for_map() %>%
   filter(change != "Unchanged") %>%
-  mutate(Subzone = str_to_title(SUBZONE_N),
-         `Before` = str_to_title(station_names$stn_name[match(dom_before, station_names$stn_code)]),
-         `After` = str_to_title(station_names$stn_name[match(dom_after, station_names$stn_code)]),
-         Residents = pop)
+  mutate(before = str_to_title(station_names$stn_name[match(dom_before, station_names$stn_code)]),
+         after = str_to_title(station_names$stn_name[match(dom_after, station_names$stn_code)])) %>%
+  st_transform(4326)
+pal_mkt <- colorFactor(c("#d95f02", "#7570b3"),
+                       levels = c("Captured by a new station", "Switched to another existing station"))
 
-as_leaflet(
-  tm_shape(market_view) +
-  tm_polygons(fill = "change",
-              fill.scale = tm_scale_categorical(values = c("Captured by a new station" = "#d95f02",
-                                                           "Switched to another existing station" = "#7570b3")),
-              fill.legend = tm_legend(title = "Dominant station"), fill_alpha = 0.6,
-              col = "white", lwd = 1, id = "Subzone",
-              popup.vars = c("Before", "After", "Residents")) +
-  network_context() +
-  tm_shape(net_new_sf) + tm_lines(col = "#d95f02", lwd = 3) +
-  tm_shape(new_stations %>% mutate(Station = str_to_title(stn_name))) +
-  tm_dots(fill = "black", size = 0.35, id = "Station"))
+base_leaflet() %>%
+  addPolygons(data = market_view, group = "Subzones that change",
+              fillColor = ~pal_mkt(change), fillOpacity = 0.6, color = "white", weight = 1,
+              label = ~str_to_title(SUBZONE_N),
+              popup = ~sprintf("<b>%s</b><br>Residents: %s<br>Before: %s (%s)<br>After: %s (%s)",
+                               str_to_title(SUBZONE_N), comma(pop), before, pct(p_before, 0),
+                               after, pct(p_after, 0))) %>%
+  add_network(new_links = TRUE) %>%
+  addCircleMarkers(data = st_transform(new_stations, 4326), group = "New stations",
+                   radius = 3, color = "black", weight = 1, fillColor = "white", fillOpacity = 1,
+                   label = ~str_to_title(stn_name)) %>%
+  addLegend("bottomright", pal = pal_mkt, values = market_view$change, opacity = 0.8,
+            title = "Dominant station") %>%
+  layer_control(c("Subzones that change", "New stations", "Rail network"))
+```
+
+```{r}
+#| label: market-table
+market_change %>% st_drop_geometry() %>%
+  filter(change != "Unchanged") %>%
+  mutate(before = str_to_title(station_names$stn_name[match(dom_before, station_names$stn_code)]),
+         after = str_to_title(station_names$stn_name[match(dom_after, station_names$stn_code)])) %>%
+  arrange(change, PLN_AREA_N, desc(pop)) %>%
+  transmute(planning_area = str_to_title(PLN_AREA_N), subzone = str_to_title(SUBZONE_N),
+            residents = fmt(pop), before, after, change)
 ```
 
 ```{r}
@@ -1453,9 +1554,9 @@ n_sw <- sum(mc$change == "Switched to another existing station")
 
 Only `r n_new` of 286 populated subzones (`r fmt(pop_new)` residents) change their dominant station to a new one, and `r n_sw` more switch to a different existing station. The shifts form three groups:
 
-- **West.** Teban Gardens and Penjuru Crescent (Jurong East) move to Pandan Reservoir. Wenya, Boon Lay Place and Yunnan (Jurong West) move to Jurong West and Gek Poh. Bukit Batok West and Brickworks move to Bukit Batok West and Tengah Park, Peng Siang to Choa Chu Kang West, and Forest Hill to Tengah. The industrial subzones of Tukang, Liu Fang and Samulun move to their JRL stations.
-- **North-east.** Serangoon North, Serangoon Garden and Seletar Hills move to Serangoon North and Tavistock. Trafalgar moves to the upgraded Hougang interchange.
-- **East.** Pasir Ris Drive, Flora Drive, Loyang, Tampines North and Paya Lebar North move to Pasir Ris East, Loyang and Tampines North.
+- **West.** Teban Gardens and Penjuru Crescent (Jurong East) move to Pandan Reservoir, and Yuhua East to Toh Guan. Wenya, Boon Lay Place and Yunnan (Jurong West) move to Jurong West and Gek Poh. Bukit Batok West and Brickworks move to Bukit Batok West and Tengah Park, Peng Siang to Choa Chu Kang West, and Forest Hill to Tengah. The industrial subzones of Tukang, Liu Fang and Samulun move to their JRL stations.
+- **North-east.** Serangoon North, Serangoon Garden and Seletar Hills move to Serangoon North and Tavistock. Trafalgar moves to the upgraded Hougang interchange, and Shangri-La and Upper Thomson to the upgraded Bright Hill interchange.
+- **East.** Pasir Ris Drive, Flora Drive, Loyang East and West, Tampines North and Paya Lebar North move to Pasir Ris East, Loyang and Tampines North.
 
 Everywhere else, including the whole of the city centre, the north and the south-west, the dominant station is unchanged. The new lines reshape market areas locally rather than system-wide.
 
@@ -1502,15 +1603,14 @@ The station with the largest absolute loss is `r str_to_title(focal$stn_name)`, 
 
 # Value-added analysis {#sec-va}
 
-Three additional analyses address questions the core Huff model cannot answer:
+Two additional analyses address questions the core Huff model cannot answer:
 
 1. **Are the low-boarding JRL stations really "ghost stations"?** The Huff model only sees *home-end* demand. An alternative probabilistic spatial interaction model, the **Multiplicative Competitive Interaction (MCI) model**, is calibrated on observed station-to-station choice shares to predict *destination-end* demand at the new stations (@sec-va-mci).
 2. **Are the Huff model's errors spatially structured?** (@sec-va-moran)
-3. **Who gains rail access from the new lines?** (@sec-va-access)
 
 ## An alternative probabilistic SIM: MCI destination-choice model {#sec-va-mci}
 
-**Question.** Eight new stations fall below today's lower quartile of morning *boardings* (@fig-new-stations). Most sit in the Jurong industrial estate, the NTU campus or the Changi aviation cluster, places people travel *to* in the morning rather than *from*. A home-end model cannot tell whether these stations will be busy as destinations, so the "ghost-risk" label may be wrong for some of them.
+**Question.** `r n_low` new stations fall below today's lower quartile of morning *boardings* (@fig-new-stations). Most sit in the Jurong industrial estate, the NTU campus or the Changi aviation cluster, places people travel *to* in the morning rather than *from*. A home-end model cannot tell whether these stations will be busy as destinations, so the "ghost-risk" label may be wrong for some of them.
 
 **Method.** The MCI model (Nakanishi & Cooper, 1974), the second probabilistic model in the `MCI` package, describes how passengers boarding at station *i* choose where to alight:
 
@@ -1650,7 +1750,7 @@ alight_r2 <- cor(alight_fit$observed, alight_fit$predicted)^2
 - **Residential floor space:** no effect (t = `r round(mci_ct["d_res_lc", "t value"], 1)`). This is expected, since morning trips end at workplaces and schools, not at homes, and it confirms that the model separates destination demand from the home-end demand handled by the Huff model.
 - **Fit:** the attributes raise the adjusted R² of the log-centered model from `r round(adj_null, 2)` (distance only) to `r round(adj_full, 2)`, and the model reproduces total morning alightings at existing stations with R² = `r round(alight_r2, 2)`.
 
-Most of the remaining variation comes from destinations the attributes cannot describe, such as hospitals, the airport and major schools. The fit is therefore weaker than that of the doubly constrained SIM (@sec-sim). The trade-off is deliberate: the doubly constrained SIM cannot be applied to a station that does not yet exist, whereas the MCI model can.
+Most of the remaining variation comes from destinations the attributes cannot describe, such as hospitals, the airport and major schools. The fit is therefore weaker than that of a doubly constrained SIM (explored in @sec-sim). The trade-off is deliberate: the doubly constrained SIM cannot be applied to a station that does not yet exist, whereas the MCI model can.
 
 **Prediction for the 2030 network.** The calibrated MCI model is applied to the expanded network (193 stations, network distances recomputed on the expanded rail graph). Morning boardings at every station come from the Huff scenario, so the two models are chained: **Huff → where residents board, MCI → where those passengers alight.**
 
@@ -1719,26 +1819,27 @@ n_dest <- sum(new_use$role == "Destination station")
 
 ```{r}
 #| label: fig-new-station-map
-#| fig-cap: "Interactive map: predicted morning use of the 29 new stations. Dot size is total predicted use (boardings + alightings; exact figures in the pop-up); colour is the station's role. Grey lines are the existing network."
+#| fig-cap: "Interactive map: predicted morning use of the 29 new stations. Bubble size is total predicted use (boardings + alightings, see the size legend); colour is the station's role. Grey lines are the existing network, orange lines the new links. Click a station for its figures."
 new_use_sf <- new_stations %>%
   left_join(new_use %>% select(stn_code, board_day, alight_day, total_day, role), by = "stn_code") %>%
-  mutate(across(c(board_day, alight_day, total_day), round), Station = str_to_title(stn_name))
+  st_transform(4326)
+pal_role <- colorFactor(c("#d95f02", "#176b87", "#7570b3"),
+                        levels = c("Destination station", "Home station", "Mixed"))
+max_use <- max(new_use_sf$total_day)
 
-as_leaflet(
-  network_context() +
-  tm_shape(net_new_sf) + tm_lines(col = "#d95f02", lwd = 3) +
-  tm_shape(new_use_sf) +
-  tm_dots(size = "total_day", fill = "role", fill_alpha = 0.9,
-             size.scale = tm_scale_continuous(values.scale = 1.4),
-             fill.scale = tm_scale_categorical(values = c("Destination station" = "#d95f02",
-                                                          "Home station" = "#176b87",
-                                                          "Mixed" = "#7570b3")),
-             fill.legend = tm_legend(title = "Station role"),
-             size.legend = tm_legend_hide(),
-             id = "Station",
-             popup.vars = c("Line" = "line", "Boardings / weekday" = "board_day",
-                            "Alightings / weekday" = "alight_day", "Total / weekday" = "total_day",
-                            "Role" = "role")))
+base_leaflet() %>%
+  add_network(new_links = TRUE) %>%
+  addCircleMarkers(data = new_use_sf %>% arrange(desc(total_day)), group = "New stations",
+                   radius = ~radius_of(total_day, max_use, 22), color = "white", weight = 1,
+                   fillColor = ~pal_role(role), fillOpacity = 0.85,
+                   label = ~str_to_title(stn_name),
+                   popup = ~sprintf("<b>%s</b> (%s)<br>Boardings: %s / weekday<br>Alightings: %s / weekday<br>Total: %s / weekday<br>%s",
+                                    str_to_title(stn_name), line, comma(round(board_day)),
+                                    comma(round(alight_day)), comma(round(total_day)), role)) %>%
+  addLegend("bottomright", pal = pal_role, values = new_use_sf$role, opacity = 0.9,
+            title = "Station role") %>%
+  add_size_legend(c(1000, 5000, 15000), max_use, "Total AM use per weekday", max_r = 22) %>%
+  layer_control(c("New stations", "Rail network"))
 ```
 
 **Insight.** Adding destination demand changes the ghost-station verdict.
@@ -1796,18 +1897,25 @@ count(st_drop_geometry(res_map), cluster)
 
 ```{r}
 #| label: fig-lisa
-#| fig-cap: "Interactive map: LISA clusters of Huff model residuals (p < 0.05, k = 6 nearest neighbours). Click a station for its residual."
-lisa_view <- res_map %>% mutate(Station = str_to_title(stn_name), Residual = round(residual))
-as_leaflet(
-  network_context() +
-  tm_shape(lisa_view) +
-  tm_dots(fill = "cluster", size = 0.6,
-          fill.scale = tm_scale_categorical(values = c(
-            "High-High (under-predicted cluster)" = "#2166ac",
-            "Low-Low (over-predicted cluster)" = "#b2182b",
-            "High-Low" = "#92c5de", "Low-High" = "#f4a582", "Not significant" = "grey70")),
-          fill.legend = tm_legend(title = "LISA cluster"),
-          id = "Station", popup.vars = c("Residual", "cluster")))
+#| fig-cap: "Interactive map: LISA clusters of Huff model residuals (p < 0.05, k = 6 nearest neighbours). Bubble size is the absolute residual per weekday. Click a station for its residual."
+lisa_levels <- c("High-High (under-predicted cluster)", "Low-Low (over-predicted cluster)",
+                 "High-Low", "Low-High", "Not significant")
+lisa_view <- res_map %>% mutate(cluster = factor(cluster, levels = lisa_levels)) %>% st_transform(4326)
+pal_lisa <- colorFactor(c("#2166ac", "#b2182b", "#92c5de", "#f4a582", "#bdbdbd"), levels = lisa_levels)
+max_res <- max(abs(lisa_view$residual)) / weekdays_may22
+
+base_leaflet() %>%
+  add_network() %>%
+  addCircleMarkers(data = lisa_view, group = "Stations",
+                   radius = ~radius_of(abs(residual) / weekdays_may22, max_res), color = "#555", weight = 0.6,
+                   fillColor = ~pal_lisa(cluster), fillOpacity = 0.85,
+                   label = ~str_to_title(stn_name),
+                   popup = ~sprintf("<b>%s</b><br>Residual: %s tap-ins / weekday<br>%s",
+                                    str_to_title(stn_name), comma(round(residual / weekdays_may22)), cluster)) %>%
+  addLegend("bottomright", pal = pal_lisa, values = lisa_view$cluster, opacity = 0.9,
+            title = "LISA cluster") %>%
+  add_size_legend(c(1000, 3000, 7000), max_res, "|Residual| per weekday") %>%
+  layer_control(c("Stations", "Rail network"))
 ```
 
 ```{r}
@@ -1827,106 +1935,176 @@ ll <- lisa_tbl %>% filter(str_starts(cluster, "Low-Low")) %>% pull(stn_name)
 
 **Assumptions and limitations.** The k = 6 neighbour definition was chosen a priori; the robustness table shows the conclusion holds for k = 4 to 10. Moran's I on residuals tests for clustering but cannot identify its cause. With 164 points, local tests also carry a multiple-testing risk, so isolated significant stations should not be over-interpreted.
 
-## Accessibility gains and equity (KD2SFCA) {#sec-va-access}
+# Station-by-station verdict {#sec-verdict}
 
-**Question.** Ridership is the operator's view. The sustainability view asks whether the new lines improve access for residents who are currently *least* served, or mainly add capacity where access is already good.
+The analyses above each look at the new stations from one angle. @tbl-verdict brings them together into one verdict per station. The categories are assigned in order, and each rests on a result from this report:
 
-**Method.** The kernel-density two-step floating catchment area method (KD2SFCA, Chapter 17) is computed for every populated subzone before and after expansion. Supply is the station's service level (number of lines), demand is resident population, and the catchment is 2 km (walking plus a short feeder trip) with the default power of 2. Unlike the Hansen measure, 2SFCA accounts for competition for supply among residents and is bounded by the catchment, so adding a station far away cannot inflate everyone's score.
+1. **Opening-day risk**: below the lower quartile of existing stations even after adding MCI destination demand (@sec-va-mci).
+2. **Depends on future housing**: boardings at least double when Tengah is built out (@sec-tengah).
+3. **Destination-led**: predicted morning alightings exceed boardings by more than half; the station is busy as a place people travel *to* (@sec-va-mci).
+4. **Strong from day one**: predicted boardings in the top quarter of existing stations under both Model 4 and Model 6 (@sec-m4-m6).
+5. **Moderate**: the remaining stations, in the normal range of today's network.
 
 ```{r}
-#| label: va-access
-acc <- function(D, supply) as.numeric(ac(p = origins_pt$pop, n = supply, D = D,
-                                         d0 = 2, power = 2, family = "KD2SFCA"))
-access <- origins_poly %>%
-  mutate(acc_before = acc(D_base, dest_base$n_lines),
-         acc_after = acc(D_exp, stations_exp$n_lines),
-         gain = acc_after - acc_before) %>%
-  filter(pop >= 100) %>%                      # ratios are unstable for near-empty subzones
-  mutate(base_quintile = ntile(acc_before, 5))
+#| label: tbl-verdict
+#| tbl-cap: "Verdict for the 29 new stations. Boardings and alightings are predicted AM-peak passengers per weekday on Census 2020 population; build-out is the Tengah sensitivity."
+p75_day <- quantile(y_obs, 0.75) / weekdays_may22
+buildout <- tibble(stn_code = scenario$stn_code, buildout_day = pred_tengah / weekdays_may22)
 
-access %>% st_drop_geometry() %>%
-  group_by(base_quintile) %>%
-  summarise(subzones = n(), residents = sum(pop),
-            residents_gaining = sum(pop[gain > 1e-9]),
-            share_residents_gaining = sum(pop[gain > 1e-9]) / sum(pop),
-            median_gain_if_gaining = median(gain[gain > 1e-9]) * 1e5) %>%
-  mutate(base_quintile = c("Q1 (least access)", "Q2", "Q3", "Q4", "Q5 (most access)"),
-         residents = fmt(residents), residents_gaining = fmt(residents_gaining),
-         share_residents_gaining = pct(share_residents_gaining),
-         median_gain_if_gaining = round(median_gain_if_gaining, 2)) %>%
-  rename(`median gain among gainers (x1e-5)` = median_gain_if_gaining)
+verdict <- new_use %>%
+  left_join(m46 %>% select(stn_code, m6), by = "stn_code") %>%
+  left_join(buildout, by = "stn_code") %>%
+  left_join(destination_df %>% select(stn_code, hdb_ha_800m), by = "stn_code") %>%
+  mutate(verdict = case_when(
+    ghost_by_total_use ~ "Opening-day risk",
+    buildout_day >= 2 * board_day ~ "Depends on future housing",
+    role == "Destination station" ~ "Destination-led",
+    board_day > p75_day & m6 > p75_day ~ "Strong from day one",
+    TRUE ~ "Moderate"),
+    verdict = factor(verdict, levels = c("Strong from day one", "Moderate", "Destination-led",
+                                         "Depends on future housing", "Opening-day risk")))
 
-cor.test(access$acc_before, access$gain, method = "spearman", exact = FALSE)
+verdict %>%
+  arrange(verdict, desc(board_day)) %>%
+  transmute(Station = str_to_title(stn_name), Line = line, Verdict = verdict,
+            `Boardings (M4)` = fmt(board_day), `Boardings (M6)` = fmt(m6),
+            Alightings = fmt(alight_day), `At build-out` = fmt(buildout_day),
+            `HDB 800 m (ha)` = round(hdb_ha_800m))
 ```
 
 ```{r}
-#| label: fig-access
-#| fig-cap: "Change in KD2SFCA rail accessibility after JRL and CRL1 open (2 km catchment). Grey subzones are essentially unpopulated (fewer than 100 residents, or fewer than 100 per km²)."
-#| fig-height: 6
-tm_shape(subzones) + tm_polygons(fill = "grey90", col = "white", lwd = 0.2) +
-  tm_shape(access %>% populated_for_map() %>% mutate(gain_e5 = gain * 1e5)) +
-  tm_polygons(fill = "gain_e5",
-              fill.scale = tm_scale_intervals(style = "fixed",
-                                              breaks = c(0, 0.05, 0.5, 1, 2, Inf),
-                                              labels = c("No change (< 0.05)", "0.05 to 0.5",
-                                                         "0.5 to 1", "1 to 2", "> 2"),
-                                              values = "brewer.yl_gn"),
-              fill.legend = tm_legend(title = "Accessibility change (×10⁻⁵)"),
-              col = "white", lwd = 0.2) +
-  tm_shape(new_stations) + tm_dots(fill = "black", size = 0.12) +
-  tm_title("Who gains rail access?") +
-  tm_compass(position = c("right", "top"), size = 1.5) +
-  tm_scalebar(position = c("left", "bottom")) +
-  tm_layout(frame = FALSE, legend.outside = TRUE)
-```
-
-```{r}
-#| label: access-numbers
+#| label: verdict-numbers
 #| include: false
-share_gain_q <- function(q) with(access[access$base_quintile == q, ], sum(pop[gain > 1e-9]) / sum(pop))
-q1_gain <- share_gain_q(1); q5_gain <- share_gain_q(5)
-top_gain <- access %>% st_drop_geometry() %>% filter(pop >= 1000) %>% slice_max(gain, n = 5)
-rho <- cor(access$acc_before, access$gain, method = "spearman")
-n_loss <- sum(access$gain < -1e-9)
-pop_gain <- sum(access$pop[access$gain > 1e-9])
+vc <- count(verdict, verdict)
+v_names <- function(v) str_c(str_to_title(verdict$stn_name[verdict$verdict == v]), collapse = ", ")
+v_n <- function(v) sum(verdict$verdict == v)
 ```
 
-**Insight.**
+Read together, the verdicts sort the new stations into five clear groups:
 
-- **Gains go where access was weakest.** About `r pct(q1_gain, 0)` of residents in the lowest-access quintile gain accessibility, against `r pct(q5_gain, 0)` in the highest-access quintile. The Spearman correlation between baseline access and gain is `r round(rho, 2)`. The JRL and CRL1 therefore **narrow rather than widen** the existing access gap, a positive equity finding to set against the low *ridership* forecasts for some JRL stations.
-- **The largest gains for populated subzones** are in `r str_c(str_to_title(top_gain$SUBZONE_N), collapse = ", ")`. These are the estates that the new lines bring within a short walk of rail for the first time.
-- **No subzone loses access** (`r n_loss` subzones decline), but this is mechanical. KD2SFCA adds the new supply without reallocating existing stations' demand, so access cannot fall. The informative result is the *distribution* of the gains, shown above.
-
-**Assumptions and limitations.** The supply measure (line count) ignores frequency and capacity. The 2 km catchment and power parameter are conventional, not calibrated. Straight-line distance understates access barriers such as expressways and rivers. The measure also uses Census 2020 population, so the Tengah gain is understated in the same way as Tengah ridership.
+- **Strong from day one (`r v_n("Strong from day one")`)**: `r v_names("Strong from day one")`. They open into mature HDB estates and would rank in the top quarter of today's stations under both models.
+- **Moderate (`r v_n("Moderate")`)**: `r v_names("Moderate")`. In the normal range of today's network; no special action is needed beyond normal feeder-bus planning.
+- **Destination-led (`r v_n("Destination-led")`)**: `r v_names("Destination-led")`. Low on home-based boardings but busy as morning destinations; they should be appraised on total use.
+- **Depends on future housing (`r v_n("Depends on future housing")`)**: `r v_names("Depends on future housing")`. Their case rests on Tengah filling up, so opening dates and service levels should follow housing completions.
+- **Opening-day risk (`r v_n("Opening-day risk")`)**: `r v_names("Opening-day risk")`. Low under every measure in this report; each needs an explicit case based on workers, students or shift-based demand that a morning residential model cannot see.
 
 # Discussion and planning implications
 
 **Addressing the objectives.**
 
-- **O1.** A Huff model with two station attributes (lines served, LRT status) and an exponential access-distance decay ($\hat\lambda \approx$ `r round(lambda_hat, 2)` per km) explains about `r pct(r2_final, 0)` of the variation in morning boardings across 164 stations. It holds up out of sample (cross-validated R² `r round(mean(cv$test_R2), 2)`) and clearly beats the nearest-station (`r round(r2_r0, 2)`) and default-Huff (`r round(r2_r1, 2)`) benchmarks. The station-to-station SIM adds the complementary insight: *once on the network*, distance matters far less (elasticity `r round(b_dbc, 2)`). Residents are choosy about which station they walk to, not about how far they ride.
+- **O1.** A Huff model with three station attributes (lines served, LRT status and HDB housing within 800 m) and an exponential access-distance decay ($\hat\lambda \approx$ `r round(lambda_hat, 2)` per km) explains about `r pct(r2_final, 0)` of the variation in morning boardings across 164 stations. It holds up out of sample (cross-validated R² `r round(mean(cv$test_R2), 2)`) and clearly beats the nearest-station (`r round(r2_r0, 2)`) and default-Huff (`r round(r2_r1, 2)`) benchmarks. The MCI destination-choice model (@sec-va-mci) adds the other end of the trip.
 - **O2.** The strongest new stations are those inserted into mature HDB estates that currently lack a walkable MRT station, led by `r str_to_title(top3[1])`, `r str_to_title(top3[2])` and `r str_to_title(top3[3])`. CRL1 stations average almost twice the JRL's morning boardings. `r n_low` stations, all in employment areas, at NTU or in Tengah, fall below today's lower quartile on boardings. The MCI destination model shows that `r length(rescued)` of them (`r str_c(str_to_title(rescued), collapse = ", ")`) are busy enough as morning *destinations* to clear that bar, leaving `r length(still_low)` genuine opening-day risks.
 - **O3.** Under fixed population the new lines redistribute, rather than create, morning boardings (about `r pct(share_div, 0)` moves to the new stations). Losses are concentrated in three clusters beside the new lines. Pioneer, Lakeside and Chinese Garden lose more than half their boardings, and four of the seven upgraded interchanges still lose tap-ins to new stations inside their catchments.
 
 **Implications for sustainable rail planning.**
 
-1. **Phase JRL openings to housing completions.** The Tengah sensitivity shows that the decisive variable is residents, not rails. A completion-linked threshold, using this model to estimate boardings at each stage of build-out, gives operators a transparent basis for deciding whether to open, partially open or defer a station, which is the decision faced at Hume and Buangkok.
-2. **Re-plan feeder buses around the losing stations.** The stations losing 15% or more of morning boardings (the Jurong West EWL stations, the Bukit Panjang LRT, and the Kovan–Serangoon–Bishan belt) are where feeder routes should be re-drawn, so that bus kilometres follow the new market areas instead of duplicating rail.
-3. **Plan interchange capacity, not just new stations.** Even where an upgraded interchange loses tap-ins, it gains transfers, which tap-in data do not record. Platform and corridor capacity at the seven interchanges is where crowding risk rises first.
-4. **Appraise stations on both ends of the trip.** The chained Huff → MCI forecast shows that `r n_dest` of the 29 new stations are destination stations. Station-level appraisals should combine home-end and destination-end demand, plus the KD2SFCA access gains for the least-served residents. Any of these alone would mis-rank the stations.
-5. **Read eastern forecasts as upper bounds.** The residual clustering shows the model systematically over-predicts in the east, so Pasir Ris East, Tampines North and Loyang may under-perform their forecasts.
+1. **Judge a new station by the housing around it, not by the network average.** Morning boardings follow the housing within walking distance (@sec-hdb-reveal). `r nrow(low_hdb_new)` new stations have almost no HDB housing within 800 m and are forecast to be among the quietest in the network; their case must rest on workers, students or future housing, and should be made explicitly.
+2. **Phase JRL openings to housing completions.** The Tengah sensitivity shows that the decisive variable is residents, not rails. A completion-linked threshold, using this model to estimate boardings at each stage of build-out, gives operators a transparent basis for deciding whether to open, partially open or defer a station, which is the decision faced at Hume and Buangkok.
+3. **Re-plan feeder buses around the losing stations.** The stations losing 15% or more of morning boardings (the Jurong West EWL stations, the Bukit Panjang LRT, and the Kovan–Serangoon–Bishan belt) are where feeder routes should be re-drawn, so that bus kilometres follow the new market areas instead of duplicating rail.
+4. **Plan interchange capacity, not just new stations.** Even where an upgraded interchange loses tap-ins, it gains transfers, which tap-in data do not record. Platform and corridor capacity at the seven interchanges is where crowding risk rises first.
+5. **Appraise stations on both ends of the trip.** The chained Huff → MCI forecast shows that `r n_dest` of the 29 new stations are destination stations. Station-level appraisals should combine home-end and destination-end demand; either alone would mis-rank the stations.
+6. **Read eastern forecasts as upper bounds.** The residual clustering shows the model systematically over-predicts in the east, so Pasir Ris East, Tampines North and Loyang may under-perform their forecasts.
 
 # Limitations
 
 - **Temporal mismatch.** OD flows are from May 2022 and population is from Census 2020; the scenario network is planned for 2028–2030. Population growth outside Tengah (for example, Tampines North and Bayshore) is not modelled.
 - **Fixed total demand.** The trip rate $k$ is fixed, so the model cannot represent induced demand from better connectivity, and new-station boardings are entirely diverted from existing stations. True totals will be higher.
-- **Attraction variables.** $A_j$ contains line count and LRT status only. Feeder-bus strength, cross-border demand, competing bus services, station amenities and service frequency are missing, as the significant residual clustering confirms. New stations are assumed to behave like an average single-line MRT station.
+- **Attraction variables.** $A_j$ contains line count, LRT status and HDB footprint within 800 m. HDB footprint is a proxy for homes and ignores private housing and occupancy; feeder-bus strength, cross-border demand, competing bus services, station amenities and service frequency are missing, as the significant residual clustering confirms. New stations are assumed to behave like an average single-line MRT station.
 - **Distance.** Straight-line distance from subzone population-weighted centroids is used for station access. Walking-network or travel-time distances, for example from `sfnetworks` on an OSM path network, would be more realistic, especially across expressways and canals.
 - **Morning peak only.** The Huff model explains home-end boardings and the MCI model explains morning destinations. Neither covers off-peak, evening or shift-work demand, which matters for stations such as Aviation Park.
 - **Station coordinates.** New-station locations come from indicative Master Plan footprints and the station list from LTA announcements. Working names and exact locations may still change.
 
 # Conclusion
 
-A carefully cleaned dataset and a parsimonious, well-validated Huff model give planners a transparent way to forecast boardings at stations that do not yet exist. For the JRL and CRL1, the model gives a clear and actionable picture. Stations dropped into mature estates open into ready-made demand. Much of the JRL is a bet on future housing, and that bet can be managed by tying station openings to housing completions. The impacts on existing stations are local, predictable and largest along the western EWL. The new lines measurably improve access for the residents who are least served today.
+A carefully cleaned dataset and a parsimonious, well-validated Huff model give planners a transparent way to forecast boardings at stations that do not yet exist. For the JRL and CRL1, the model gives a clear and actionable picture. Stations dropped into mature estates open into ready-made demand, while stations with little housing within walking distance, in industrial estates, at NTU, near the airport or in the still-filling new town of Tengah, are forecast to have very low ridership. Much of the JRL is a bet on future housing, and that bet can be managed by tying station openings to housing completions. The impacts on existing stations are local, predictable and largest along the western EWL.
+
+# Further exploration: station-to-station spatial interaction models {#sec-sim}
+
+The Huff and MCI models above are the appropriate tools for the research question, because they model a resident's *choice among competing stations* and can be applied to stations that do not exist yet. This section records an additional exploration: the generic Chapter 16 family of spatial interaction models (SIMs), fitted to station-to-station flows. These models describe how far people *ride* once on the network rather than which station they *board* at, and the doubly constrained version cannot be applied to a new station. They are therefore kept as background, not as part of the forecast.
+
+## Distance measure
+
+The flow data frame `sim_data` (@sec-sidf) holds every station pair, including zero-flow pairs, with two distance measures: straight-line distance, and network distance along the rail graph, which is closer to what passengers actually travel. Two stations on either side of a river may be close in a straight line but far apart by rail.
+
+
+
+```{r}
+#| label: sim-distance-choice
+dbc_euc <- glm(trips ~ orig + dest + log(euc_km), family = poisson(link = "log"), data = sim_data)
+dbc_net <- glm(trips ~ orig + dest + log(net_km), family = poisson(link = "log"), data = sim_data)
+
+CalcRSquared <- function(observed, estimated) cor(observed, estimated)^2
+
+tibble(distance = c("Euclidean", "Network"),
+       beta_distance = c(coef(dbc_euc)["log(euc_km)"], coef(dbc_net)["log(net_km)"]),
+       AIC = c(AIC(dbc_euc), AIC(dbc_net)),
+       R2 = c(CalcRSquared(sim_data$trips, fitted(dbc_euc)),
+              CalcRSquared(sim_data$trips, fitted(dbc_net))))
+```
+
+Network distance gives the lower AIC and the higher R², so it is used for the SIM family below.
+
+## Calibrating the four SIMs
+
+The origin attribute is residential intensity (HDB footprint within 800 m, a proxy for the people who can walk to the station). The destination attributes are service level (`d_lines`) and LRT status. These are the station-level analogues of the age-band population variables used in Chapter 16.
+
+```{r}
+#| label: sim-models
+sim_models <- list(
+  unconstrained = glm(trips ~ log(o_hdb) + log(d_lines) + d_lrt + log(net_km),
+                      family = poisson(link = "log"), data = sim_data),
+  origin_constrained = glm(trips ~ orig + log(d_lines) + d_lrt + log(net_km),
+                           family = poisson(link = "log"), data = sim_data),
+  destination_constrained = glm(trips ~ dest + log(o_hdb) + log(net_km),
+                                family = poisson(link = "log"), data = sim_data),
+  doubly_constrained = glm(trips ~ orig + dest + log(net_km),
+                           family = poisson(link = "log"), data = sim_data))
+
+sim_summary <- imap_dfr(sim_models, \(m, nm) tibble(
+  model = nm,
+  beta_distance = coef(m)["log(net_km)"],
+  beta_origin_hdb = coef(m)["log(o_hdb)"],
+  beta_dest_lines = coef(m)["log(d_lines)"],
+  beta_dest_lrt = coef(m)["d_lrt"],
+  R2 = CalcRSquared(sim_data$trips, fitted(m)),
+  RMSE = sqrt(mean((sim_data$trips - fitted(m))^2))))
+
+sim_summary %>% mutate(across(where(is.numeric), \(x) round(x, 3)))
+compare_performance(sim_models, metrics = "RMSE")
+```
+
+```{r}
+#| label: fig-sim-fit
+#| fig-cap: "Observed versus fitted station-to-station flows for the four SIMs (log scales; the dashed line is perfect fit)."
+#| fig-height: 7
+sim_fit <- imap(sim_models, \(m, nm) {
+  tibble(obs = sim_data$trips, fit = fitted(m)) %>%
+    ggplot(aes(fit + 1, obs + 1)) +
+    geom_point(alpha = 0.08, size = 0.5, colour = "#176b87") +
+    geom_abline(linetype = 2, colour = "grey30") +
+    scale_x_log10(labels = label_comma()) + scale_y_log10(labels = label_comma()) +
+    labs(title = str_replace(nm, "_", " "),
+         subtitle = str_c("R² = ", round(CalcRSquared(sim_data$trips, fitted(m)), 3)),
+         x = "Fitted trips + 1", y = "Observed trips + 1") +
+    theme_minimal(base_size = 10)
+})
+ggarrange(plotlist = sim_fit, ncol = 2, nrow = 2)
+```
+
+## Interpretation
+
+```{r}
+#| label: sim-numbers
+#| include: false
+b_dbc <- sim_summary$beta_distance[sim_summary$model == "doubly_constrained"]
+r2_dbc <- sim_summary$R2[sim_summary$model == "doubly_constrained"]
+r2_unc <- sim_summary$R2[sim_summary$model == "unconstrained"]
+```
+
+- **Constraints matter most.** Fit rises from R² = `r round(r2_unc, 2)` (unconstrained) to `r round(r2_dbc, 2)` (doubly constrained). Station-specific origin and destination effects therefore explain far more of the flow pattern than the few attributes we can measure. Unmeasured destination pull from employment, schools and malls is the main omitted factor, which the destination fixed effects absorb.
+- **Distance decay is modest.** In the doubly constrained model, a 1% increase in network distance reduces expected flow by about `r round(abs(b_dbc), 2)`%. Rail is used for long, cross-island trips; this elasticity is far weaker than the access-distance decay of the Huff model (@sec-huff), because people choose a *station* within walking or feeder range but will ride that station's line across the island.
+- **LRT destinations attract fewer trips** (negative `d_lrt`), and **more lines attract more trips** (positive `d_lines`). Both signs agree with the Huff calibration in @sec-huff, which is reassuring.
+- **Limitations.** The doubly constrained model cannot predict flows for a station with no history, because it needs a fixed effect for every origin and destination. This is why it remains an *explanatory* exploration, and the Huff and MCI models carry the *predictive* step. The Poisson models also assume equidispersion. With 15% zero pairs and heavy-tailed counts the flows are overdispersed, so standard errors are too small and coefficients should be read as effect sizes, not tested for significance.
 
 # Saving results for the Executive Summary
 
@@ -1941,20 +2119,22 @@ write_rds(list(
   net_base = net_base_sf, net_new = net_new_sf,
   calibrated = calibrated, new_pred = new_pred, tengah = tengah_cmp,
   impact_sf = impact_sf, market = market_change %>% select(SUBZONE_N, pop, change),
-  access = access %>% select(SUBZONE_N, pop, gain, base_quintile),
   res_map = res_map %>% select(stn_code, residual, cluster),
   numbers = list(r2 = r2_final, r2_r0 = r2_r0, r2_r1 = r2_r1, cv_r2 = mean(cv$test_R2),
-                 gamma = gamma_hat, delta = delta_hat, lambda = lambda_hat,
+                 gamma = gamma_hat, delta = delta_hat, theta = theta_hat, lambda = lambda_hat,
+                 r2_m2 = spec_table$R2[2], r2_m6 = spec_table$R2[6],
                  r2_power = decay_table$R2[1], b_dbc = b_dbc, r2_dbc = r2_dbc,
                  p25 = p25_existing, weekdays = weekdays_may22, share_div = share_div,
                  n_low = n_low, low_names = low_names, n_loss15 = n_loss15,
                  crl_mean = crl_mean, jrl_mean = jrl_mean, moran = moran_mc$statistic,
-                 moran_p = moran_mc$p.value, q1_gain = q1_gain, q5_gain = q5_gain, rho = rho,
+                 moran_p = moran_mc$p.value,
                  naive_new = length(naive_new), n_new_sz = n_new, pop_new_sz = pop_new,
                  mci_adj = adj_full, mci_null = adj_null, mci_alight_r2 = alight_r2,
                  n_dest = n_dest, rescued = rescued, still_low = still_low, b_mci = b_mci,
                  p25_use = p25_use),
-  new_use = new_use),
+  new_use = new_use, hdb_cmp = hdb_cmp, verdict = verdict %>% select(stn_code, stn_name, line, verdict, board_day, m6, alight_day, buildout_day, hdb_ha_800m),
+  m46 = m46, cv46 = c(cv_r2_4 = cv_r2_4, cv_r2_6 = cv_r2_6, rho_46 = rho_46),
+  low_hdb_new = low_hdb_new$stn_name, rho_hdb = rho_hdb),
   "data/rds/th3_results.rds", compress = "xz")
 ```
 
@@ -1967,7 +2147,6 @@ write_rds(list(
 - Lin, T. (G.), Xia, J., Robinson, T. P., et al. (2016). Enhanced Huff model for estimating Park and Ride (PnR) catchment areas in Perth, WA. *Journal of Transport Geography*, 54, 336–348.
 - Bahrami, M., et al. (2022). Using gravity model to make store closing decisions: A data driven approach. *Expert Systems with Applications*, 205, 117703.
 - Bai, L., et al. (2023). Delineating hierarchical obstetric hospital service areas using the Huff model based on medical records. *Applied Geography*, 153, 102903.
-- Dai, D., & Wang, F. (2011). Geographic disparities in accessibility to food stores in southwest Mississippi. *Environment and Planning B*, 38(4), 659–677.
 - Kam, T. S. (2025). *R for Geospatial Data Science and Analytics*, Chapters 9, 10 and 15–18. <https://r4gdsa.netlify.app/>
 - Land Transport Authority (2019). Cross Island Line Phase 1: new links by 2029 [joint news release].
 - Land Transport Authority. Jurong Region Line and Cross Island Line station information. <https://www.lta.gov.sg/>

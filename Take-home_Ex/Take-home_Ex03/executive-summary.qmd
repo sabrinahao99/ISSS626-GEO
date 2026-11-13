@@ -67,7 +67,7 @@ map_layout <- tm_layout(frame = FALSE, inner.margins = c(0, 0, 0, 0), outer.marg
 ::: card
 [04]{.n}
 [Planning implications]{.t}
-[Phasing, feeder buses, interchange capacity and equity]{.d}
+[Housing-led appraisal, phasing, feeder buses and interchange capacity]{.d}
 :::
 
 ::: card
@@ -169,15 +169,15 @@ May 2022 network (grey) and JRL / CRL1 extensions (teal) with the 29 new station
 
 ::: step
 [2]{.no}
-[Flow models (SIM)]{.tt}
-[Poisson unconstrained → doubly constrained models on station-to-station flows, network distance.]{.dd}
-[→ distance elasticity `r round(n$b_dbc, 2)`]{.out}
+[Attraction specs]{.tt}
+[Six Huff specifications compared: lines, LRT, closeness, HDB within 800 m, bus stops within 400 m.]{.dd}
+[→ Model 4: lines + LRT + HDB 800 m]{.out}
 :::
 
 ::: step
 [3]{.no}
 [Huff calibration]{.tt}
-[Residents choose a station by attraction (lines, LRT) and access distance; tested against two benchmarks.]{.dd}
+[Residents choose a station by its lines, LRT status and surrounding housing, and by access distance; two benchmarks.]{.dd}
 [→ R² `r r2f(n$r2)`, CV R² `r r2f(n$cv_r2)`]{.out}
 :::
 
@@ -191,21 +191,22 @@ May 2022 network (grey) and JRL / CRL1 extensions (teal) with the 29 new station
 ::: step
 [5]{.no}
 [Value-added]{.tt}
-[**MCI destination-choice model** (alternative probabilistic SIM) for alightings; LISA on residuals; KD2SFCA access.]{.dd}
-[→ destination demand, bias, equity]{.out}
+[**MCI destination-choice model** (second `MCI` model) for alightings; LISA on Huff residuals.]{.dd}
+[→ destination demand, regional bias]{.out}
 :::
 :::
 
 ::: chips
 [**Demand** · weekday 06:00–09:59 tap-ins]{.chip}
-[**Attraction** · lines served γ = `r round(n$gamma, 2)`, LRT δ = `r round(n$delta, 2)`]{.chip}
+[**Attraction** · lines γ = `r round(n$gamma, 2)`, LRT δ = `r round(n$delta, 2)`, HDB 800 m θ = `r round(n$theta, 2)`]{.chip}
 [**Decay** · exponential λ = `r round(n$lambda, 2)` per km]{.chip}
 [**Calibration** · optim() on RMSE, 5-fold CV]{.chip}
-[**Software** · R: sf, MCI, igraph, spdep, SpatialAcc, tmap]{.chip}
+[**Model 6 check** · + bus stops: CV R² `r sprintf('%.3f', r$cv46[['cv_r2_6']])` vs `r sprintf('%.3f', r$cv46[['cv_r2_4']])`, rank ρ = `r sprintf('%.2f', r$cv46[['rho_46']])`]{.chip}
+[**Software** · R: sf, MCI, igraph, spdep, tmap, leaflet]{.chip}
 :::
 
 ::: band
-**Key modelling choice.** Exponential decay beat the course-default power function (R² `r r2f(n$r2)` vs `r r2f(n$r2_power)`). The power curve's long tail let stations 5 km away compete for residents, which spread scenario impacts unrealistically across the whole island.
+**Key modelling choice.** Attractiveness depends on the **HDB housing within 800 m** (Model 4), not just on lines and LRT status. Older stations were built inside existing HDB towns; many newer ones sit in districts with little housing yet. Without this term, the model would rate a station in an empty district like one in a mature estate.
 :::
 
 ## [04 · Key findings]{.kicker}Finding 1: The model reproduces where Singapore boards
@@ -381,60 +382,43 @@ Western EWL: **Pioneer, Lakeside, Chinese Garden, Joo Koon** lose over half thei
 :::
 :::
 
-## [04 · Key findings]{.kicker}Finding 5: Market areas shift locally; access gains go to the least served
+## [04 · Key findings]{.kicker}Finding 5: No housing within walking distance, no riders
 
-::: {.grid style="grid-template-columns: 1fr 1fr 0.8fr;"}
+::: {.grid .center-v style="grid-template-columns: 1.35fr 1fr;"}
 ::: figure
 ```{r}
-#| fig-width: 5.2
-#| fig-height: 3.9
-#| fig-dpi: 220
-#| out-width: 100%
-base_map +
-  tm_shape(r$market %>% filter(pop >= 100, change != "Unchanged",
-                              pop / (as.numeric(st_area(geometry)) / 1e6) >= 100)) +
-  tm_polygons(fill = "change",
-              fill.scale = tm_scale_categorical(values = c("#0b7a83", "#7570b3")),
-              fill.legend = tm_legend(title = "Most-likely station"), col = "white", lwd = 0.3) +
-  tm_shape(r$new_stations) + tm_dots(fill = "black", size = 0.1) +
-  map_layout + tm_layout(legend.position = c("left", "top"))
+#| fig-width: 8
+#| fig-height: 5.2
+#| out-height: 600px
+hc <- r$hdb_cmp
+ggplot(hc, aes(hdb_ha_800m + 1, per_day, colour = group)) +
+  geom_point(data = filter(hc, group == "Existing (observed)"), size = 2, alpha = 0.55) +
+  geom_point(data = filter(hc, group != "Existing (observed)"), size = 3.4) +
+  ggrepel::geom_text_repel(data = filter(hc, group != "Existing (observed)", hdb_ha_800m < 5),
+                           aes(label = str_to_title(stn_name)), size = 3.6, show.legend = FALSE,
+                           seed = 626, max.overlaps = 20) +
+  geom_hline(yintercept = n$p25 / n$weekdays, linetype = 2, colour = "grey40") +
+  scale_x_log10() + scale_y_log10(labels = label_comma()) +
+  scale_colour_manual(values = c("Existing (observed)" = "grey60", "New CRL (predicted)" = "#97c616",
+                                 "New JRL (predicted)" = "#0b7a83")) +
+  labs(x = "HDB footprint within 800 m (ha + 1, log)", y = "AM-peak tap-ins per weekday (log)", colour = NULL) +
+  theme_minimal(base_size = 15) + theme(legend.position = "bottom")
 ```
-
-::: cap
-Subzones whose most-likely boarding station changes
-:::
-:::
-
-::: figure
-```{r}
-#| fig-width: 5.2
-#| fig-height: 3.9
-#| fig-dpi: 220
-#| out-width: 100%
-base_map +
-  tm_shape(r$access %>% mutate(g = gain * 1e5)) +
-  tm_polygons(fill = "g",
-              fill.scale = tm_scale_intervals(style = "fixed", breaks = c(0, 0.05, 0.5, 2, Inf),
-                                              labels = c("No change", "Small", "Moderate", "Large"),
-                                              values = "brewer.yl_gn"),
-              fill.legend = tm_legend(title = "Access gain"), col = "white", lwd = 0.2) +
-  map_layout + tm_layout(legend.position = c("left", "top"))
-```
-
-::: cap
-KD2SFCA rail accessibility gain (2 km catchment)
-:::
 :::
 
 ::: rows
 ::: {.card .accent .stat}
-[`r n$n_new_sz`]{.num}
-[subzones (`r fmt(n$pop_new_sz / 1000)`k residents) gain a **new** most-likely station; the rest of the island is unchanged]{.lbl}
+[ρ = `r round(r$rho_hdb, 2)`]{.num}
+[between housing within 800 m and morning boardings at **existing** stations: older lines were built inside existing HDB towns]{.lbl}
 :::
 
 ::: {.card .accent .stat}
-[`r pct(n$q1_gain)` vs `r pct(n$q5_gain)`]{.num}
-[of residents gaining access in the **least** vs **best** served quintile (ρ = `r round(n$rho, 2)`): the lines **narrow** the access gap]{.lbl}
+[`r length(r$low_hdb_new)` of 29]{.num}
+[**new stations have under 5 ha of HDB housing** within 800 m, in industrial estates, at NTU and near the airport]{.lbl}
+:::
+
+::: band
+These stations are forecast at the **bottom of the network**. Their case rests on workers, students or future housing, and should be made explicitly.
 :::
 :::
 :::
@@ -442,14 +426,15 @@ KD2SFCA rail accessibility gain (2 km catchment)
 ## [05 · Planning implications]{.kicker}Turning forecasts into decisions
 
 ```{=html}
-<table class="impl" style="font-size:0.64em">
+<table class="impl" style="font-size:0.56em">
   <thead>
     <tr><th>Evidence</th><th>Recommended response</th><th>Why</th></tr>
   </thead>
   <tbody>
+    <tr><td>New stations with almost no housing within 800 m<br><span style="font-weight:400;color:#66747b">`r str_c(str_to_title(head(r$low_hdb_new, 4)), collapse = ", ")` …</span></td><td>Make the non-resident case explicitly, or defer</td><td>Housing within walking distance is what fills a station in the morning.</td></tr>
     <tr><td>Tengah stations below the ghost-risk line on 2020 population<br><span style="font-weight:400;color:#66747b">JS3 Tengah, JE1 Tengah Plantation</span></td><td>Tie opening to housing completion thresholds</td><td>Forecast boardings rise several-fold at build-out; opening day matters more than the line itself.</td></tr>
     <tr><td>Western EWL and Kovan–Serangoon belt lose 15%+<br><span style="font-weight:400;color:#66747b">Pioneer, Lakeside, Chinese Garden, Kovan</span></td><td>Re-draw feeder-bus routes around new market areas</td><td>Avoid bus kilometres that duplicate the new rail catchments.</td></tr>
-    <tr><td>Seven upgraded interchanges<br><span style="font-weight:400;color:#66747b">Jurong East, Boon Lay, Hougang, Ang Mo Kio …</span></td><td>Plan platform and transfer-corridor capacity</td><td>Transfers are invisible in tap-ins but rise at every interchange.</td></tr>
+    <tr><td>Seven upgraded interchanges<br><span style="font-weight:400;color:#66747b">Jurong East, Boon Lay, Hougang, Ang Mo Kio …</span></td><td><b>Public safety:</b> plan platform, stair and transfer-corridor capacity before opening</td><td>Transfers are invisible in tap-ins but rise at every interchange; crowding at peak transfers is the main safety risk.</td></tr>
     <tr><td>Destination stations with low home-based boardings<br><span style="font-weight:400;color:#66747b">Tukang, Enterprise, Nanyang Gateway, Tengah</span></td><td>Appraise on boardings + alightings, not boardings alone</td><td>The MCI model shows workers and students arriving keep most of them above the ghost-risk line.</td></tr>
     <tr><td>Model over-predicts in the east (LISA)<br><span style="font-weight:400;color:#66747b">Pasir Ris East, Tampines North, Loyang</span></td><td>Treat eastern forecasts as upper bounds</td><td>Residuals cluster significantly (Moran's I = `r round(n$moran, 2)`, p = `r signif(n$moran_p, 1)`).</td></tr>
   </tbody>
@@ -475,7 +460,7 @@ Forecasts are a **comparative screening tool**: they rank stations and locate im
 [Method]{.ct}
 
 - Fixed trip rate: no **induced demand**; new boardings are diverted from existing stations.
-- Attraction uses only lines and LRT status; feeder buses and frequency are missing.
+- Attraction uses lines, LRT status and HDB footprint (a proxy for homes); feeder buses and frequency are missing.
 - Straight-line access distance, not walking-network distance.
 :::
 
